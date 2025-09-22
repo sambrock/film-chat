@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from 'convex/react';
+import { ArrowUp } from 'lucide-react';
 
 import { api } from '@/infra/convex/_generated/api';
 import { cn } from '@/lib/utils';
@@ -40,10 +41,14 @@ export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
         {EXAMPLE_MESSAGES.map((message, i) => (
           <li key={i} className="border-foreground-0/5 border-b py-2 last:border-0">
             <button
-              className="text-foreground-1 hover:bg-foreground-0/5 w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium transition"
+              className="group text-foreground-1 hover:bg-foreground-0/5 focus-visible:ring-ring flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition select-none focus:outline-none focus-visible:ring-2"
               onClick={() => sendMessage.mutate(message)}
             >
               {message}
+              <ArrowUp
+                className="text-foreground-1 invisible ml-auto size-5 transition group-hover:visible group-focus:visible"
+                strokeWidth={1.5}
+              />
             </button>
           </li>
         ))}

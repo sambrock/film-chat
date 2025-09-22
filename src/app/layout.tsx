@@ -33,19 +33,20 @@ export default async function RootLayout(props: { children: React.ReactNode; mod
         <meta name="apple-mobile-web-app-title" content="Film Chat" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </head>
+
       <body className={cn('text-foreground-0 bg-background-0', fontSans.className)}>
         <QueryClientProvider>
           <ConvexClientProvider>
-            <UserContextProvider>
-              <GlobalStoreProvider>
+            <GlobalStoreProvider>
+              <UserContextProvider>
                 <div className="flex h-screen overflow-hidden">
                   <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" />
                   <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} />
                   <div className="bg-background-1 w-full">{props.children}</div>
                   {props?.modal}
                 </div>
-              </GlobalStoreProvider>
-            </UserContextProvider>
+              </UserContextProvider>
+            </GlobalStoreProvider>
           </ConvexClientProvider>
         </QueryClientProvider>
       </body>

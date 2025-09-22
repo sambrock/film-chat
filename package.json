@@ -10,6 +10,7 @@
     "generate-tmdb": "openapi-typescript https://developer.themoviedb.org/openapi/64542913e1f86100738e227f --output ./src/lib/tmdb/schema-v3.d.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.15",
     "@ai-sdk/openai": "^2.0.30",
     "@tanstack/react-query": "^5.87.4",
     "ai": "^5.0.43",

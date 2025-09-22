@@ -1,65 +1,64 @@
+import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 
-export type Model = 'openai/gpt-4.1-nano' | 'openai/gpt-4.1' | 'openai/gpt-4' | 'xai/grok-3-beta';
+import { MapKey, type StringLiterals } from './utils';
 
-export const models = new Map([
+type OpenAiModel = StringLiterals<Parameters<typeof openai>[0]>;
+type GoogleModel = StringLiterals<Parameters<typeof google>[0]>;
+export type SupportedModel = `openai/${OpenAiModel}` | `google/${GoogleModel}`;
+
+export type Model = MapKey<typeof models>;
+
+type ModelMeta = {
+  model: SupportedModel;
+  provider: string;
+  name: string;
+};
+
+export const models = new Map<SupportedModel, ModelMeta>([
   [
     'openai/gpt-4.1-nano',
     {
-      id: 'openai/gpt-4.1-nano',
+      model: 'openai/gpt-4.1-nano',
+      provider: 'OpenAI',
       name: 'GPT-4.1 Nano',
-      provider: 'OpenAI',
-      description: 'A smaller, faster version of GPT-4.1',
-      active: true,
     },
   ],
   [
-    'openai/gpt-4.1',
+    'openai/gpt-5-mini',
     {
-      id: 'openai/gpt-4.1',
-      name: 'GPT-4.1',
+      model: 'openai/gpt-5-mini',
       provider: 'OpenAI',
-      description: 'The latest version of GPT-4',
-      active: true,
+      name: 'GPT-5 Mini',
     },
   ],
   [
-    'openai/gpt-4',
+    'openai/gpt-5',
     {
-      id: 'openai/gpt-4',
-      name: 'GPT-4',
+      model: 'openai/gpt-5',
       provider: 'OpenAI',
-      description: 'The original GPT-4 model',
-      active: true,
+      name: 'GPT-5',
     },
   ],
   [
-    'xai/grok-3-beta',
+    'google/gemini-2.5-flash',
     {
-      id: 'xai/grok-3-beta',
-      name: 'Grok 3 Beta',
-      provider: 'XAI',
-      description: 'The beta version of Grok 3',
-      active: true,
+      model: 'google/gemini-2.5-flash',
+      provider: 'Google',
+      name: 'Gemini 2.5 Flash',
     },
   ],
-] as const) satisfies ReadonlyMap<
-  Model,
-  {
-    id: string;
-    name: string;
-    provider: string;
-    description: string;
-    active: boolean;
-  }
->;
+] as const);
 
-export const getModel = (model: Model) => {
-  const [provider, modelId] = model.split('/');
+export const getStreamTextModel = (model: Model | (string & {})) => {
+  const [modelProvider, modelName] = model.split('/');
 
-  switch (provider) {
+  switch (modelProvider) {
     case 'openai': {
-      return openai(modelId);
+      return openai(modelName);
+    }
+    case 'google': {
+      return google(modelName);
     }
     default: {
       return openai('gpt-4.1-nano');

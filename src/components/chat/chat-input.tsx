@@ -35,7 +35,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
     >
       <textarea
         className="text-foreground-0 placeholder:text-foreground-0/35 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
-        placeholder="Type your message..."
+        placeholder="Type your message here..."
         value={value}
         rows={1}
         autoFocus

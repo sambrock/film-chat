@@ -24,7 +24,10 @@ export const Sidebar = async ({ className, ...props }: Props) => {
   return (
     <div className={cn('border-foreground-0/10 bg-background-0 h-screen border-r p-2', className)} {...props}>
       <div className="hidden p-3 lg:block">
-        <Link href="/">
+        <Link
+          href="/"
+          className="focus-visible:ring-ring flex w-7 rounded-sm whitespace-nowrap transition select-none focus:outline-none focus-visible:ring-2"
+        >
           <Image className="relative z-[999] w-7" src="/logo.svg" alt="Logo" width={28} height={38} />
         </Link>
       </div>

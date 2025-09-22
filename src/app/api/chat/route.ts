@@ -4,8 +4,8 @@ import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import z from 'zod';
 
 import { api } from '@/infra/convex/_generated/api';
-import { Doc } from '@/infra/convex/_generated/dataModel';
-import { getModel, Model } from '@/lib/models';
+import type { Doc } from '@/infra/convex/_generated/dataModel';
+import { getStreamTextModel } from '@/lib/models';
 import { tmdbFindMovie, tmdbGetMovieById } from '@/lib/tmdb/client';
 import { modelResponseTextToMoviesArr } from '@/lib/utils';
 
@@ -13,7 +13,7 @@ const BodySchema = z.object({
   threadId: z.string(),
   messageId: z.string(),
   content: z.string(),
-  model: z.string().refine((val) => getModel(val as Model)),
+  model: z.string(),
 });
 
 export type ChatBodySchema = z.infer<typeof BodySchema>;
@@ -34,16 +34,17 @@ export async function POST(req: Request) {
   ]);
 
   const response = streamText({
-    model: getModel(parsed.data.model as Model),
+    model: getStreamTextModel(parsed.data.model),
     messages: [
       { role: 'system', content: SYSTEM_CONTEXT_MESSAGE },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
       { role: 'user', content: content },
     ],
     onFinish: async (message) => {
-      if (message.content[0].type !== 'text') return;
+      const textContent = message.content.find((c) => c.type === 'text');
+      if (!textContent) return;
 
-      const finalContent = message.content[0].text;
+      const finalContent = textContent.text;
 
       // Find movies from the model response
       const movies = await Promise.all(
@@ -102,17 +103,17 @@ export async function POST(req: Request) {
 
       if (thread && !thread.title) {
         const generateThreadTitle = await generateText({
-          model: openai('gpt-4o-mini'),
+          model: openai('gpt-4.1-nano'),
           prompt: `Generate a short title for this prompt in 3 words or less (don't use the word "movie"): "Movie picks for prompt: ${content}"`,
         });
+
+        const textContent = generateThreadTitle.content.find((c) => c.type === 'text');
+        if (!textContent) return;
 
         await fetchMutation(api.threads.update, {
           threadId,
           data: {
-            title:
-              generateThreadTitle.content[0].type === 'text'
-                ? generateThreadTitle.content[0].text
-                : 'New chat',
+            title: textContent.text,
           },
         });
       }

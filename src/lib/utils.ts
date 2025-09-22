@@ -105,3 +105,7 @@ export type DeepPartial<T> = T extends object
 export type Prettify<T> = {
   [K in keyof T]: T[K];
 } & {};
+
+export type StringLiterals<T> = T extends string ? (string extends T ? never : T) : never;
+
+export type MapKey<T> = T extends Map<infer K, any> ? K : never;
