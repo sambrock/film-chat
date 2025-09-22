@@ -16,7 +16,7 @@ export const MessageMovie = ({ movie }: Props) => {
     <div className="group border-foreground-0/5 flex cursor-pointer border-b-1 px-2 py-2 last:border-0">
       <Link
         href={movie.found ? `/movie/${movie.tmdbId}` : '#'}
-        className="focus-visible:ring-ring flex w-full rounded-md focus:outline-none focus-visible:ring focus-visible:ring-2"
+        className="focus-visible:ring-ring flex w-full rounded-md focus:outline-none focus-visible:ring-2"
         onClick={(e) => {
           if (!movie.found) {
             e.preventDefault();

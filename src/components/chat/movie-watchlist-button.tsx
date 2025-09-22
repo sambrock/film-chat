@@ -3,13 +3,12 @@
 import { useRef } from 'react';
 import { useMutation, useQuery } from 'convex/react';
 import { produce } from 'immer';
-import { Check, Minus, Plus } from 'lucide-react';
-import { useHover } from 'usehooks-ts';
+import { Check, Plus } from 'lucide-react';
 
 import { api } from '@/infra/convex/_generated/api';
 import { Id } from '@/infra/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
-import { useUserContext } from '@/providers/use-context-provider';
+import { useSessionContext } from '@/providers/session-context-provider';
 import { Button } from '../common/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../common/tooltip';
 
@@ -28,9 +27,9 @@ export const MovieWatchlistButton = ({
   className,
   ...props
 }: Props) => {
-  const { userId } = useUserContext();
+  const { session } = useSessionContext();
 
-  const watchlist = useQuery(api.watchlist.getWatchlist, { userId });
+  const watchlist = useQuery(api.watchlist.getBySession, { session });
   const updateWatchlist = useUpdateWatchlistMutation();
 
   const isInWatchlist = Boolean(watchlist?.find((item) => item.tmdbId === tmdbId));
@@ -53,8 +52,8 @@ export const MovieWatchlistButton = ({
             onClick={(e) => {
               e.stopPropagation();
               updateWatchlist({
+                session,
                 tmdbId,
-                userId,
                 data: { watchlist: !isInWatchlist, title, releaseDate, posterPath },
               });
             }}
@@ -74,12 +73,13 @@ export const MovieWatchlistButton = ({
 
 const useUpdateWatchlistMutation = () => {
   return useMutation(api.watchlist.updateWatchlist).withOptimisticUpdate((localState, args) => {
-    const localStateWatchlist = localState.getQuery(api.watchlist.getWatchlist, { userId: args.userId });
+    const localStateWatchlist = localState.getQuery(api.watchlist.getBySession, { session: args.session });
+
     if (localStateWatchlist && Array.isArray(localStateWatchlist)) {
       const exists = localStateWatchlist.find((item) => item.tmdbId === args.tmdbId);
       localState.setQuery(
-        api.watchlist.getWatchlist,
-        { userId: args.userId },
+        api.watchlist.getBySession,
+        { session: args.session },
         produce(localStateWatchlist, (draft) => {
           if (exists) {
             const index = draft.indexOf(exists);
@@ -92,7 +92,7 @@ const useUpdateWatchlistMutation = () => {
             draft.push({
               _id: 'temp-id' as Id<'watchlist'>,
               _creationTime: Date.now(),
-              userId: args.userId,
+              userId: '',
               tmdbId: args.tmdbId,
               title: args.data.title,
               releaseDate: args.data.releaseDate,

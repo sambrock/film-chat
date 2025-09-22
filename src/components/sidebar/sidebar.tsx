@@ -1,10 +1,10 @@
+import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
-import { preloadedQueryResult, preloadQuery } from 'convex/nextjs';
+import { fetchQuery } from 'convex/nextjs';
 import { SquarePen } from 'lucide-react';
 
 import { api } from '@/infra/convex/_generated/api';
-import { getUserFromAuthTokenCookie } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { SidebarButton } from './sidebar-button';
 import { SidebarChats } from './sidebar-chats';
@@ -13,12 +13,12 @@ import { SidebarWatchlistButton } from './sidebar-watchlist-button';
 type Props = React.ComponentProps<'div'>;
 
 export const Sidebar = async ({ className, ...props }: Props) => {
-  const user = await getUserFromAuthTokenCookie();
-  console.log('user', user);
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session')?.value;
 
-  const [preloadedThreadsQuery, preloadedWatchlistQuery] = await Promise.all([
-    user ? preloadQuery(api.threads.getByUserId, { userId: user.userId }) : null,
-    user ? preloadQuery(api.watchlist.getWatchlist, { userId: user.userId }) : null,
+  const [initialThreads, initialWatchlist] = await Promise.all([
+    session ? fetchQuery(api.threads.getBySession, { session }) : null,
+    session ? fetchQuery(api.watchlist.getBySession, { session }) : null,
   ]);
 
   return (
@@ -40,18 +40,12 @@ export const Sidebar = async ({ className, ...props }: Props) => {
           </Link>
         </SidebarButton>
 
-        <SidebarWatchlistButton
-          initialWatchlistCount={
-            preloadedWatchlistQuery ? preloadedQueryResult(preloadedWatchlistQuery).length : 0
-          }
-        />
+        <SidebarWatchlistButton initialWatchlistCount={initialWatchlist?.length || 0} />
       </div>
 
       <div className="mt-4">
         <div className="text-foreground-1 px-3 py-1 text-sm">Chats</div>
-        <SidebarChats
-          initialData={preloadedThreadsQuery ? preloadedQueryResult(preloadedThreadsQuery) : []}
-        />
+        <SidebarChats initialData={initialThreads || []} />
       </div>
     </div>
   );

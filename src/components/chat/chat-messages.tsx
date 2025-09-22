@@ -29,7 +29,7 @@ export const ChatMessages = ({ initialData, className, ...props }: Props) => {
   }, [messages.length]);
 
   return (
-    <div id="chatMessages" ref={divRef} className={cn('mt-20 space-y-4 pb-20 lg:mt-8', className)} {...props}>
+    <div id="chatMessages" ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)} {...props}>
       {messages.map((message) => (
         <MessageContextProvider key={message.messageId} message={message}>
           {message.role === 'user' && <MessageUser />}

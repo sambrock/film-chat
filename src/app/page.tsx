@@ -1,8 +1,8 @@
 import { generateUuid } from '@/lib/utils';
-import { ChatView } from '@/components/views/chat-view';
+import { ChatPageComponent } from './chat/[thread_id]/page';
 
 export default function NewChatPage() {
   const threadId = generateUuid();
 
-  return <ChatView threadId={threadId} isPersisted={false} />;
+  return <ChatPageComponent threadId={threadId} isPersisted={false} initialData={[]} />;
 }

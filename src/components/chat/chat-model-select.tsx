@@ -23,8 +23,9 @@ export const ChatModelSelect = () => {
           <ChevronDown className="size-5" />
         </Button>
       </DropdownTrigger>
+
       <DropdownContent className="min-w-80 origin-bottom-left" align="start" side="top" sideOffset={2}>
-        {[...models.values()].map((model) => (
+        {models.values().map((model) => (
           <DropdownItem
             key={model.model}
             className={cn(model.model === selectedModel && 'bg-background-1/50')}

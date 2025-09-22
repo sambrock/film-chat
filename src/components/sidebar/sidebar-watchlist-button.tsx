@@ -9,7 +9,7 @@ import { ListVideo } from 'lucide-react';
 import { api } from '@/infra/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useUserContext } from '@/providers/use-context-provider';
+import { useSessionContext } from '@/providers/session-context-provider';
 import { SidebarButton } from './sidebar-button';
 
 type Props = {
@@ -17,10 +17,10 @@ type Props = {
 };
 
 export const SidebarWatchlistButton = ({ initialWatchlistCount }: Props) => {
-  const { userId } = useUserContext();
+  const { session } = useSessionContext();
 
   const dispatch = useGlobalStore((s) => s.dispatch);
-  const watchlist = useQuery(api.watchlist.getWatchlist, { userId });
+  const watchlist = useQuery(api.watchlist.getBySession, { session });
   const pathname = usePathname();
 
   const watchlistCount = watchlist ? watchlist.length : initialWatchlistCount;

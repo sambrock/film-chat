@@ -7,11 +7,11 @@ import { Doc } from '@/infra/convex/_generated/dataModel';
 import { ChatBodySchema } from '@/app/api/chat/route';
 import { generateUuid } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
+import { useSessionContext } from '@/providers/session-context-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';
-import { useUserContext } from '@/providers/use-context-provider';
 
 export const useApiSendMessage = () => {
-  const { userId } = useUserContext();
+  const { session } = useSessionContext();
   const { threadId, getThreadIsPersisted, setThreadIsPersisted } = useThreadContext();
 
   const model = useGlobalStore((s) => s.model);
@@ -20,12 +20,12 @@ export const useApiSendMessage = () => {
   const router = useRouter();
 
   const newChatMessage = useMutation(api.chat.newChatMessage).withOptimisticUpdate((localStore, args) => {
-    const localStateThreads = localStore.getQuery(api.threads.getByUserId, { userId: args.userId });
+    const localStateThreads = localStore.getQuery(api.threads.getBySession, { session });
     const localStateMessages = localStore.getQuery(api.messages.getByThreadId, { threadId: args.threadId });
 
     if (localStateThreads && Array.isArray(localStateThreads) && !args.threadIsPersisted) {
-      localStore.setQuery(api.threads.getByUserId, { userId: args.userId }, [
-        { threadId: args.threadId, userId: args.userId, title: 'New chat' } as Doc<'threads'>,
+      localStore.setQuery(api.threads.getBySession, { session }, [
+        { threadId: args.threadId, userId: '', title: 'New chat' } as Doc<'threads'>,
         ...localStateThreads,
       ]);
     }
@@ -52,7 +52,7 @@ export const useApiSendMessage = () => {
       await newChatMessage({
         threadId,
         threadIsPersisted: getThreadIsPersisted(),
-        userId,
+        session,
         userMessage: {
           messageId: messageUserId,
           threadId,

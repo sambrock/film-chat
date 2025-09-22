@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText } from 'ai';
 import { fetchMutation, fetchQuery } from 'convex/nextjs';
@@ -19,6 +20,12 @@ const BodySchema = z.object({
 export type ChatBodySchema = z.infer<typeof BodySchema>;
 
 export async function POST(req: Request) {
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session')?.value;
+  if (!session) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const body = await req.json();
 
   const parsed = BodySchema.safeParse(body);

@@ -1,22 +1,25 @@
 import { v } from 'convex/values';
 
+import { decryptSession } from '@/lib/session';
 import { mutation, query } from './_generated/server';
 
-export const getWatchlist = query({
+export const getBySession = query({
   args: {
-    userId: v.string(),
+    session: v.string(),
   },
   handler: async (ctx, args) => {
+    const sessionPayload = await decryptSession(args.session);
+    if (!sessionPayload) return;
+
     return ctx.db
       .query('watchlist')
-      .withIndex('by_user_id', (q) => q.eq('userId', args.userId))
+      .withIndex('by_user_id', (q) => q.eq('userId', sessionPayload.userId))
       .collect();
   },
 });
 
 export const updateWatchlist = mutation({
   args: {
-    userId: v.string(),
     tmdbId: v.number(),
     data: v.object({
       watchlist: v.boolean(),
@@ -24,18 +27,22 @@ export const updateWatchlist = mutation({
       releaseDate: v.number(),
       posterPath: v.string(),
     }),
+    session: v.string(),
   },
   handler: async (ctx, args) => {
+    const sessionPayload = await decryptSession(args.session);
+    if (!sessionPayload) return;
+
     const exists = await ctx.db
       .query('watchlist')
-      .withIndex('by_user_tmdb_id', (q) => q.eq('userId', args.userId).eq('tmdbId', args.tmdbId))
+      .withIndex('by_user_tmdb_id', (q) => q.eq('userId', sessionPayload.userId).eq('tmdbId', args.tmdbId))
       .first();
 
     if (exists) {
       await ctx.db.delete(exists._id);
     } else {
       await ctx.db.insert('watchlist', {
-        userId: args.userId,
+        userId: sessionPayload.userId,
         tmdbId: args.tmdbId,
         title: args.data.title,
         releaseDate: args.data.releaseDate,

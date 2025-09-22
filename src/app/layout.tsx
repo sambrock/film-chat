@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils';
 import { ConvexClientProvider } from '@/providers/convex-client-provider';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
 import { QueryClientProvider } from '@/providers/query-client-provider';
-import { UserContextProvider } from '@/providers/use-context-provider';
 import { Sidebar } from '@/components/sidebar/sidebar';
 import { SidebarMobile } from '@/components/sidebar/sidebar-mobile';
 
 import './globals.css';
+
+import { SessionContextProvider } from '@/providers/session-context-provider';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     'Get personalized movie recommendations powered by AI. Chat and discover your next favorite film!',
 };
 
-export default async function RootLayout(props: { children: React.ReactNode; modal?: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -38,14 +39,13 @@ export default async function RootLayout(props: { children: React.ReactNode; mod
         <QueryClientProvider>
           <ConvexClientProvider>
             <GlobalStoreProvider>
-              <UserContextProvider>
+              <SessionContextProvider>
                 <div className="flex h-screen overflow-hidden">
                   <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" />
                   <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} />
                   <div className="bg-background-1 w-full">{props.children}</div>
-                  {props?.modal}
                 </div>
-              </UserContextProvider>
+              </SessionContextProvider>
             </GlobalStoreProvider>
           </ConvexClientProvider>
         </QueryClientProvider>

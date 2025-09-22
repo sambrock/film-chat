@@ -10,7 +10,7 @@ import { api } from '@/infra/convex/_generated/api';
 import { Doc } from '@/infra/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useUserContext } from '@/providers/use-context-provider';
+import { useSessionContext } from '@/providers/session-context-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { SpinnerEllipsis } from '../common/spinner';
@@ -20,9 +20,9 @@ type Props = {
 };
 
 export const SidebarChats = ({ initialData }: Props) => {
-  const { userId } = useUserContext();
+  const { session } = useSessionContext();
 
-  const threads = useQuery(api.threads.getByUserId, { userId }) || initialData;
+  const threads = useQuery(api.threads.getBySession, { session }) || initialData;
 
   return (
     <Fragment>

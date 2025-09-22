@@ -9,22 +9,21 @@ import { useGlobalStore } from '@/providers/global-store-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';
 import { useApiSendMessage } from '@/hooks/use-api-send-message';
 
-type Props = { initialActive: boolean } & React.ComponentProps<'div'>;
+type Props = { initialIsActive: boolean } & React.ComponentProps<'div'>;
 
 const EXAMPLE_MESSAGES = [
-  "Recommend me a hidden gem I probably haven't seen",
-  'I want a mind-bending thriller with a twist ending',
-  'Suggest a cozy movie for a rainy day',
-  'New York City in the 80s',
+  `Recommend me a hidden gem I probably haven't seen`,
+  `I want a mind-bending thriller with a twist ending`,
+  `Suggest a cozy movie for a rainy day`,
+  `1960s London`,
 ];
 
-export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
+export const ChatWelcome = ({ initialIsActive, className, ...props }: Props) => {
   const { threadId } = useThreadContext();
 
-  const isActive = useQuery(api.messages.getByThreadId, { threadId })?.length === 0 || initialActive;
-  const isPending = useGlobalStore((s) => s.chatPending.has(threadId) || s.chatPending.has('new'));
-  const isInput =
-    useGlobalStore((s) => s.chatInputValue.get(threadId) || s.chatInputValue.get('new') || '').length > 0;
+  const isActive = useQuery(api.messages.getByThreadId, { threadId })?.length === 0 || initialIsActive;
+  const isPending = useGlobalStore((s) => s.chatPending.has(threadId));
+  const isInput = useGlobalStore((s) => s.chatInputValue.has('new'));
 
   const sendMessage = useApiSendMessage();
 
@@ -56,29 +55,3 @@ export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
     </div>
   );
 };
-
-{
-  /* <li className="border-foreground-0/5 border-b py-1 text-base">
-          <button
-            className="text-foreground-1 px-3 py-2 text-sm font-medium"
-            onClick={() => sendMessage("Recommend me a hidden gem I probably haven't seen")}
-          >
-            Recommend me a hidden gem I probably haven't seen
-          </button>
-        </li>
-        <li className="border-foreground-0/5 border-b py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            I want a mind-bending thriller with a twist ending
-          </div>
-        </li>
-        <li className="border-foreground-0/5 border-b py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            Suggest a cozy movie for a rainy day
-          </div>
-        </li>
-        <li className="py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            Pick a random underrated indie film for me
-          </div>
-        </li> */
-}
