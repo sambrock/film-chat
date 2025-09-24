@@ -1,17 +1,15 @@
 'use client';
 
+import type { MessageUser as MessageUserType } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
-import { useMessageContext } from '@/providers/message-context-provider';
 
-type Props = React.ComponentProps<'div'>;
+type Props = { message: MessageUserType } & React.ComponentProps<'div'>;
 
-export const MessageUser = ({ className, ...props }: Props) => {
-  const { message } = useMessageContext();
-
+export const MessageUser = ({ message, className, ...props }: Props) => {
   return (
     <div
       className={cn(
-        'bg-background-3 ml-auto w-max -mt-4 max-w-2/3 rounded-xl px-3 py-2 whitespace-pre-line',
+        'bg-background-3 -mt-4 ml-auto w-max max-w-2/3 rounded-xl px-3 py-2 whitespace-pre-line',
         className
       )}
       {...props}

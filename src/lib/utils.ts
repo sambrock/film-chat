@@ -1,7 +1,7 @@
 import { cx, CxOptions } from 'class-variance-authority';
 import { v4 } from 'uuid';
 
-import type { Doc } from '@/infra/convex/_generated/dataModel';
+import { MessageStructured } from './definitions';
 
 export const cn = (...inputs: CxOptions) => {
   return cx(inputs);
@@ -82,13 +82,13 @@ export const modelResponseTextToMoviesArr = (content: string) => {
 
   const length = Math.max(titles.length, releaseYears.length, whys.length);
 
-  const movies: NonNullable<Doc<'messages'>['movies']> = [];
+  const movies: MessageStructured[] = [];
 
   for (let i = 0; i < length; i++) {
     movies.push({
       found: false,
       title: titles[i] || '',
-      releaseDate: releaseYears[i] ? new Date(+releaseYears[i], 0, 1).getTime() : 0,
+      releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
       why: whys[i] || '',
     });
   }

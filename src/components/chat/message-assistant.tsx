@@ -2,17 +2,16 @@
 
 import { useCallback, useLayoutEffect } from 'react';
 
+import { Model, models } from '@/lib/ai/models';
+import type { MessageAssistant as MessageAssistantType } from '@/lib/definitions';
 import { cn, modelResponseTextToMoviesArr } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useMessageContext } from '@/providers/message-context-provider';
 import { SpinnerEllipsis } from '../common/spinner';
-import { MessageAssistantActions } from './message-assistant-actions';
 import { MessageMovie } from './message-movie';
 
-type Props = React.ComponentProps<'div'>;
+type Props = { message: MessageAssistantType } & React.ComponentProps<'div'>;
 
-export const MessageAssistant = ({ className, ...props }: Props) => {
-  const { message } = useMessageContext();
+export const MessageAssistant = ({ message, className, ...props }: Props) => {
   const pendingContent = useGlobalStore((s) => s.messagePendingContent.get(message.messageId));
 
   const getMovies = useCallback(() => {
@@ -47,7 +46,15 @@ export const MessageAssistant = ({ className, ...props }: Props) => {
         </div>
       )}
 
-      <MessageAssistantActions />
+      <div
+        className={cn(
+          'text-foreground-1 mt-4 flex px-2 text-xs',
+          message.status === 'done' ? 'visible' : 'invisible'
+        )}
+        {...props}
+      >
+        <span className="font-medium">{models.get(message.model as Model)?.name}</span>
+      </div>
     </div>
   );
 };

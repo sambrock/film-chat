@@ -8,7 +8,7 @@ import { Check, Plus } from 'lucide-react';
 import { api } from '@/infra/convex/_generated/api';
 import { Id } from '@/infra/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
-import { useSessionContext } from '@/providers/session-context-provider';
+import { useSessionContext } from '@/app/session-init';
 import { Button } from '../common/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../common/tooltip';
 

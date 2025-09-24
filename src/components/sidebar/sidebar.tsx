@@ -1,10 +1,8 @@
-import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchQuery } from 'convex/nextjs';
 import { SquarePen } from 'lucide-react';
 
-import { api } from '@/infra/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import { SidebarButton } from './sidebar-button';
 import { SidebarChats } from './sidebar-chats';
@@ -13,12 +11,9 @@ import { SidebarWatchlistButton } from './sidebar-watchlist-button';
 type Props = React.ComponentProps<'div'>;
 
 export const Sidebar = async ({ className, ...props }: Props) => {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('session')?.value;
-
   const [initialThreads, initialWatchlist] = await Promise.all([
-    session ? fetchQuery(api.threads.getBySession, { session }) : null,
-    session ? fetchQuery(api.watchlist.getBySession, { session }) : null,
+    session ? fetchQuery(api.threads.getBySession, { session }) : [],
+    session ? fetchQuery(api.watchlist.getBySession, { session }) : [],
   ]);
 
   return (
@@ -40,12 +35,12 @@ export const Sidebar = async ({ className, ...props }: Props) => {
           </Link>
         </SidebarButton>
 
-        <SidebarWatchlistButton initialWatchlistCount={initialWatchlist?.length || 0} />
+        <SidebarWatchlistButton initialWatchlistCount={initialWatchlist.length} />
       </div>
 
       <div className="mt-4">
         <div className="text-foreground-1 px-3 py-1 text-sm">Chats</div>
-        <SidebarChats initialData={initialThreads || []} />
+        <SidebarChats initialData={initialThreads} />
       </div>
     </div>
   );

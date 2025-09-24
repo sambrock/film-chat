@@ -5,7 +5,6 @@ import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';
-import { useApiSendMessage } from '@/hooks/use-api-send-message';
 import { Button } from '../common/button';
 import { ChatModelSelect } from './chat-model-select';
 
@@ -20,7 +19,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const isSendDisabled = isPending || !value.trim();
 
-  const sendMessage = useApiSendMessage();
+  // const sendMessage = useApiSendMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
@@ -32,7 +31,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage.mutate(value);
+      // sendMessage.mutate(value);
     }
   };
 

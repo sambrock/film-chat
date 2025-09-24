@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react';
 
-import { models } from '@/lib/models';
+import { models } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';

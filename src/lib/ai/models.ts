@@ -1,7 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 
-import { MapKey, type StringLiterals } from './utils';
+import { MapKey, type StringLiterals } from '../utils';
 
 type OpenAiModel = StringLiterals<Parameters<typeof openai>[0]>;
 type GoogleModel = StringLiterals<Parameters<typeof google>[0]>;

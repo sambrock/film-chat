@@ -10,7 +10,7 @@ import { api } from '@/infra/convex/_generated/api';
 import { Doc } from '@/infra/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useSessionContext } from '@/providers/session-context-provider';
+import { useSessionContext } from '@/app/session-init';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { SpinnerEllipsis } from '../common/spinner';

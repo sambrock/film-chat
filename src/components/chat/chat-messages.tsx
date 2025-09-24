@@ -1,24 +1,19 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
-import { useQuery } from 'convex/react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
 
-import { api } from '@/infra/convex/_generated/api';
-import { Doc } from '@/infra/convex/_generated/dataModel';
 import { cn } from '@/lib/utils';
-import { MessageContextProvider } from '@/providers/message-context-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';
+import { useQueryGetThreadMessages } from '@/hooks/use-query-get-thread-messages';
 import { MessageAssistant } from './message-assistant';
 import { MessageUser } from './message-user';
 
-type Props = {
-  initialData: Doc<'messages'>[];
-} & React.ComponentProps<'div'>;
+type Props = React.ComponentProps<'div'>;
 
-export const ChatMessages = ({ initialData, className, ...props }: Props) => {
+export const ChatMessages = ({ className, ...props }: Props) => {
   const { threadId } = useThreadContext();
 
-  const messages = useQuery(api.messages.getByThreadId, { threadId }) || initialData;
+  const { data } = useQueryGetThreadMessages(threadId);
 
   const divRef = useRef<HTMLDivElement>(null);
 
@@ -26,15 +21,20 @@ export const ChatMessages = ({ initialData, className, ...props }: Props) => {
     if (divRef.current) {
       divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
     }
-  }, [messages.length]);
+  }, [data.length]);
 
   return (
-    <div id="chatMessages" ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)} {...props}>
-      {messages.map((message) => (
-        <MessageContextProvider key={message.messageId} message={message}>
-          {message.role === 'user' && <MessageUser />}
-          {message.role === 'assistant' && <MessageAssistant />}
-        </MessageContextProvider>
+    <div
+      id="chatMessages"
+      ref={divRef}
+      className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)}
+      {...props}
+    >
+      {[...data.reverse()].map((message) => (
+        <Fragment key={message.messageId}>
+          {message.role === 'user' && <MessageUser message={message} />}
+          {message.role === 'assistant' && <MessageAssistant message={message} />}
+        </Fragment>
       ))}
     </div>
   );

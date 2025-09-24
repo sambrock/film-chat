@@ -9,7 +9,7 @@ import { ListVideo } from 'lucide-react';
 import { api } from '@/infra/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useSessionContext } from '@/providers/session-context-provider';
+import { useSessionContext } from '@/app/session-init';
 import { SidebarButton } from './sidebar-button';
 
 type Props = {

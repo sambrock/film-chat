@@ -1,16 +1,15 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Schibsted_Grotesk } from 'next/font/google';
+import { headers } from 'next/headers';
 
+import { auth } from '@/lib/auth/server';
 import { cn } from '@/lib/utils';
-import { ConvexClientProvider } from '@/providers/convex-client-provider';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
-import { QueryClientProvider } from '@/providers/query-client-provider';
-import { Sidebar } from '@/components/sidebar/sidebar';
-import { SidebarMobile } from '@/components/sidebar/sidebar-mobile';
+import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
+import { SessionInit } from './session-init';
 
 import './globals.css';
-
-import { SessionContextProvider } from '@/providers/session-context-provider';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -36,19 +35,21 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       </head>
 
       <body className={cn('text-foreground-0 bg-background-0', fontSans.className)}>
-        <QueryClientProvider>
-          <ConvexClientProvider>
-            <GlobalStoreProvider>
-              <SessionContextProvider>
-                <div className="flex h-screen overflow-hidden">
-                  <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" />
-                  <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} />
-                  <div className="bg-background-1 w-full">{props.children}</div>
-                </div>
-              </SessionContextProvider>
-            </GlobalStoreProvider>
-          </ConvexClientProvider>
-        </QueryClientProvider>
+        <QueryClientTRPCProvider>
+          <GlobalStoreProvider>
+            <div className="flex h-screen overflow-hidden">
+              {/* <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" /> */}
+              {/* <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} /> */}
+              <div className="bg-background-1 w-full">{props.children}</div>
+            </div>
+          </GlobalStoreProvider>
+        </QueryClientTRPCProvider>
+
+        <Suspense>
+          <SessionInit
+            shouldSignInAnonymously={(await auth.api.getSession({ headers: await headers() })) === null}
+          />
+        </Suspense>
       </body>
     </html>
   );
