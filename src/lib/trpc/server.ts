@@ -1,23 +1,18 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { headers } from 'next/headers';
 import { initTRPC } from '@trpc/server';
-import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
+
 import superjson from 'superjson';
 
 import { auth } from '../auth/server';
 
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export const createTRPCContext = cache(async () => {
+  const session = await auth.api.getSession({ headers: await headers() });
 
-  console.log('session', session);
-
-  return {
-    session,
-  };
-};
+  return { session };
+});
 
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 

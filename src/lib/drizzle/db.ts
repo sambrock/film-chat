@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import { drizzle as prod } from 'drizzle-orm/neon-http';
 import { drizzle as dev } from 'drizzle-orm/node-postgres';
 
-import { env } from '../utils/env';
+import { env } from '../env';
 import {
   accounts,
   library,

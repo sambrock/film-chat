@@ -26,6 +26,7 @@
     "@trpc/tanstack-react-query": "^11.5.1",
     "ai": "^5.0.43",
     "better-auth": "^1.3.14",
+    "better-sse": "^0.15.1",
     "class-variance-authority": "^0.7.1",
     "convex": "^1.27.0",
     "dotenv": "^17.2.2",

@@ -1,7 +1,7 @@
 import { cx, CxOptions } from 'class-variance-authority';
 import { v4 } from 'uuid';
 
-import { MessageStructured } from './definitions';
+import { MessageResponseMovie } from './definitions';
 
 export const cn = (...inputs: CxOptions) => {
   return cx(inputs);
@@ -71,7 +71,7 @@ export const genreName = (name: string) => {
  * @param content - The content returned from the AI model
  * @returns An array of movie objects with title, release year, and why
  */
-export const modelResponseTextToMoviesArr = (content: string) => {
+export const modelResponseTextToMovies = (content: string) => {
   const titleRegex = /"title":\s*"([^"]+)"?/g;
   const releaseYearRegex = /"release_year":\s*"?(\d{4})?/g;
   const whyRegex = /"why":\s*"([^"]+)"?/g;
@@ -82,11 +82,12 @@ export const modelResponseTextToMoviesArr = (content: string) => {
 
   const length = Math.max(titles.length, releaseYears.length, whys.length);
 
-  const movies: MessageStructured[] = [];
+  const movies: MessageResponseMovie[] = [];
 
   for (let i = 0; i < length; i++) {
     movies.push({
       found: false,
+      tmdbId: null,
       title: titles[i] || '',
       releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
       why: whys[i] || '',

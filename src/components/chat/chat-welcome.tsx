@@ -19,7 +19,6 @@ const EXAMPLE_MESSAGES = [
 export const ChatWelcome = ({ className, ...props }: Props) => {
   const { threadId } = useThreadContext();
 
-  // const isActive = useQuery(api.messages.getByThreadId, { threadId })?.length === 0 || initialIsActive;
   const { data } = useQueryGetThreadMessages(threadId);
 
   const isActive = data.length === 0;

@@ -1,116 +1,120 @@
-// import { useRouter } from 'next/navigation';
-// import { useMutation as useMutationReactQuery } from '@tanstack/react-query';
-// import { useMutation } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { useMutation as useMutationReactQuery, useQueryClient } from '@tanstack/react-query';
+import { produce } from 'immer';
 
-// import { generateUuid } from '@/lib/utils';
-// import { useGlobalStore } from '@/providers/global-store-provider';
-// import { useSessionContext } from '@/providers/session-context-provider';
-// import { useThreadContext } from '@/providers/thread-context-provider';
+import { ChatBodySchema, ChatSSE } from '@/app/api/chat/route';
+import { useTRPC } from '@/lib/trpc/client';
+import { modelResponseTextToMovies } from '@/lib/utils';
+import { useGlobalStore } from '@/providers/global-store-provider';
+import { useThreadContext } from '@/providers/thread-context-provider';
 
-// export const useMutationSendMessage = () => {
-//   const { session } = useSessionContext();
-//   const { threadId, getThreadIsPersisted, setThreadIsPersisted } = useThreadContext();
+export const useMutationSendMessage = () => {
+  const { threadId } = useThreadContext();
 
-//   const model = useGlobalStore((s) => s.model);
-//   const dispatch = useGlobalStore((s) => s.dispatch);
+  const model = useGlobalStore((s) => s.model);
+  const dispatch = useGlobalStore((s) => s.dispatch);
 
-//   const router = useRouter();
+  const router = useRouter();
 
-//   const newChatMessage = useMutation(api.chat.newChatMessage).withOptimisticUpdate((localStore, args) => {
-//     const localStateThreads = localStore.getQuery(api.threads.getBySession, { session });
-//     const localStateMessages = localStore.getQuery(api.messages.getByThreadId, { threadId: args.threadId });
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
 
-//     if (localStateThreads && Array.isArray(localStateThreads) && !args.threadIsPersisted) {
-//       localStore.setQuery(api.threads.getBySession, { session }, [
-//         { threadId: args.threadId, userId: '', title: 'New chat' } as Doc<'threads'>,
-//         ...localStateThreads,
-//       ]);
-//     }
-//     if (localStateMessages && Array.isArray(localStateMessages)) {
-//       localStore.setQuery(api.messages.getByThreadId, { threadId: args.threadId }, [
-//         ...localStateMessages,
-//         args.userMessage as Doc<'messages'>,
-//         args.assistantMessage as Doc<'messages'>,
-//       ]);
-//     }
-//   });
+  return useMutationReactQuery({
+    mutationFn: async (content: string) => {
+      // dispatch({
+      //   type: 'MESSAGE_PENDING',
+      //   payload: { threadId },
+      // });
 
-//   return useMutationReactQuery({
-//     mutationFn: async (content: string) => {
-//       dispatch({
-//         type: 'MESSAGE_PENDING',
-//         payload: { threadId, isPersisted: getThreadIsPersisted() },
-//       });
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        body: JSON.stringify({ threadId, content, model } as ChatBodySchema),
+      });
 
-//       const messageUserId = generateUuid();
-//       const messageAssistantId = generateUuid();
+      const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
 
-//       // Create assistant message with empty content
-//       await newChatMessage({
-//         threadId,
-//         threadIsPersisted: getThreadIsPersisted(),
-//         session,
-//         userMessage: {
-//           messageId: messageUserId,
-//           threadId,
-//           model,
-//           content,
-//           role: 'user',
-//           status: 'pending',
-//         },
-//         assistantMessage: {
-//           messageId: messageAssistantId,
-//           threadId,
-//           model,
-//           content: '',
-//           role: 'assistant',
-//           status: 'pending',
-//         },
-//       });
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-//       if (!document.URL.includes(threadId)) {
-//         router.push(`/chat/${threadId}`);
-//         // window.history.pushState(null, '', `/chat/${threadId}`);
-//       }
+        const data = value
+          .split('\n')
+          .filter((line) => line.startsWith('data: '))
+          .map((line) => line.replace('data: ', '').trim())
+          .filter((line) => line !== '[DONE]');
 
-//       setThreadIsPersisted();
+        for (const item of data) {
+          const parsed = JSON.parse(item) as ChatSSE;
 
-//       const response = await fetch('/api/chat', {
-//         method: 'POST',
-//         body: JSON.stringify({
-//           threadId,
-//           messageId: messageAssistantId,
-//           content,
-//           model,
-//         } as ChatBodySchema),
-//       });
+          if (parsed.type === 'thread') {
+            // router.replace(`/chat/${parsed.threadId}`);
+          }
+          if (parsed.type === 'message') {
+            queryClient.setQueryData(
+              trpc.getThreadMessages.queryKey({ threadId: parsed.threadId }),
+              (state) => {
+                return produce(state, (draft) => {
+                  if (!draft) return;
+                  draft.unshift(parsed.message);
+                });
+              }
+            );
+          }
+          if (parsed.type === 'content') {
+            queryClient.setQueryData(
+              trpc.getThreadMessages.queryKey({ threadId: parsed.threadId }),
+              (state) => {
+                return produce(state, (draft) => {
+                  const message = draft?.find((m) => m.messageId === parsed.messageId);
+                  if (message && message.role === 'assistant') {
+                    message.content += parsed.v;
+                  }
+                });
+              }
+            );
+          }
+        }
+      }
 
-//       const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error();
+      }
 
-//       if (!reader) {
-//         throw new Error();
-//       }
+      //  router.push(`/chat/${threadId}`);
 
-//       const readChunks = async () => {
-//         const { done, value } = await reader.read();
-//         if (done) return;
+      // const readChunks = async () => {
+      //   try {
+      //     const { done, value } = await reader.read();
+      //     if (done) return;
 
-//         const chunk = new TextDecoder().decode(value);
+      //     const chunk = new TextDecoder().decode(value);
 
-//         dispatch({
-//           type: 'SET_MESSAGE_PENDING_CONTENT',
-//           payload: { messageId: messageAssistantId, content: chunk, append: true },
-//         });
+      //     const data = chunk
+      //       .split('\n')
+      //       .filter((line) => line.startsWith('data: '))
+      //       .map((line) => line.replace('data: ', '').trim());
 
-//         await readChunks();
-//       };
+      //     const parsed = JSON.parse(data);
 
-//       await readChunks();
+      //     console.log(parsed);
+      //   } catch (e) {
+      //     console.log('READ CHUNKS ERROR', e);
+      //   }
 
-//       dispatch({
-//         type: 'MESSAGE_DONE',
-//         payload: { threadId },
-//       });
-//     },
-//   });
-// };
+      //   // dispatch({
+      //   //   type: 'SET_MESSAGE_PENDING_CONTENT',
+      //   //   payload: { messageId: messageAssistantId, content: chunk, append: true },
+      //   // });
+
+      //   await readChunks();
+      // };
+
+      // await readChunks();
+
+      // dispatch({
+      //   type: 'MESSAGE_DONE',
+      //   payload: { threadId },
+      // });
+    },
+  });
+};

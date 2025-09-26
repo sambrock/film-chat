@@ -6,35 +6,20 @@ import { useGlobalStore } from './global-store-provider';
 
 export type ThreadContext = {
   threadId: string;
-  getThreadIsPersisted: () => boolean;
-  setThreadIsPersisted: () => void;
 };
 
 export const ThreadContext = createContext<ThreadContext | undefined>(undefined);
 
 export const ThreadContextProvider = ({
   threadId,
-  isPersisted,
   ...props
-}: React.PropsWithChildren<{ threadId: string; isPersisted: boolean }>) => {
-  const isPersistedRef = useRef(isPersisted);
-
+}: React.PropsWithChildren<{ threadId: string }>) => {
   const dispatch = useGlobalStore((s) => s.dispatch);
   useEffect(() => {
     dispatch({ type: 'SET_ACTIVE_THREAD_ID', payload: { threadId } });
   }, []);
 
-  return (
-    <ThreadContext.Provider
-      value={{
-        threadId,
-        getThreadIsPersisted: () => isPersistedRef.current,
-        setThreadIsPersisted: () => (isPersistedRef.current = true),
-      }}
-    >
-      {props.children}
-    </ThreadContext.Provider>
-  );
+  return <ThreadContext.Provider value={{ threadId }}>{props.children}</ThreadContext.Provider>;
 };
 
 export const useThreadContext = () => {

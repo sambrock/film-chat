@@ -5,13 +5,14 @@ import { ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useThreadContext } from '@/providers/thread-context-provider';
+import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
 import { ChatModelSelect } from './chat-model-select';
 
 type Props = React.ComponentProps<'div'>;
 
 export const ChatInput = ({ className, ...props }: Props) => {
-  const { threadId, getThreadIsPersisted } = useThreadContext();
+  const { threadId } = useThreadContext();
 
   const value = useGlobalStore((s) => s.chatInputValue.get(threadId) || s.chatInputValue.get('new') || '');
   const isPending = useGlobalStore((s) => s.chatPending.has(threadId));
@@ -19,19 +20,19 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const isSendDisabled = isPending || !value.trim();
 
-  // const sendMessage = useApiSendMessage();
+  const sendMessage = useMutationSendMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
       type: 'SET_INPUT_VALUE',
-      payload: { threadId, value: e.target.value, isPersisted: getThreadIsPersisted() },
+      payload: { threadId, value: e.target.value, isPersisted: true },
     });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      // sendMessage.mutate(value);
+      sendMessage.mutate(value);
     }
   };
 

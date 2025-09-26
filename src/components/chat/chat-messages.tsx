@@ -17,10 +17,13 @@ export const ChatMessages = ({ className, ...props }: Props) => {
 
   const divRef = useRef<HTMLDivElement>(null);
 
+  const scrollToEnd = () => {
+    if (!divRef.current) return;
+    divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
+  };
+
   useLayoutEffect(() => {
-    if (divRef.current) {
-      divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
-    }
+    scrollToEnd();
   }, [data.length]);
 
   return (
@@ -30,10 +33,10 @@ export const ChatMessages = ({ className, ...props }: Props) => {
       className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)}
       {...props}
     >
-      {[...data.reverse()].map((message) => (
+      {[...data].reverse().map((message) => (
         <Fragment key={message.messageId}>
           {message.role === 'user' && <MessageUser message={message} />}
-          {message.role === 'assistant' && <MessageAssistant message={message} />}
+          {message.role === 'assistant' && <MessageAssistant message={message} scrollToEnd={scrollToEnd} />}
         </Fragment>
       ))}
     </div>

@@ -5,5 +5,17 @@ import { useTRPC } from '@/lib/trpc/client';
 export const useQueryGetThreadMessages = (threadId: string) => {
   const trpc = useTRPC();
 
-  return useQuery(trpc.getThreadMessages.queryOptions({ threadId }, { initialData: [] }));
+  return useQuery(
+    trpc.getThreadMessages.queryOptions(
+      { threadId },
+      {
+        initialData: [],
+        staleTime: Infinity,
+        retry: false,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      }
+    )
+  );
 };

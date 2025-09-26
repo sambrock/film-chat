@@ -13,7 +13,8 @@ export type GlobalState = {
   chatUnseenUpdates: Set<string>; // threadId
   chatInputValue: Map<string, string>; // threadId, value
   chatModel: Map<string, Model>; // threadId, model
-  messagePendingContent: Map<string, string>; // messageId, content
+  messageUserPendingContent: Map<string, string>; // threadId, content
+  messageAssistantPendingContent: Map<string, string>; // threadId, content
 };
 
 export type GlobalStore = GlobalState & {
@@ -31,7 +32,8 @@ export const createGlobalStore = () => {
         chatUnseenUpdates: new Set(),
         chatInputValue: new Map(),
         chatModel: new Map(),
-        messagePendingContent: new Map(),
+        messageUserPendingContent: new Map(),
+        messageAssistantPendingContent: new Map(),
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

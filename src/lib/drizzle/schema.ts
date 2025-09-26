@@ -11,7 +11,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 
-import type { MessageResponseMovie, TMDbMovieDetails } from '../definitions';
+import type { MessageResponseMovie, TMDbMovieDetails, TMDbSearchMovieResult } from '../definitions';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -98,7 +98,7 @@ export const messages = pgTable('messages', {
   responseMovies: jsonb('response_movies').$type<MessageResponseMovie[]>(),
   model: text('model').notNull(),
   role: text({ enum: ['user', 'assistant'] }).notNull(),
-  status: text({ enum: ['pending', 'done'] }).notNull(),
+  status: text({ enum: ['in_progress', 'done'] }).notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
     .notNull()

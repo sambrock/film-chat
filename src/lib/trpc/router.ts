@@ -22,9 +22,24 @@ export const appRouter = router({
   getThreadMessages: publicProcedure
     .input(z.object({ threadId: z.string() }))
     .output(z.array(MessageUserSchema.or(MessageAssistantSchema)))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session) {
+        return [];
+      }
+
       const data = await db.query.messages.findMany({
         where: (messages, { eq }) => eq(messages.threadId, input.threadId),
+        with: {
+          movies: {
+            with: {
+              movie: {
+                with: {
+                  libraries: { where: (library, { eq }) => eq(library.userId, ctx.session.user.id) },
+                },
+              },
+            },
+          },
+        },
         orderBy: (messages, { desc }) => [desc(messages.serial)],
         limit: 20,
       });
@@ -33,9 +48,15 @@ export const appRouter = router({
         if (message.role === 'user') {
           return MessageUserSchema.parse(message);
         } else {
-          return MessageAssistantSchema.parse(message);
+          return MessageAssistantSchema.parse({
+            ...message,
+            movies: message.movies.map((m) => m.movie),
+            library: message.movies.flatMap((m) => m.movie.libraries),
+          });
         }
       });
+
+      console.log('messages', messages);
 
       return messages;
     }),

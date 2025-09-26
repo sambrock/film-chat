@@ -29,8 +29,7 @@ export const MessageResponseMovieSchema = z.discriminatedUnion('found', [
 export const MessageUserSchema = MessageSchema.omit({
   serial: true,
   parentId: true,
-  structured: true,
-  model: true,
+  responseMovies: true,
 }).extend({
   role: z.literal('user'),
 });

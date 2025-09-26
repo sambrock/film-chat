@@ -1,8 +1,8 @@
 import { cache } from 'react';
 import createClient from 'openapi-fetch';
 
-import { MovieCredits, MovieDetails } from '../definitions';
-import { env } from '../utils/env';
+import { TMDbMovieDetails, TMDbMovieDetailsWithCredits, TMDbSearchMovieResult } from '../definitions';
+import { env } from '../env';
 import { paths } from './schema-v3';
 
 export const tmdb = createClient<paths>({
@@ -12,28 +12,44 @@ export const tmdb = createClient<paths>({
   },
 });
 
-export const tmdbFindMovie = cache(async (query: string, year: string) => {
-  const search = await tmdb.GET('/3/search/movie', {
+export const tmdbFindMovie = cache(
+  async (query: string, year: string): Promise<TMDbSearchMovieResult | null> => {
+    const search = await tmdb.GET('/3/search/movie', {
+      params: {
+        query: { query, year, primary_release_year: year },
+      },
+    });
+
+    if (!search.data || !search.data.results || search.data.results.length === 0) {
+      return null;
+    }
+
+    const [result] = search.data.results;
+
+    if (!result.id || !result.title || !result.release_date || !result.backdrop_path || !result.poster_path) {
+      return null;
+    }
+
+    return result;
+  }
+);
+
+export const tmdbGetMovieById = cache(async (movieId: number): Promise<TMDbMovieDetails | null> => {
+  const { data } = await tmdb.GET(`/3/movie/{movie_id}`, {
     params: {
-      query: { query, year, primary_release_year: year },
+      path: { movie_id: movieId },
     },
   });
 
-  if (!search.data || !search.data.results || search.data.results.length === 0) {
+  if (!data || !data.id || !data.title || !data.release_date || !data.backdrop_path || !data.poster_path) {
     return null;
   }
 
-  const [result] = search.data.results;
-
-  if (!result.id || !result.title || !result.release_date || !result.backdrop_path || !result.poster_path) {
-    return null;
-  }
-
-  return result;
+  return data;
 });
 
-export const tmdbGetMovieById = cache(
-  async (movieId: number): Promise<(MovieDetails & { credits: MovieCredits }) | null> => {
+export const tmdbGetMovieByIdWithCredits = cache(
+  async (movieId: number): Promise<TMDbMovieDetailsWithCredits | null> => {
     const { data } = await tmdb.GET(`/3/movie/{movie_id}`, {
       params: {
         path: { movie_id: movieId },
@@ -45,6 +61,6 @@ export const tmdbGetMovieById = cache(
       return null;
     }
 
-    return data as MovieDetails & { credits: MovieCredits };
+    return data as TMDbMovieDetailsWithCredits;
   }
 );

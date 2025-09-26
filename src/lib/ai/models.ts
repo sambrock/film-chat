@@ -49,19 +49,3 @@ export const models = new Map<SupportedModel, ModelMeta>([
     },
   ],
 ] as const);
-
-export const getStreamTextModel = (model: Model | (string & {})) => {
-  const [modelProvider, modelName] = model.split('/');
-
-  switch (modelProvider) {
-    case 'openai': {
-      return openai(modelName);
-    }
-    case 'google': {
-      return google(modelName);
-    }
-    default: {
-      return openai('gpt-4.1-nano');
-    }
-  }
-};

@@ -3,8 +3,8 @@ import z from 'zod';
 import {
   LibrarySchema,
   MessageAssistantSchema,
-  MessageSchema,
   MessageResponseMovieSchema,
+  MessageSchema,
   MessageUserSchema,
   MovieSchema,
   ThreadSchema,
@@ -13,7 +13,9 @@ import {
 import { type operations } from './tmdb/schema-v3';
 import { Prettify } from './utils';
 
-export type TMDbSearchMovie = operations['search-movie']['responses']['200']['content']['application/json'];
+export type TMDbSearchMovieResult = NonNullable<
+  operations['search-movie']['responses']['200']['content']['application/json']['results']
+>[number];
 export type TMDbMovieDetails = operations['movie-details']['responses']['200']['content']['application/json'];
 export type TMDbMovieCredits = operations['movie-credits']['responses']['200']['content']['application/json'];
 export type TMDbMovieDetailsWithCredits = Prettify<TMDbMovieDetails & { credits: TMDbMovieCredits }>;
