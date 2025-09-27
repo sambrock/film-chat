@@ -104,7 +104,10 @@ export async function POST(req: Request) {
       if (chunk.type === 'text-delta') {
         controller.enqueue(encodeSSE({ type: 'content', v: chunk.text }));
         messageAssistant.content += chunk.text;
-        messageAssistant.recommendations = parseRecommendations(messageAssistant);
+        messageAssistant.recommendations = parseRecommendations(
+          messageAssistant.content,
+          messageAssistant.messageId
+        );
       }
       if (chunk.type === 'finish') {
         messageAssistant.status = 'done';
