@@ -1,120 +1,102 @@
-import { useRouter } from 'next/navigation';
 import { useMutation as useMutationReactQuery, useQueryClient } from '@tanstack/react-query';
+import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
 
-import { ChatBodySchema, ChatSSE } from '@/app/api/chat/route';
+import type { ChatSSEData, ConversationBody } from '@/app/api/conversation/route';
 import { useTRPC } from '@/lib/trpc/client';
-import { modelResponseTextToMovies } from '@/lib/utils';
+import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
 
 export const useMutationSendMessage = () => {
-  const { threadId } = useThreadContext();
+  const { conversationId, setConversationId } = useConversationContext();
 
   const model = useGlobalStore((s) => s.model);
-  const dispatch = useGlobalStore((s) => s.dispatch);
-
-  const router = useRouter();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
+  const updateConversationHistoryCache = <T>(draft: T) =>
+    queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
+      produce(state, (draft: T) => (draft = draft))
+    );
+    
+
   return useMutationReactQuery({
     mutationFn: async (content: string) => {
-      // dispatch({
-      //   type: 'MESSAGE_PENDING',
-      //   payload: { threadId },
-      // });
-
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/conversation', {
         method: 'POST',
-        body: JSON.stringify({ threadId, content, model } as ChatBodySchema),
+        body: JSON.stringify({ conversationId, content, model } as ConversationBody),
       });
 
-      const reader = response.body!.pipeThrough(new TextDecoderStream()).getReader();
+      const stream = response.body!;
+
+      const eventStream = stream
+        .pipeThrough(new TextDecoderStream())
+        .pipeThrough(new EventSourceParserStream());
+
+      const reader = eventStream.getReader();
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
 
-        const data = value
-          .split('\n')
-          .filter((line) => line.startsWith('data: '))
-          .map((line) => line.replace('data: ', '').trim())
-          .filter((line) => line !== '[DONE]');
+        const { event, data } = value;
 
-        for (const item of data) {
-          const parsed = JSON.parse(item) as ChatSSE;
-
-          if (parsed.type === 'thread') {
-            // router.replace(`/chat/${parsed.threadId}`);
-          }
-          if (parsed.type === 'message') {
-            queryClient.setQueryData(
-              trpc.getThreadMessages.queryKey({ threadId: parsed.threadId }),
-              (state) => {
-                return produce(state, (draft) => {
-                  if (!draft) return;
-                  draft.unshift(parsed.message);
-                });
-              }
-            );
-          }
-          if (parsed.type === 'content') {
-            queryClient.setQueryData(
-              trpc.getThreadMessages.queryKey({ threadId: parsed.threadId }),
-              (state) => {
-                return produce(state, (draft) => {
-                  const message = draft?.find((m) => m.messageId === parsed.messageId);
-                  if (message && message.role === 'assistant') {
-                    message.content += parsed.v;
-                  }
-                });
-              }
-            );
+        if (event === 'delta') {
+          const parsed = JSON.parse(data) as ChatSSEData;
+          if (parsed.type === 'conversation') {
           }
         }
       }
-
-      if (!reader) {
-        throw new Error();
-      }
-
-      //  router.push(`/chat/${threadId}`);
-
-      // const readChunks = async () => {
-      //   try {
-      //     const { done, value } = await reader.read();
-      //     if (done) return;
-
-      //     const chunk = new TextDecoder().decode(value);
-
-      //     const data = chunk
-      //       .split('\n')
-      //       .filter((line) => line.startsWith('data: '))
-      //       .map((line) => line.replace('data: ', '').trim());
-
-      //     const parsed = JSON.parse(data);
-
-      //     console.log(parsed);
-      //   } catch (e) {
-      //     console.log('READ CHUNKS ERROR', e);
-      //   }
-
-      //   // dispatch({
-      //   //   type: 'SET_MESSAGE_PENDING_CONTENT',
-      //   //   payload: { messageId: messageAssistantId, content: chunk, append: true },
-      //   // });
-
-      //   await readChunks();
-      // };
-
-      // await readChunks();
-
-      // dispatch({
-      //   type: 'MESSAGE_DONE',
-      //   payload: { threadId },
-      // });
     },
   });
 };
+
+// while (true) {
+//   const { value, done } = await reader.read();
+//   if (done) break;
+
+//   const data = value
+//     .split('\n')
+//     .filter((line) => line.startsWith('data: '))
+//     .map((line) => line.replace('data: ', '').trim())
+//     .filter((line) => line !== '[DONE]');
+
+//   for (const item of data) {
+//     const parsed = JSON.parse(item) as ChatSSE;
+
+//     if (parsed.type === 'thread') {
+//       if (threadId !== parsed.v) {
+//         setThreadId(parsed.v);
+//         window.history.replaceState(null, '', `/chat/${parsed.v}`);
+//       }
+//     }
+//     if (parsed.type === 'message') {
+//       queryClient.setQueryData(
+//         trpc.conversationHistory.queryKey({ threadId: parsed.v.threadId }),
+//         (state) => {
+//           return produce(state, (draft) => {
+//             console.log(parsed.v.role, draft);
+//             if (!draft) draft = [];
+//             const index = draft.findIndex((m) => m.messageId === parsed.v.messageId);
+//             if (index !== -1) {
+//               draft[index] = parsed.v;
+//             } else {
+//               draft.unshift(parsed.v);
+//             }
+//           });
+//         }
+//       );
+//     }
+//     if (parsed.type === 'end') {
+//       queryClient.invalidateQueries({
+//         queryKey: trpc.conversationHistory.queryKey({ threadId }),
+//       });
+//     }
+//   }
+// }
+
+// dispatch({
+//   type: 'MESSAGE_DONE',
+//   payload: { threadId },
+// });

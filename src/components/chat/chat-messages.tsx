@@ -3,17 +3,17 @@
 import { Fragment, useLayoutEffect, useRef } from 'react';
 
 import { cn } from '@/lib/utils';
-import { useThreadContext } from '@/providers/thread-context-provider';
-import { useQueryGetThreadMessages } from '@/hooks/use-query-get-thread-messages';
+import { useConversationContext } from '@/providers/conversation-context-provider';
+import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
 import { MessageAssistant } from './message-assistant';
 import { MessageUser } from './message-user';
 
 type Props = React.ComponentProps<'div'>;
 
 export const ChatMessages = ({ className, ...props }: Props) => {
-  const { threadId } = useThreadContext();
+  const { conversationId } = useConversationContext();
 
-  const { data } = useQueryGetThreadMessages(threadId);
+  const { data } = useQueryConversationHistory(conversationId);
 
   const divRef = useRef<HTMLDivElement>(null);
 

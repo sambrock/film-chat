@@ -1,5 +1,5 @@
-import ChatPage from './chat/[thread_id]/page';
+import ConversationPage from './c/[conversationId]/page';
 
-export default function NewChatPage() {
-  return <ChatPage />;
+export default function NewConversationPage() {
+  return <ConversationPage />;
 }

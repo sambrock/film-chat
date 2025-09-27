@@ -3,9 +3,9 @@
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
-import { useQueryGetThreadMessages } from '@/hooks/use-query-get-thread-messages';
+import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
 
 type Props = React.ComponentProps<'div'>;
 
@@ -17,15 +17,15 @@ const EXAMPLE_MESSAGES = [
 ];
 
 export const ChatWelcome = ({ className, ...props }: Props) => {
-  const { threadId } = useThreadContext();
+  const { conversationId } = useConversationContext();
 
-  const { data } = useQueryGetThreadMessages(threadId);
+  const { data } = useQueryConversationHistory(conversationId);
 
   const isActive = data.length === 0;
   const isInput = useGlobalStore((s) => s.chatInputValue.has('new'));
-  const isPending = useGlobalStore((s) => s.chatPending.has(threadId));
+  const isInProgress = useGlobalStore((s) => s.chatInProgress.has(conversationId));
 
-  if (!isActive || isInput || isPending) {
+  if (!isActive || isInput || isInProgress) {
     return null;
   }
   return (

@@ -4,15 +4,15 @@ import { ChevronDown } from 'lucide-react';
 
 import { models } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
+import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 
 export const ChatModelSelect = () => {
-  const { threadId } = useThreadContext();
+  const { conversationId } = useConversationContext();
 
-  const selectedModel = useGlobalStore((s) => s.chatModel.get(threadId) || s.model);
+  const selectedModel = useGlobalStore((s) => s.chatModel.get(conversationId) || s.model);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   return (
@@ -29,7 +29,7 @@ export const ChatModelSelect = () => {
           <DropdownItem
             key={model.model}
             className={cn(model.model === selectedModel && 'bg-background-1/50')}
-            onClick={() => dispatch({ type: 'SET_MODEL', payload: { threadId, model: model.model } })}
+            onClick={() => dispatch({ type: 'SET_MODEL', payload: { conversationId, model: model.model } })}
           >
             <div className="flex items-end gap-3">
               <span className="font-medium">{model.name}</span>

@@ -1,26 +1,26 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient, trpc } from '@/lib/trpc/ssr';
-import { ThreadContextProvider } from '@/providers/thread-context-provider';
+import { ConversationContextProvider } from '@/providers/conversation-context-provider';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatWelcome } from '@/components/chat/chat-welcome';
 
 type Props = {
-  params?: Promise<{ thread_id?: string }>;
+  params?: Promise<{ conversationId: string }>;
 };
 
-export default async function ChatPage({ params }: Props) {
-  const threadId = (await params)?.thread_id;
+export default async function ConversationPage({ params }: Props) {
+  const { conversationId } = params ? await params : {};
 
   const queryClient = getQueryClient();
-  if (threadId) {
-    await queryClient.prefetchQuery(trpc.getThreadMessages.queryOptions({ threadId }));
+  if (conversationId) {
+    await queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ThreadContextProvider threadId={threadId || ''}>
+      <ConversationContextProvider conversationId={conversationId}>
         <main className="relative mx-auto grid w-full grid-rows-[calc(100vh-20px)_20px]">
           <div className="mx-auto w-full overflow-y-scroll p-3">
             <ChatWelcome className="mx-auto mt-[20vh] justify-self-center lg:w-3xl" />
@@ -32,7 +32,7 @@ export default async function ChatPage({ params }: Props) {
             <ChatInput className="relative z-10 mx-auto w-full shadow-xl shadow-black/10 lg:w-3xl" />
           </div>
         </main>
-      </ThreadContextProvider>
+      </ConversationContextProvider>
     </HydrationBoundary>
   );
 }

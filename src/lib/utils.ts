@@ -1,7 +1,5 @@
 import { cx, CxOptions } from 'class-variance-authority';
-import { v4 } from 'uuid';
-
-import { MessageResponseMovie } from './definitions';
+import { v4, v5 } from 'uuid';
 
 export const cn = (...inputs: CxOptions) => {
   return cx(inputs);
@@ -9,6 +7,10 @@ export const cn = (...inputs: CxOptions) => {
 
 export const generateUuid = () => {
   return v4();
+};
+
+export const generateUuidFromString = (str: string) => {
+  return v5(str, v5.DNS);
 };
 
 export const timeAgo = (date: Date) => {
@@ -66,37 +68,6 @@ export const genreName = (name: string) => {
   return name;
 };
 
-/**
- * @description Parses the arbitrary AI model response text into a structured format
- * @param content - The content returned from the AI model
- * @returns An array of movie objects with title, release year, and why
- */
-export const modelResponseTextToMovies = (content: string) => {
-  const titleRegex = /"title":\s*"([^"]+)"?/g;
-  const releaseYearRegex = /"release_year":\s*"?(\d{4})?/g;
-  const whyRegex = /"why":\s*"([^"]+)"?/g;
-
-  const titles = [...content.matchAll(titleRegex)].map((m) => m[1]?.trim());
-  const releaseYears = [...content.matchAll(releaseYearRegex)].map((m) => m[1]?.trim());
-  const whys = [...content.matchAll(whyRegex)].map((m) => m[1]?.trim());
-
-  const length = Math.max(titles.length, releaseYears.length, whys.length);
-
-  const movies: MessageResponseMovie[] = [];
-
-  for (let i = 0; i < length; i++) {
-    movies.push({
-      found: false,
-      tmdbId: null,
-      title: titles[i] || '',
-      releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
-      why: whys[i] || '',
-    });
-  }
-
-  return movies;
-};
-
 export type DeepPartial<T> = T extends object
   ? {
       [P in keyof T]?: DeepPartial<T[P]>;
@@ -110,3 +81,31 @@ export type Prettify<T> = {
 export type StringLiterals<T> = T extends string ? (string extends T ? never : T) : never;
 
 export type MapKey<T> = T extends Map<infer K, any> ? K : never;
+
+export const parseRecommendations = (message: MessageAssistant) => {
+  const titleRegex = /"title":\s*"([^"]+)"?/g;
+  const releaseYearRegex = /"release_year":\s*"?(\d{4})?/g;
+  const whyRegex = /"why":\s*"([^"]+)"?/g;
+
+  const titles = [...message.content.matchAll(titleRegex)].map((m) => m[1]?.trim());
+  const releaseYears = [...message.content.matchAll(releaseYearRegex)].map((m) => m[1]?.trim());
+  const whys = [...message.content.matchAll(whyRegex)].map((m) => m[1]?.trim());
+
+  const length = Math.max(titles.length, releaseYears.length, whys.length);
+
+  const recommendations: Recommendation[] = [];
+
+  for (let i = 0; i < length; i++) {
+    recommendations.push({
+      recommendationId: generateUuid(),
+      messageId: message.messageId,
+      movieId: null,
+      title: titles[i] || '',
+      releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
+      why: whys[i] || '',
+      createdAt: new Date(),
+    });
+  }
+
+  return recommendations;
+};

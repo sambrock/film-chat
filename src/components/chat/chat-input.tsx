@@ -3,8 +3,8 @@
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
 import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
 import { ChatModelSelect } from './chat-model-select';
@@ -12,20 +12,22 @@ import { ChatModelSelect } from './chat-model-select';
 type Props = React.ComponentProps<'div'>;
 
 export const ChatInput = ({ className, ...props }: Props) => {
-  const { threadId } = useThreadContext();
+  const { conversationId } = useConversationContext();
 
-  const value = useGlobalStore((s) => s.chatInputValue.get(threadId) || s.chatInputValue.get('new') || '');
-  const isPending = useGlobalStore((s) => s.chatPending.has(threadId));
+  const value = useGlobalStore(
+    (s) => s.chatInputValue.get(conversationId) || s.chatInputValue.get('new') || ''
+  );
+  const isInProgress = useGlobalStore((s) => s.chatInProgress.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const isSendDisabled = isPending || !value.trim();
+  const isSendDisabled = isInProgress || !value.trim();
 
   const sendMessage = useMutationSendMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
       type: 'SET_INPUT_VALUE',
-      payload: { threadId, value: e.target.value, isPersisted: true },
+      payload: { conversationId, value: e.target.value, isPersisted: true },
     });
   };
 
