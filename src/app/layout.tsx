@@ -8,9 +8,10 @@ import { auth } from '@/lib/auth/server';
 import { cn } from '@/lib/utils';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
 import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
+import { Sidebar } from '@/components/sidebar/sidebar';
 import { SessionInit } from './session-init';
 
-import './globals.css';
+import './styles.css';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -38,9 +39,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       <body className={cn('text-foreground-0 bg-background-0', fontSans.className)}>
         <QueryClientTRPCProvider>
           <GlobalStoreProvider>
-            <div className="flex h-screen overflow-hidden">
-              {/* <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" /> */}
-              {/* <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} /> */}
+            <div className="relative flex h-full w-screen">
+              <Sidebar />
               <div className="bg-background-1 w-full">{props.children}</div>
             </div>
           </GlobalStoreProvider>

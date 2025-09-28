@@ -1,21 +1,39 @@
-import { Slot } from 'radix-ui';
+'use client';
+
+import Link from 'next/link';
 
 import { cn } from '@/lib/utils';
+import { Button, type ButtonProps } from '../common/button';
 
-type Props = React.ComponentProps<'button'> & { asChild?: boolean };
+type Props = ButtonProps & {
+  href: string;
+  icon?: React.ReactNode;
+  shortcut?: string[];
+  isUnread?: boolean;
+  isProcessing?: boolean;
+};
 
-export const SidebarButton = ({ asChild, className, ...props }: Props) => {
-  const Comp = asChild ? Slot.Root : 'button';
-
+export const SidebarButton = ({ icon, shortcut, isUnread, isProcessing, className, ...props }: Props) => {
   return (
-    <Comp
-      className={cn(
-        'hover:bg-foreground-0/5 text-foreground-2 focus-within:text-foreground-0 hover:text-foreground-0 focus-visible:ring-ring flex h-9 cursor-pointer items-center rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition select-none focus:outline-none focus-visible:ring-2',
-        className
-      )}
+    <Button
+      variant="sidebar"
+      size="default"
+      className={cn('group gap-2 text-sm', className)}
+      asChild
       {...props}
     >
-      {props.children}
-    </Comp>
+      <Link href={props.href}>
+        {icon && icon}
+        {props.children}
+
+        <div className="ml-auto">
+          {shortcut && (
+            <span className="text-foreground-3 invisible font-medium antialiased group-hover:visible">
+              {shortcut.join('')}
+            </span>
+          )}
+        </div>
+      </Link>
+    </Button>
   );
 };

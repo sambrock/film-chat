@@ -1,47 +1,41 @@
+import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { fetchQuery } from 'convex/nextjs';
-import { SquarePen } from 'lucide-react';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import { cn } from '@/lib/utils';
-import { SidebarButton } from './sidebar-button';
-import { SidebarChats } from './sidebar-chats';
-import { SidebarWatchlistButton } from './sidebar-watchlist-button';
+import { getQueryClient, trpc } from '@/lib/trpc/ssr';
+import { SidebarButtonNewChat } from './sidebar-button-new-chat';
+import { SidebarButtonWatchlist } from './sidebar-button-watchlist';
+import { SidebarConversations } from './sidebar-conversations';
 
-type Props = React.ComponentProps<'div'>;
-
-export const Sidebar = async ({ className, ...props }: Props) => {
-  const [initialThreads, initialWatchlist] = await Promise.all([
-    session ? fetchQuery(api.threads.getBySession, { session }) : [],
-    session ? fetchQuery(api.watchlist.getBySession, { session }) : [],
-  ]);
-
+export const Sidebar = () => {
   return (
-    <div className={cn('border-foreground-0/10 bg-background-0 h-screen border-r p-2', className)} {...props}>
-      <div className="hidden p-3 lg:block">
-        <Link
-          href="/"
-          className="focus-visible:ring-ring flex w-7 rounded-sm whitespace-nowrap transition select-none focus:outline-none focus-visible:ring-2"
-        >
-          <Image className="relative z-[999] w-7" src="/logo.svg" alt="Logo" width={28} height={38} />
+    <nav className="bg-background-0 w-[260px] p-2">
+      <div className="mb-3 px-3 py-2">
+        <Link href="/">
+          <Image className="shrink-0 grow-0" src="/logo.svg" height={32} width={24} alt="Logo" />
         </Link>
       </div>
 
-      <div className="mt-16 flex flex-col lg:mt-4">
-        <SidebarButton asChild>
-          <Link href="/" className="">
-            <SquarePen className="mr-2 size-4.5" />
-            New chat
-          </Link>
-        </SidebarButton>
+      <SidebarButtonNewChat />
+      <SidebarButtonWatchlist />
 
-        <SidebarWatchlistButton initialWatchlistCount={initialWatchlist.length} />
-      </div>
+      <div className="text-foreground-1 mt-6 mb-2 px-3 text-sm font-medium">Chats</div>
 
-      <div className="mt-4">
-        <div className="text-foreground-1 px-3 py-1 text-sm">Chats</div>
-        <SidebarChats initialData={initialThreads} />
-      </div>
-    </div>
+      <Suspense>
+        <SidebarConversationsSuspense />
+      </Suspense>
+    </nav>
+  );
+};
+
+const SidebarConversationsSuspense = async () => {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(trpc.conversations.queryOptions(undefined));
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <SidebarConversations />
+    </HydrationBoundary>
   );
 };

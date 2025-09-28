@@ -7,17 +7,18 @@ import { publicProcedure, router } from './server';
 export type AppRouter = typeof appRouter;
 
 export const appRouter = router({
-  // getUserThreads: publicProcedure.query(async ({ ctx }) => {
-  //   if (!ctx.session) {
-  //     return [];
-  //   }
+  conversations: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      return [];
+    }
 
-  //   const data = await db.query.threads.findMany({
-  //     where: (threads, { eq }) => eq(threads.userId, ctx.session.user.id),
-  //   });
+    const data = await db.query.conversations.findMany({
+      where: (conversations, { eq }) => eq(conversations.userId, ctx.session.user.id),
+      orderBy: (conversations, { desc }) => [desc(conversations.updatedAt)],
+    });
 
-  //   return data;
-  // }),
+    return data;
+  }),
 
   conversationHistory: publicProcedure
     .input(z.object({ conversationId: z.string() }))

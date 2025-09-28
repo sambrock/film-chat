@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
@@ -7,7 +9,7 @@ import { db } from '../drizzle/db';
 
 export const auth = betterAuth({
   session: {
-    expiresIn: undefined, // Sessions do not expire,
+    expiresIn: undefined,
   },
   database: drizzleAdapter(db, {
     provider: 'pg',

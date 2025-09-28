@@ -14,22 +14,23 @@
   --color-foreground-2: oklch(0.8431 0 0);
   --color-foreground-3: oklch(0.5231 0 0);
 
-  --color-primary: oklch(0.6152 0.2108 256.1);
-  --color-primary-foreground: oklch(0.6152 0.0108 256.1);
+  /* --color-primary: oklch(0.6152 0.2108 256.1); */
+  /* --color-primary-foreground: oklch(0.6152 0.0108 256.1); */
+  --color-primary: oklch(0.6869 0.1759 245.81);
+  --color-primary-foreground: oklch(0.6869 0.1059 245.81);
 
   --color-ring: #0466ff;
 }
 
-body {
+/* body {
   font-family: var(--font-sans), Helvetica, sans-serif;
   background: var(--color-background-1);
-}
-
-.debug {
-  border: 1px red solid;
-}
+} */
 
 @layer utilities {
+  .debug {
+    border: 1px red solid;
+  }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
