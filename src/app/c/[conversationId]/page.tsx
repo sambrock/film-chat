@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient, trpc } from '@/lib/trpc/ssr';
+import { randomUuid } from '@/lib/utils/uuid';
 import { ConversationContextProvider } from '@/providers/conversation-context-provider';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessages } from '@/components/chat/chat-messages';
@@ -20,7 +21,7 @@ export default async function ConversationPage({ params }: Props) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ConversationContextProvider conversationId={conversationId}>
+      <ConversationContextProvider conversationId={conversationId || randomUuid()}>
         <main className="relative mx-auto grid w-full grid-rows-[calc(100vh-20px)_20px]">
           <div className="mx-auto w-full overflow-y-scroll p-3">
             <ChatWelcome className="mx-auto mt-[20vh] justify-self-center lg:w-3xl" />

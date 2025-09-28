@@ -9,8 +9,8 @@ export type ConversationContext = {
 
 export const ConversationContext = createContext<ConversationContext | undefined>(undefined);
 
-export const ConversationContextProvider = (props: React.PropsWithChildren<{ conversationId?: string }>) => {
-  const [conversationId, setConversationId] = useState(props.conversationId || '');
+export const ConversationContextProvider = (props: React.PropsWithChildren<{ conversationId: string }>) => {
+  const [conversationId, setConversationId] = useState(props.conversationId);
 
   return (
     <ConversationContext.Provider value={{ conversationId, setConversationId }}>

@@ -8,10 +8,11 @@ import { Conversation, ConversationMessage } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';
 import { conversations, messages, movies, recommendations } from '@/lib/drizzle/schema';
 import { tmdbFindMovie, tmdbGetMovieById } from '@/lib/tmdb/client';
-import { generateUuid, generateUuidFromString, parseRecommendations } from '@/lib/utils';
+import { parseRecommendations } from '@/lib/utils';
+import { randomUuid, uuidFromString } from '@/lib/utils/uuid';
 
 const BodySchema = z.object({
-  conversationId: z.string(),
+  conversationId: z.uuid(),
   content: z.string(),
   model: z.string(),
 });
@@ -30,13 +31,11 @@ export async function POST(req: Request) {
     return new Response(parsed.error.message, { status: 400 });
   }
 
-  const { content, conversationId } = parsed.data;
+  const { conversationId, content } = parsed.data;
 
-  let conversation = await db.query.conversations
-    .findFirst({
-      where: (conversations, { eq }) => eq(conversations.conversationId, conversationId),
-    })
-    .catch(() => null);
+  let conversation = await db.query.conversations.findFirst({
+    where: (conversations, { eq }) => eq(conversations.conversationId, conversationId),
+  });
 
   const conversationHistory = conversation
     ? await db.query.messages.findMany({
@@ -59,7 +58,7 @@ export async function POST(req: Request) {
     [conversation] = await db
       .insert(conversations)
       .values({
-        conversationId: generateUuid(),
+        conversationId: randomUuid(),
         userId: session.user.id,
         title: 'New chat',
       })
@@ -67,7 +66,7 @@ export async function POST(req: Request) {
   }
 
   const messageUser: ConversationMessage = {
-    messageId: generateUuid(),
+    messageId: randomUuid(),
     conversationId: conversation.conversationId,
     content,
     model: parsed.data.model,
@@ -78,7 +77,7 @@ export async function POST(req: Request) {
   };
 
   const messageAssistant: ConversationMessage = {
-    messageId: generateUuid(),
+    messageId: randomUuid(),
     conversationId: conversation.conversationId,
     parentId: messageUser.messageId,
     content: '',
@@ -97,8 +96,8 @@ export async function POST(req: Request) {
   const transformStream = new TransformStream({
     start: async (controller) => {
       controller.enqueue(encodeSSE({ type: 'conversation', v: conversation }));
-      controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
-      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+      controller.enqueue(encodeSSE({ type: 'message_done', v: messageUser }));
+      controller.enqueue(encodeSSE({ type: 'message_processing', v: messageAssistant }));
     },
     transform: async (chunk: TextStreamPart<ToolSet>, controller) => {
       if (chunk.type === 'text-delta') {
@@ -122,7 +121,7 @@ export async function POST(req: Request) {
               return recommendation;
             }
 
-            const movieId = generateUuidFromString(found.id.toString());
+            const movieId = uuidFromString(found.id.toString());
             await db
               .insert(movies)
               .values({ movieId, tmdbId: found.id, tmdb: source, createdAt: new Date() })
@@ -141,7 +140,7 @@ export async function POST(req: Request) {
           .set(messageAssistant)
           .where(eq(messages.messageId, messageAssistant.messageId));
 
-        controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+        controller.enqueue(encodeSSE({ type: 'message_done', v: messageAssistant }));
         controller.enqueue(encodeSSE('end'));
         controller.terminate();
       }
@@ -159,7 +158,8 @@ export async function POST(req: Request) {
 
 export type ChatSSEData =
   | { type: 'conversation'; v: Conversation }
-  | { type: 'message'; v: ConversationMessage }
+  | { type: 'message_processing'; v: ConversationMessage }
+  | { type: 'message_done'; v: ConversationMessage }
   | { type: 'content'; v: string }
   | { type: 'end' };
 
