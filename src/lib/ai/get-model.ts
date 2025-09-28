@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai';
 
 import { Model } from './models';
 
-export const getStreamTextModel = (model: Model | (string & {})) => {
+export const streamTextModel = (model: Model | (string & {})) => {
   const [modelProvider, modelName] = model.split('/');
 
   switch (modelProvider) {
@@ -19,7 +19,7 @@ export const getStreamTextModel = (model: Model | (string & {})) => {
   }
 };
 
-export const getGenerateThreadTitleModel = () => {
+export const generateConversationModel = () => {
   return openai('gpt-4.1-nano');
 };
 

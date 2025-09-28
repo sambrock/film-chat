@@ -24,7 +24,7 @@ export const SidebarButton = ({ icon, shortcut, isUnread, isProcessing, classNam
     >
       <Link href={props.href}>
         {icon && icon}
-        {props.children}
+        <span className="w-full overflow-hidden overflow-ellipsis whitespace-nowrap mr-6">{props.children}</span>
 
         <div className="ml-auto">
           {shortcut && (

@@ -17,10 +17,10 @@ const variants = cva(
           'text-foreground-1 hover:text-foreground-0 hover:bg-foreground-1/20 border-foreground-0/5 border',
         primary: 'text-primary bg-primary/10',
         sidebar:
-          'text-foreground-2 hover:text-foreground-0 hover:bg-foreground-0/5 w-full justify-start rounded-md bg-transparent px-3 py-2',
+          'text-foreground-1 hover:text-foreground-1 group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 hover:bg-foreground-0/5 w-full justify-start rounded-md bg-transparent px-3 py-2',
       },
       size: {
-        default: 'h-9 rounded-md px-2 py-2 text-sm',
+        default: 'h-8 rounded-md px-2 py-2 text-sm',
         xs: 'h-7 gap-1.5 rounded-md px-2',
         sm: 'h-8 gap-1.5 rounded-md px-2',
         lg: 'h-10 rounded-md px-6',

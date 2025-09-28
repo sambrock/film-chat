@@ -7,19 +7,19 @@ enableMapSet();
 
 export type GlobalStoreAction =
   | {
+      type: 'SET_CONVERSATION_VALUE';
+      payload: { conversationId: string; value: string };
+    }
+  | {
       type: 'SET_MODEL';
       payload: { conversationId: string; model: Model };
     }
   | {
-      type: 'SET_INPUT_VALUE';
-      payload: { conversationId: string; value?: string; isPersisted: boolean };
-    }
-  | {
-      type: 'SET_CHAT_IN_PROGRESS';
+      type: 'SET_CONVERSATION_PROCESSING';
       payload: { conversationId: string };
     }
   | {
-      type: 'SET_CHAT_DONE';
+      type: 'SET_CONVERSATION_DONE';
       payload: { conversationId: string };
     };
 
@@ -27,39 +27,23 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
   switch (type) {
     case 'SET_MODEL': {
       return produce(state, (draft) => {
-        draft.model = payload.model;
-        draft.chatModel.set(payload.conversationId, payload.model);
+        draft.model.set(payload.conversationId, payload.model);
       });
     }
-    case 'SET_INPUT_VALUE': {
+    case 'SET_CONVERSATION_VALUE': {
       return produce(state, (draft) => {
-        if (!payload.value) {
-          draft.chatInputValue.delete(payload.conversationId);
-          draft.chatInputValue.delete('new');
-          return;
-        }
-        if (!payload.isPersisted) {
-          draft.chatInputValue.set('new', payload.value);
-          return;
-        }
-        draft.chatInputValue.set(payload.conversationId, payload.value);
+        draft.inputValue.set(payload.conversationId, payload.value);
+        draft.defaultInputValue = payload.value;
       });
     }
-    case 'SET_CHAT_IN_PROGRESS': {
+    case 'SET_CONVERSATION_PROCESSING': {
       return produce(state, (draft) => {
-        draft.chatInProgress.add(payload.conversationId);
-        draft.chatInputValue.delete(payload.conversationId);
-        // if (!payload.isPersisted) {
-        //   draft.chatInputValue.delete('new');
-        // }
+        draft.isProcessing.add(payload.conversationId);
       });
     }
-    case 'SET_CHAT_DONE': {
+    case 'SET_CONVERSATION_DONE': {
       return produce(state, (draft) => {
-        draft.chatInProgress.delete(payload.conversationId);
-        // if (draft.activeconversationId !== payload.conversationId) {
-        //   draft.chatUnseenUpdates.add(payload.conversationId);
-        // }
+        draft.isProcessing.delete(payload.conversationId);
       });
     }
     default: {

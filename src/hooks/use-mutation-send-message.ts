@@ -1,6 +1,8 @@
+import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
+import superjson from 'superjson';
 
 import type { ChatSSEData, ConversationBody } from '@/app/api/conversation/route';
 import { useTRPC } from '@/lib/trpc/client';
@@ -12,16 +14,47 @@ import { useGlobalStore } from '@/providers/global-store-provider';
 export const useMutationSendMessage = () => {
   const { conversationId } = useConversationContext();
 
-  const model = useGlobalStore((s) => s.model);
+  const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
+  const dispatch = useGlobalStore((s) => s.dispatch);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const queryKey = trpc.conversationHistory.queryKey({ conversationId });
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (content: string) => {
-      queryClient.setQueryData(queryKey, (state) =>
+      const isNewConversation =
+        queryClient
+          .getQueryData(trpc.conversations.queryKey(undefined))
+          ?.some((c) => c.conversationId === conversationId) || true;
+
+      if (isNewConversation) {
+        window.history.replaceState({}, '', `/c/${conversationId}`);
+      }
+
+      dispatch({
+        type: 'SET_CONVERSATION_PROCESSING',
+        payload: { conversationId },
+      });
+
+      queryClient.setQueryData(trpc.conversations.queryKey(undefined), (state) =>
+        produce(state, (draft) => {
+          if (!draft) draft = [];
+          const index = draft.findIndex((c) => c.conversationId === conversationId);
+          if (index === -1) {
+            draft.unshift({
+              conversationId,
+              title: 'New chat',
+              userId: '',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          }
+        })
+      );
+
+      queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
         produce(state, (draft) => {
           if (!draft) draft = [];
           draft.unshift({
@@ -59,15 +92,23 @@ export const useMutationSendMessage = () => {
         const { event, data } = value;
 
         if (event === 'delta') {
-          const parsed = JSON.parse(data) as ChatSSEData;
+          const parsed = superjson.parse(data) as ChatSSEData;
 
           if (parsed.type === 'conversation') {
-            if (conversationId !== parsed.v.conversationId) {
-              window.history.replaceState(null, '', `/c/${parsed.v.conversationId}`);
-            }
+            queryClient.setQueryData(trpc.conversations.queryKey(undefined), (state) =>
+              produce(state, (draft) => {
+                if (!draft) draft = [];
+                const index = draft.findIndex((c) => c.conversationId === parsed.v.conversationId);
+                if (index !== -1) {
+                  Object.assign(draft[index], parsed.v);
+                } else {
+                  draft.unshift(parsed.v);
+                }
+              })
+            );
           }
           if (parsed.type === 'message_processing') {
-            queryClient.setQueryData(queryKey, (state) =>
+            queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const index = draft.findIndex((m) => m.messageId === parsed.v.messageId);
@@ -80,7 +121,7 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'message_done') {
-            queryClient.setQueryData(queryKey, (state) =>
+            queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 if (parsed.v.role === 'user') {
@@ -99,7 +140,7 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'content') {
-            queryClient.setQueryData(queryKey, (state) =>
+            queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const message = draft.find((m) => m.role === 'assistant' && m.status === 'processing');
@@ -112,7 +153,19 @@ export const useMutationSendMessage = () => {
           }
         }
         if (event === 'end') {
-          queryClient.invalidateQueries({ queryKey });
+          queryClient.invalidateQueries({
+            queryKey: [
+              trpc.conversationHistory.queryKey({ conversationId }),
+              trpc.conversations.queryKey(undefined),
+            ],
+          });
+          dispatch({
+            type: 'SET_CONVERSATION_DONE',
+            payload: { conversationId },
+          });
+          if (isNewConversation) {
+            router.push(`/c/${conversationId}`, { scroll: false });
+          }
         }
       }
     },

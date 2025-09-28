@@ -6,12 +6,12 @@ import { Model } from '@/lib/ai/models';
 import { GlobalStoreAction, reducer } from './global-store-reducer';
 
 export type GlobalState = {
-  model: Model;
+  defaultModel: Model;
+  defaultInputValue: string;
 
-  chatInProgress: Set<string>; // threadId
-  chatUnseenUpdates: Set<string>; // threadId
-  chatInputValue: Map<string, string>; // threadId, value
-  chatModel: Map<string, Model>; // threadId, model
+  model: Map<string, Model>; // Map<conversationId, model>
+  inputValue: Map<string, string>; // Map<conversationId, inputValue>
+  isProcessing: Set<string>; // Set<conversationId>
 };
 
 export type GlobalStore = GlobalState & {
@@ -22,12 +22,12 @@ export const createGlobalStore = () => {
   return createStore<GlobalStore>()(
     persist(
       (set) => ({
-        model: 'openai/gpt-4.1-nano',
+        defaultModel: 'openai/gpt-4.1-nano',
+        defaultInputValue: '',
 
-        chatInProgress: new Set(),
-        chatUnseenUpdates: new Set(),
-        chatInputValue: new Map(),
-        chatModel: new Map(),
+        model: new Map(),
+        inputValue: new Map(),
+        isProcessing: new Set(),
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

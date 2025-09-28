@@ -12,7 +12,7 @@ import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '..
 export const ChatModelSelect = () => {
   const { conversationId } = useConversationContext();
 
-  const selectedModel = useGlobalStore((s) => s.chatModel.get(conversationId) || s.model);
+  const selectedModel = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   return (

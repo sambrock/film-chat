@@ -22,10 +22,10 @@ export const ChatWelcome = ({ className, ...props }: Props) => {
   const { data } = useQueryConversationHistory(conversationId);
 
   const isActive = data.length === 0;
-  const isInput = useGlobalStore((s) => s.chatInputValue.has('new'));
-  const isInProgress = useGlobalStore((s) => s.chatInProgress.has(conversationId));
+  const isInput = useGlobalStore((s) => s.defaultInputValue.length > 0);
+  const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
-  if (!isActive || isInput || isInProgress) {
+  if (!isActive || isInput || isProcessing) {
     return null;
   }
   return (

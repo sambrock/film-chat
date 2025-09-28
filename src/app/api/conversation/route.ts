@@ -1,8 +1,10 @@
-import { streamText, TextStreamPart, ToolSet } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
+import superjson from 'superjson';
 import z from 'zod';
 
-import { getStreamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
+import { generateConversationModel, streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
 import { auth } from '@/lib/auth/server';
 import { Conversation, ConversationMessage } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';
@@ -46,7 +48,7 @@ export async function POST(req: Request) {
     : [];
 
   const modelStream = streamText({
-    model: getStreamTextModel(parsed.data.model),
+    model: streamTextModel(parsed.data.model),
     messages: [
       { role: 'system', content: SYSTEM_CONTEXT_MESSAGE },
       ...conversationHistory.map((m) => ({ role: m.role, content: m.content })),
@@ -54,11 +56,13 @@ export async function POST(req: Request) {
     ],
   });
 
+  let shouldGenerateConversationTitle = false;
   if (!conversation) {
+    shouldGenerateConversationTitle = true;
     [conversation] = await db
       .insert(conversations)
       .values({
-        conversationId: randomUuid(),
+        conversationId,
         userId: session.user.id,
         title: 'New chat',
       })
@@ -141,6 +145,23 @@ export async function POST(req: Request) {
           .where(eq(messages.messageId, messageAssistant.messageId));
 
         controller.enqueue(encodeSSE({ type: 'message_done', v: messageAssistant }));
+
+        if (shouldGenerateConversationTitle) {
+          const generatedTitle = await generateText({
+            model: openai('gpt-4.1-nano'),
+            prompt: `Generate a concise title for in 3 words or less: "Movies for this prompt: ${messageAssistant.content}"`,
+          });
+
+          await db
+            .update(conversations)
+            .set({ title: generatedTitle.text })
+            .where(eq(conversations.conversationId, conversation!.conversationId));
+
+          controller.enqueue(
+            encodeSSE({ type: 'conversation', v: { ...conversation, title: generatedTitle.text } })
+          );
+        }
+
         controller.enqueue(encodeSSE('end'));
         controller.terminate();
       }
@@ -167,5 +188,5 @@ const encodeSSE = (data: ChatSSEData | 'end') => {
   if (data === 'end') {
     return new TextEncoder().encode(`event: end\ndata: \n\n`);
   }
-  return new TextEncoder().encode(`event: delta\ndata: ${JSON.stringify(data)}\n\n`);
+  return new TextEncoder().encode(`event: delta\ndata: ${superjson.stringify(data)}\n\n`);
 };

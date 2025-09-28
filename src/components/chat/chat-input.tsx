@@ -1,5 +1,6 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -14,20 +15,25 @@ type Props = React.ComponentProps<'div'>;
 export const ChatInput = ({ className, ...props }: Props) => {
   const { conversationId } = useConversationContext();
 
+  const params = useParams<{ conversationId: string }>();
+
   const value = useGlobalStore(
-    (s) => s.chatInputValue.get(conversationId) || s.chatInputValue.get('new') || ''
+    (s) => s.inputValue.get(params.conversationId === conversationId ? conversationId : 'new') || ''
   );
-  const isInProgress = useGlobalStore((s) => s.chatInProgress.has(conversationId));
+  const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const isSendDisabled = isInProgress || !value.trim();
+  const isSendDisabled = isProcessing || !value.trim();
 
   const sendMessage = useMutationSendMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
-      type: 'SET_INPUT_VALUE',
-      payload: { conversationId, value: e.target.value, isPersisted: true },
+      type: 'SET_CONVERSATION_VALUE',
+      payload: {
+        conversationId: params.conversationId === conversationId ? conversationId : 'new',
+        value: e.target.value,
+      },
     });
   };
 

@@ -91,7 +91,7 @@ export const messages = pgTable('messages', {
   messageId: uuid('message_id').primaryKey(),
   conversationId: uuid('conversation_id')
     .notNull()
-    .references(() => conversations.conversationId),
+    .references(() => conversations.conversationId, { onDelete: 'cascade' }),
   parentId: uuid('parent_id'),
   serial: serial('serial').notNull(),
   content: text('content').notNull(),
@@ -109,7 +109,7 @@ export const recommendations = pgTable('recommendations', {
   recommendationId: uuid('recommendation_id').primaryKey(),
   messageId: uuid('message_id')
     .notNull()
-    .references(() => messages.messageId),
+    .references(() => messages.messageId, { onDelete: 'cascade' }),
   movieId: uuid('movie_id').references(() => movies.movieId),
   title: text('title').notNull().default(''),
   releaseYear: integer('release_year').notNull().default(0),

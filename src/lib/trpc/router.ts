@@ -1,6 +1,9 @@
+import { TRPCError } from '@trpc/server';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 
 import { db } from '../drizzle/db';
+import { conversations } from '../drizzle/schema';
 import { ConversationMessageSchema, MessageAssistantSchema, MessageUserSchema } from '../drizzle/zod';
 import { publicProcedure, router } from './server';
 
@@ -59,5 +62,22 @@ export const appRouter = router({
       });
 
       return conversationHistory;
+    }),
+
+  deleteConversation: publicProcedure
+    .input(z.object({ conversationId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+
+      await db
+        .delete(conversations)
+        .where(
+          and(
+            eq(conversations.conversationId, input.conversationId),
+            eq(conversations.userId, ctx.session.user.id)
+          )
+        );
     }),
 });
