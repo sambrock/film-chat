@@ -1,10 +1,11 @@
 import { TRPCError } from '@trpc/server';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import z from 'zod';
 
 import { db } from '../drizzle/db';
-import { conversations } from '../drizzle/schema';
+import { conversations, messages, recommendations } from '../drizzle/schema';
 import { ConversationMessageSchema, MessageAssistantSchema, MessageUserSchema } from '../drizzle/zod';
+import { tmdbGetMovieByIdWithCredits } from '../tmdb/client';
 import { publicProcedure, router } from './server';
 
 export type AppRouter = typeof appRouter;
@@ -22,6 +23,40 @@ export const appRouter = router({
 
     return data;
   }),
+
+  conversation: publicProcedure
+    .input(
+      z.object({
+        conversationId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session) {
+        return null;
+      }
+
+      const conversationWithCount = await db
+        .select({
+          conversation: conversations,
+          moviesCount: sql`count(recommendations.movie_id)`.mapWith(Number),
+        })
+        .from(conversations)
+        .leftJoin(messages, eq(messages.conversationId, conversations.conversationId))
+        .leftJoin(recommendations, eq(messages.messageId, recommendations.messageId))
+        .where(
+          and(
+            eq(conversations.conversationId, input.conversationId),
+            eq(conversations.userId, ctx.session.user.id)
+          )
+        )
+        .groupBy(conversations.conversationId)
+        .limit(1);
+
+      const conversation = conversationWithCount[0]?.conversation ?? null;
+      const moviesCount = conversationWithCount[0]?.moviesCount ?? 0;
+
+      return { ...conversation, moviesCount };
+    }),
 
   conversationHistory: publicProcedure
     .input(z.object({ conversationId: z.string() }))
@@ -80,4 +115,21 @@ export const appRouter = router({
           )
         );
     }),
+
+  movie: publicProcedure.input(z.object({ movieId: z.string() })).query(async ({ ctx, input }) => {
+    const movie = await db.query.movies.findFirst({
+      where: (movies, { and, eq, isNotNull }) => eq(movies.movieId, input.movieId),
+      with: {
+        libraries: { where: (library, { eq }) => eq(library.userId, ctx.session.user.id) },
+      },
+    });
+
+    if (!movie) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Movie not found' });
+    }
+
+    const withCast = await tmdbGetMovieByIdWithCredits(movie.tmdbId);
+
+    return { ...movie, credits: withCast?.credits };
+  }),
 });

@@ -12,6 +12,9 @@ export type GlobalState = {
   model: Map<string, Model>; // Map<conversationId, model>
   inputValue: Map<string, string>; // Map<conversationId, inputValue>
   isProcessing: Set<string>; // Set<conversationId>
+
+  movieModalOpen?: boolean;
+  movieModalMovieId?: string;
 };
 
 export type GlobalStore = GlobalState & {
@@ -28,6 +31,9 @@ export const createGlobalStore = () => {
         model: new Map(),
         inputValue: new Map(),
         isProcessing: new Set(),
+
+        movieModalOpen: false,
+        movieModalMovieId: undefined,
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

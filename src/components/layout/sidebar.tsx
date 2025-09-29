@@ -13,7 +13,7 @@ export const Sidebar = () => {
     <nav className="bg-background-0 border-foreground-0/5 w-[260px] shrink-0 grow-0 border-r p-2">
       <div className="mb-3 px-3 py-2">
         <Link href="/">
-          <Image className="shrink-0 grow-0" src="/logo.svg" height={32} width={24} alt="Logo" />
+          <Image className="shrink-0 grow-0 relative z-[999]" src="/logo.svg" height={29.26} width={22} alt="Logo" />
         </Link>
       </div>
 

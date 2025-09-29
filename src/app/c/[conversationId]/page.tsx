@@ -6,6 +6,8 @@ import { ConversationContextProvider } from '@/providers/conversation-context-pr
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatWelcome } from '@/components/chat/chat-welcome';
+import { HeaderChat } from '@/components/layout/header-chat';
+import { MovieModal } from '@/components/movie/movie-modal';
 
 type Props = {
   params?: Promise<{ conversationId: string }>;
@@ -16,13 +18,16 @@ export default async function ConversationPage({ params }: Props) {
 
   const queryClient = getQueryClient();
   if (conversationId) {
-    await queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
+    void queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
+    void queryClient.prefetchQuery(trpc.conversation.queryOptions({ conversationId }));
   }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ConversationContextProvider conversationId={conversationId || randomUuid()}>
-        <main className="relative mx-auto grid w-full grid-rows-[calc(100vh-20px)_20px]">
+        <main className="relative mx-auto grid w-full grid-rows-[48px_calc(100vh-70px)_20px] overflow-y-hidden">
+          <HeaderChat />
+
           <div className="mx-auto w-full overflow-y-scroll p-3">
             <ChatWelcome className="mx-auto mt-[20vh] justify-self-center lg:w-3xl" />
 
@@ -33,6 +38,8 @@ export default async function ConversationPage({ params }: Props) {
             <ChatInput className="relative z-10 mx-auto w-full shadow-xl shadow-black/10 lg:w-3xl" />
           </div>
         </main>
+
+        <MovieModal />
       </ConversationContextProvider>
     </HydrationBoundary>
   );

@@ -2,6 +2,7 @@
 
 import { Library, Movie, Recommendation } from '@/lib/definitions';
 import { cn, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
+import { useGlobalStore } from '@/providers/global-store-provider';
 import { TooltipProvider } from '../common/tooltip';
 
 type Props = {
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export const ChatMovieRecommendation = ({ recommendation, movie, library }: Props) => {
+  const dispatch = useGlobalStore((s) => s.dispatch);
+
   return (
     <div className="group border-foreground-0/5 flex cursor-pointer px-2 py-2 last:border-0">
       <div
@@ -26,7 +29,13 @@ export const ChatMovieRecommendation = ({ recommendation, movie, library }: Prop
       </div>
 
       <div className="ml-4 flex w-full flex-col py-2">
-        <div className="mb-1 font-semibold">
+        <div
+          className="mb-1 font-semibold"
+          onClick={() => {
+            if (!recommendation.movieId) return;
+            dispatch({ type: 'OPEN_MOVIE_MODAL', payload: { movieId: recommendation.movieId } });
+          }}
+        >
           {recommendation.title}{' '}
           <span className="text-foreground-1 ml-1 text-xs font-medium">
             {recommendation.releaseYear ? recommendation.releaseYear : ''}

@@ -8,10 +8,11 @@ import { auth } from '@/lib/auth/server';
 import { cn } from '@/lib/utils';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
 import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
-import { Sidebar } from '@/components/sidebar/sidebar';
 import { SessionInit } from './session-init';
 
 import './styles.css';
+
+import { Sidebar } from '@/components/layout/sidebar';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],

@@ -21,6 +21,14 @@ export type GlobalStoreAction =
   | {
       type: 'SET_CONVERSATION_DONE';
       payload: { conversationId: string };
+    }
+  | {
+      type: 'OPEN_MOVIE_MODAL';
+      payload: { movieId: string };
+    }
+  | {
+      type: 'CLOSE_MOVIE_MODAL';
+      payload: undefined;
     };
 
 export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction) => {
@@ -44,6 +52,18 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
     case 'SET_CONVERSATION_DONE': {
       return produce(state, (draft) => {
         draft.isProcessing.delete(payload.conversationId);
+      });
+    }
+    case 'OPEN_MOVIE_MODAL': {
+      return produce(state, (draft) => {
+        draft.movieModalOpen = true;
+        draft.movieModalMovieId = payload.movieId;
+      });
+    }
+    case 'CLOSE_MOVIE_MODAL': {
+      return produce(state, (draft) => {
+        draft.movieModalOpen = false;
+        draft.movieModalMovieId = undefined;
       });
     }
     default: {

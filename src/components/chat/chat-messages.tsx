@@ -27,7 +27,7 @@ export const ChatMessages = ({ className, ...props }: Props) => {
   }, [data?.length]);
 
   return (
-    <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)} {...props}>
+    <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-8', className)} {...props}>
       {data && [...data].reverse().map((message) => (
         <Fragment key={message.messageId}>
           {message.role === 'user' && <ChatMessageUser message={message} />}
