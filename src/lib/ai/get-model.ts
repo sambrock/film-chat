@@ -19,15 +19,11 @@ export const streamTextModel = (model: Model | (string & {})) => {
   }
 };
 
-export const generateConversationModel = () => {
-  return openai('gpt-4.1-nano');
-};
-
 export const SYSTEM_CONTEXT_MESSAGE = `
   You are a movie recommendation AI.
 
   Suggest exactly **4 existing movies** based on conversations.
-  Do not suggest TV series. Just existing movies.
+  Do not suggest TV series. Only existing movies.
 
   Return the result as a **JSON array of 4 objects**.  
   Each object must have the following keys:

@@ -9,7 +9,7 @@ export const SidebarButtonWatchlist = () => {
     <SidebarButton
       href="/watchlist"
       className="w-full gap-2"
-      icon={<ListVideo className="size-4.5" strokeWidth={2} />}
+      icon={<ListVideo className="size-4.5 shrink-0" strokeWidth={2} />}
       // shortcut={['⌘', '⇧', 'W']}
     >
       Watchlist

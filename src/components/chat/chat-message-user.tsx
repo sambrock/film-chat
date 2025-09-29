@@ -1,11 +1,11 @@
 'use client';
 
-import type { MessageUser as MessageUserType } from '@/lib/definitions';
+import type { MessageUser } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 
-type Props = { message: MessageUserType } & React.ComponentProps<'div'>;
+type Props = { message: MessageUser } & React.ComponentProps<'div'>;
 
-export const MessageUser = ({ message, className, ...props }: Props) => {
+export const ChatMessageUser = ({ message, className, ...props }: Props) => {
   return (
     <div
       className={cn(

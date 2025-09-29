@@ -5,8 +5,8 @@ import { Fragment, useLayoutEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
-import { MessageAssistant } from './message-assistant';
-import { MessageUser } from './message-user';
+import { ChatMessageAssistant } from './chat-message-assistant';
+import { ChatMessageUser } from './chat-message-user';
 
 type Props = React.ComponentProps<'div'>;
 
@@ -24,19 +24,16 @@ export const ChatMessages = ({ className, ...props }: Props) => {
 
   useLayoutEffect(() => {
     scrollToEnd();
-  }, [data.length]);
+  }, [data?.length]);
 
   return (
-    <div
-      id="chatMessages"
-      ref={divRef}
-      className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)}
-      {...props}
-    >
-      {[...data].reverse().map((message) => (
+    <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-12', className)} {...props}>
+      {data && [...data].reverse().map((message) => (
         <Fragment key={message.messageId}>
-          {message.role === 'user' && <MessageUser message={message} />}
-          {message.role === 'assistant' && <MessageAssistant message={message} scrollToEnd={scrollToEnd} />}
+          {message.role === 'user' && <ChatMessageUser message={message} />}
+          {message.role === 'assistant' && (
+            <ChatMessageAssistant message={message} scrollToEnd={scrollToEnd} />
+          )}
         </Fragment>
       ))}
     </div>

@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import superjson from 'superjson';
 import z from 'zod';
 
-import { generateConversationModel, streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
+import { streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
 import { auth } from '@/lib/auth/server';
 import { Conversation, ConversationMessage } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';

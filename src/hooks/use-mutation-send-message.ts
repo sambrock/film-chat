@@ -30,6 +30,7 @@ export const useMutationSendMessage = () => {
           ?.some((c) => c.conversationId === conversationId) || true;
 
       if (isNewConversation) {
+        // Update URL, but don't reload the page
         window.history.replaceState({}, '', `/c/${conversationId}`);
       }
 
@@ -58,12 +59,26 @@ export const useMutationSendMessage = () => {
         produce(state, (draft) => {
           if (!draft) draft = [];
           draft.unshift({
-            messageId: `temp:${randomUuid()}`,
+            messageId: `${randomUuid()}`,
             conversationId,
             model,
             content,
             role: 'user',
             status: 'processing',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          draft.unshift({
+            messageId: `${randomUuid()}`,
+            parentId: `${randomUuid()}`,
+            conversationId,
+            model,
+            content,
+            role: 'assistant',
+            status: 'processing',
+            library: [],
+            movies: [],
+            recommendations: [],
             createdAt: new Date(),
             updatedAt: new Date(),
           });
@@ -111,11 +126,17 @@ export const useMutationSendMessage = () => {
             queryClient.setQueryData(trpc.conversationHistory.queryKey({ conversationId }), (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const index = draft.findIndex((m) => m.messageId === parsed.v.messageId);
-                if (index !== -1) {
-                  draft[index] = parsed.v;
-                } else {
-                  draft.unshift(parsed.v);
+                if (parsed.v.role === 'user') {
+                  const index = draft.findIndex((m) => m.role === 'user' && m.status === 'processing');
+                  if (index !== -1) {
+                    draft[index] = parsed.v;
+                  }
+                }
+                if (parsed.v.role === 'assistant') {
+                  const index = draft.findIndex((m) => m.role === 'assistant' && m.status === 'processing');
+                  if (index !== -1) {
+                    draft[index] = parsed.v;
+                  }
                 }
               })
             );
@@ -125,7 +146,7 @@ export const useMutationSendMessage = () => {
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 if (parsed.v.role === 'user') {
-                  const index = draft.findIndex((m) => m.messageId.startsWith('temp:'));
+                  const index = draft.findIndex((m) => m.role === 'user' && m.status === 'processing');
                   if (index !== -1) {
                     draft[index] = parsed.v;
                   }
@@ -159,12 +180,14 @@ export const useMutationSendMessage = () => {
               trpc.conversations.queryKey(undefined),
             ],
           });
+
           dispatch({
             type: 'SET_CONVERSATION_DONE',
             payload: { conversationId },
           });
+
           if (isNewConversation) {
-            router.push(`/c/${conversationId}`, { scroll: false });
+            router.push(`/c/${conversationId}`);
           }
         }
       }
