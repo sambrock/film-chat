@@ -22,7 +22,11 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
 
   return (
     <div className="group relative flex items-center">
-      <SidebarButton className="w-full gap-2" href={`/c/${conversation.conversationId}`} asChild>
+      <SidebarButton
+        className="group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2 "
+        href={`/c/${conversation.conversationId}`}
+        asChild
+      >
         {conversation.title}
       </SidebarButton>
 
@@ -32,11 +36,11 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
         <DropdownTrigger asChild disabled={isProcessing}>
           <Button
             className={cn(
-              'invisible absolute top-0 right-2 ml-auto text-sm group-focus-within:visible group-hover:visible',
+              'absolute top-0 right-2 ml-auto -mr-2 text-sm opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100',
               isProcessing && 'hidden'
             )}
-            size="sm"
             variant="transparent"
+            size="icon"
           >
             <Ellipsis className="size-5" />
           </Button>
@@ -58,7 +62,7 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
 
           <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
-          <div className="text-foreground-3 px-2 py-1 text-xs select-none">
+          <div className="text-foreground-2 px-2 py-1 text-xs select-none">
             Created {conversation.createdAt && timeAgo(conversation.createdAt)}
           </div>
         </DropdownContent>

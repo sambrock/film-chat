@@ -37,7 +37,7 @@ export const DropdownItem = ({ className, ...props }: DropdownMenu.DropdownMenuI
   return (
     <DropdownMenu.Item
       className={cn(
-        'focus:bg-background-1 select-none text-foreground-2 flex h-7 cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm focus:outline-none',
+        'focus:bg-foreground-0/5 select-none text-foreground-0/80 flex h-7 cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm focus:outline-none',
         className
       )}
       {...props}

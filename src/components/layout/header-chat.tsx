@@ -20,17 +20,17 @@ export const HeaderChat = () => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
   return (
-    <Header>
-      <div className="text-foreground-2 text-sm font-medium">{data?.title}</div>
-      <div className="text-foreground-3 text-xs font-medium">{data?.moviesCount} films</div>
+    <Header className="group">
+      <div className="text-foreground-0/70 text-sm font-medium">{data?.title}</div>
+      <div className="text-foreground-1 text-xs font-medium">{data?.moviesCount} films</div>
 
-      <div className="text-foreground-3 ml-auto text-xs font-medium">
+      <div className="text-foreground-2 ml-auto text-xs font-medium">
         Updated {data?.updatedAt && timeAgo(data.updatedAt)}
       </div>
 
       <DropdownRoot>
         <DropdownTrigger asChild disabled={isProcessing}>
-          <Button className={cn('text-sm', isProcessing && 'hidden')} size="default" variant="ghost-2">
+          <Button className={cn('text-sm', isProcessing && 'hidden')} size="icon">
             <Ellipsis className="size-5" />
           </Button>
         </DropdownTrigger>
@@ -49,7 +49,7 @@ export const HeaderChat = () => {
 
           <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
-          <div className="text-foreground-3 px-2 py-1 text-xs select-none">
+          <div className="text-foreground-2 px-2 py-1 text-xs select-none">
             Created {data?.createdAt && timeAgo(data.createdAt)}
           </div>
         </DropdownContent>

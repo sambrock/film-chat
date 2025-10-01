@@ -65,7 +65,6 @@ export const ChatInput = ({ className, ...props }: Props) => {
         <Button
           className={cn('ml-auto', isSendDisabled && 'pointer-events-none')}
           size="icon"
-          variant="ghost"
           disabled={isSendDisabled}
         >
           <ArrowUp className="size-5" strokeWidth={2.5} />

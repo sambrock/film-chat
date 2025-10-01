@@ -18,8 +18,8 @@ export default async function ConversationPage({ params }: Props) {
 
   const queryClient = getQueryClient();
   if (conversationId) {
-    void queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
-    void queryClient.prefetchQuery(trpc.conversation.queryOptions({ conversationId }));
+    await queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
+    await queryClient.prefetchQuery(trpc.conversation.queryOptions({ conversationId }));
   }
 
   return (

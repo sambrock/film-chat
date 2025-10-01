@@ -15,13 +15,7 @@ type Props = ButtonProps & {
 
 export const SidebarButton = ({ icon, shortcut, isUnread, isProcessing, className, ...props }: Props) => {
   return (
-    <Button
-      variant="sidebar"
-      size="default"
-      className={cn('group gap-2 text-sm', className)}
-      asChild
-      {...props}
-    >
+    <Button className={cn('gap-2 text-sm', className)} asChild {...props}>
       <Link href={props.href}>
         {icon && icon}
         <span className="mr-6 w-full truncate">{props.children}</span>

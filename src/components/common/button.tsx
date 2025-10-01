@@ -6,24 +6,11 @@ const variants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface-2 hover:bg-surface-3 text-text-primary',
-        transparent:
-          'hover:bg-surface-3 focus-visible:text-foreground-0 hover:text-foreground-0 text-foreground-3 bg-transparent',
-        ghost:
-          'text-foreground-1 hover:text-foreground-0 hover:bg-foreground-1/20 focus-visible:bg-foreground-1/20 focus-visible:text-foreground-0',
-        'ghost-2':
-          'text-foreground-3 hover:text-foreground-0 hover:bg-foreground-1/20 focus-visible:bg-foreground-1/20 focus-visible:text-foreground-0',
-        outline:
-          'text-foreground-1 hover:text-foreground-0 hover:bg-foreground-1/20 border-foreground-0/5 border',
-        primary: 'text-primary bg-primary/10',
-        sidebar:
-          'text-foreground-1 hover:text-foreground-1 group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 hover:bg-foreground-0/5 w-full justify-start rounded-md bg-transparent px-3 py-2',
+        default: 'text-foreground-0/70 hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5',
+        transparent: 'text-foreground-0/70',
       },
       size: {
-        default: 'h-8 rounded-md px-2 py-2 text-sm',
-        xs: 'h-7 gap-1.5 rounded-md px-2',
-        sm: 'h-8 gap-1.5 rounded-md px-2',
-        lg: 'h-10 rounded-md px-6',
+        default: 'h-8 rounded-md px-3 text-sm',
         icon: 'size-8 justify-center rounded-md',
       },
       disabled: {
