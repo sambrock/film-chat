@@ -85,7 +85,7 @@ export const ModalContentDrawer = ({
       <ModalPrimitive.Content
         className={cn(
           'bg-background-0 border-foreground-0/5 fixed top-0 right-0 z-50 h-screen w-3xl overflow-y-auto border-l outline-none',
-          'bg-background data-[state=open]:animate-in data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full data-[state=closed]:animate-out duration-100',
+          'bg-background data-[state=open]:animate-in data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full data-[state=closed]:animate-out duration-150',
           className
         )}
         data-slot="Modal-content"

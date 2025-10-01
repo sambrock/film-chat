@@ -63,7 +63,7 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
     case 'CLOSE_MOVIE_MODAL': {
       return produce(state, (draft) => {
         draft.movieModalOpen = false;
-        draft.movieModalMovieId = undefined;
+        // draft.movieModalMovieId = undefined;
       });
     }
     default: {

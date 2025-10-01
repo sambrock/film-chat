@@ -27,7 +27,7 @@ export const MovieModal = () => {
         <ModalDescription className="sr-only"></ModalDescription>
 
         <div className="mb-12 flex flex-col">
-          <Header className="fixed top-0">
+          <Header className="bg-background-0/20 fixed top-0">
             {/* <div className="text-foreground-2 text-sm font-medium">{data.tmdb.title} </div> */}
           </Header>
 
@@ -54,7 +54,7 @@ export const MovieModal = () => {
             </div>
 
             <div className="col-span-2 mt-6">
-              <div className="text-foreground-0/80 text-sm leading-6">
+              <div className="text-foreground-0/80 mr-8 text-sm leading-6">
                 {data.tmdb.tagline && (
                   <span className="text-foreground-0/80 mr-2 mb-2 text-sm leading-6 font-medium italic">
                     {data.tmdb.tagline}
@@ -67,7 +67,7 @@ export const MovieModal = () => {
                 <h2 className="text-foreground-2 mb-4 text-sm font-medium">Crew</h2>
 
                 {data.credits?.crew?.length && (
-                  <div className="flex gap-3 overflow-x-auto">
+                  <div className="no-scrollbar flex gap-3 overflow-x-auto">
                     {data.credits?.crew
                       ?.filter((crew) => ['Director', 'Producer', 'Screenplay', 'Writer'].includes(crew.job!))
                       .sort((a, b) => {
@@ -122,9 +122,7 @@ export const MovieModal = () => {
                         )}
                       </div>
                       <div className="mt-1 text-sm font-medium">
-                        <div className="w-32 truncate font-medium" title={cast.name}>
-                          {cast.name}
-                        </div>
+                        <div className="w-32 font-medium">{cast.name}</div>
                         <div className="text-foreground-1 mt-1 text-xs font-normal">{cast.character}</div>
                       </div>
                     </CarouselItem>
