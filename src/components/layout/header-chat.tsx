@@ -21,7 +21,7 @@ export const HeaderChat = () => {
 
   return (
     <Header className="group">
-      <div className="text-foreground-0/70 text-sm font-medium">{data?.title}</div>
+      <div className="text-foreground-0/80 text-sm font-medium">{data?.title}</div>
       <div className="text-foreground-1 text-xs font-medium">{data?.moviesCount} films</div>
 
       <div className="text-foreground-2 ml-auto text-xs font-medium">
