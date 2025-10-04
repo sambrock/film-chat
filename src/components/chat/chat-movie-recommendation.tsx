@@ -1,23 +1,29 @@
 'use client';
 
+import { PanelRight, PanelRightOpen } from 'lucide-react';
+
 import { Library, Movie, Recommendation } from '@/lib/definitions';
 import { cn, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { TooltipProvider } from '../common/tooltip';
+import { Button } from '../common/button';
+import { LibraryButtonWatchlist } from '../library/library-button-actions';
 
 type Props = {
+  messageId: string;
   recommendation: Recommendation;
   movie?: Movie;
   library?: Library;
 };
 
-export const ChatMovieRecommendation = ({ recommendation, movie, library }: Props) => {
+export const ChatMovieRecommendation = ({ messageId, recommendation, movie, library }: Props) => {
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   return (
-    <div className="group border-foreground-0/5 flex cursor-pointer px-2 py-2 last:border-0">
+    <div className="group relative border-foreground-0/5 flex px-2 py-2">
       <div
-        className={cn('bg-background-4 w-20 self-start overflow-clip rounded-sm md:aspect-[1/1.5] md:w-26')}
+        className={cn(
+          'bg-background-4 w-20 shrink-0 self-start overflow-clip rounded-sm md:aspect-[1/1.5] md:w-22'
+        )}
       >
         {movie && (
           <img
@@ -30,19 +36,19 @@ export const ChatMovieRecommendation = ({ recommendation, movie, library }: Prop
 
       <div className="ml-4 flex w-full flex-col py-2">
         <div
-          className="mb-1 font-semibold"
+          className="mb-1 flex flex-wrap items-baseline font-semibold"
           onClick={() => {
             if (!recommendation.movieId) return;
             dispatch({ type: 'OPEN_MOVIE_MODAL', payload: { movieId: recommendation.movieId } });
           }}
         >
-          {recommendation.title}{' '}
+          <span className="mr-1 max-w-4/5"> {recommendation.title} </span>
           <span className="text-foreground-1 ml-1 text-xs font-medium">
             {recommendation.releaseYear ? recommendation.releaseYear : ''}
           </span>
         </div>
         <div className="text-foreground-1 text-sm md:max-w-3/4">{recommendation.why}</div>
-        <div className="mt-2 flex items-baseline md:mt-auto">
+        <div className="flex items-baseline md:mt-auto">
           {movie && (
             <div className="text-foreground-1 mt-auto flex gap-3 text-xs font-medium">
               <span>{runtimeToHoursMins(movie.tmdb.runtime)}</span>
@@ -53,16 +59,22 @@ export const ChatMovieRecommendation = ({ recommendation, movie, library }: Prop
       </div>
 
       {movie && (
-        <TooltipProvider>
-          <div className="ml-auto flex items-end gap-1">
-            {/* <MovieWatchlistButton
-              tmdbId={movie.tmdbId}
-              title={movie.title}
-              releaseDate={movie.releaseDate}
-              posterPath={movie.posterPath}
-            /> */}
-          </div>
-        </TooltipProvider>
+        <div className="absolute bottom-2 right-2 flex items-center gap-1 self-end opacity-0 transition group-hover:opacity-100">
+          {/* <LibraryButtonWatched movieId={movie.movieId} messageId={messageId} library={library} /> */}
+          {/* <LibraryButtonLike movieId={movie.movieId} messageId={messageId} library={library} /> */}
+          <LibraryButtonWatchlist movieId={movie.movieId} messageId={messageId} library={library} />
+          <Button
+            className={cn(library?.watchlist)}
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              dispatch({ type: 'OPEN_MOVIE_MODAL', payload: { movieId: movie.movieId } });
+            }}
+          >
+            <PanelRight className="mr-1 -ml-1 size-4 shrink-0" strokeWidth={2} />
+            Open
+          </Button>
+        </div>
       )}
     </div>
   );

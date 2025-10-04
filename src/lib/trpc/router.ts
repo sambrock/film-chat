@@ -3,7 +3,7 @@ import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import z from 'zod';
 
 import { db } from '../drizzle/db';
-import { conversations, messages, recommendations } from '../drizzle/schema';
+import { conversations, library, messages, recommendations } from '../drizzle/schema';
 import { ConversationMessageSchema, MessageAssistantSchema, MessageUserSchema } from '../drizzle/zod';
 import { tmdbGetMovieByIdWithCredits } from '../tmdb/client';
 import { publicProcedure, router } from './server';
@@ -116,7 +116,7 @@ export const appRouter = router({
         );
     }),
 
-  movie: publicProcedure.input(z.object({ movieId: z.string() })).query(async ({ ctx, input }) => {
+  movie: publicProcedure.input(z.object({ movieId: z.uuid() })).query(async ({ ctx, input }) => {
     const movie = await db.query.movies.findFirst({
       where: (movies, { and, eq, isNotNull }) => eq(movies.movieId, input.movieId),
       with: {
@@ -132,4 +132,72 @@ export const appRouter = router({
 
     return { ...movie, credits: withCast?.credits };
   }),
+
+  library: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      return [];
+    }
+
+    const data = await db.query.library.findMany({
+      where: (library, { eq, isNotNull }) =>
+        and(eq(library.userId, ctx.session.user.id), isNotNull(library.movieId)),
+      with: { movie: true },
+      orderBy: (library, { desc }) => [desc(library.updatedAt)],
+      limit: 100,
+    });
+
+    return data;
+  }),
+
+  libraryCount: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.session) {
+      return 0;
+    }
+
+    const [{ count }] = await db
+      .select({
+        count: sql`count(*)`.mapWith(Number),
+      })
+      .from(library)
+      .where(and(eq(library.userId, ctx.session.user.id), isNotNull(library.movieId)));
+
+    return count;
+  }),
+
+  updateLibrary: publicProcedure
+    .input(
+      z.object({
+        movieId: z.uuid(),
+        liked: z.boolean().optional(),
+        watched: z.boolean().optional(),
+        watchlist: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.session) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+
+      const [data] = await db
+        .insert(library)
+        .values({
+          movieId: input.movieId,
+          userId: ctx.session.user.id,
+          liked: input.liked ?? false,
+          watched: input.watched ?? false,
+          watchlist: input.watchlist ?? false,
+        })
+        .onConflictDoUpdate({
+          target: [library.movieId, library.userId],
+          set: {
+            liked: input.liked ?? library.liked,
+            watched: input.watched ?? library.watched,
+            watchlist: input.watchlist ?? library.watchlist,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+
+      return data;
+    }),
 });

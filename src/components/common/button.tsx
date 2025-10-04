@@ -6,11 +6,14 @@ const variants = cva(
   {
     variants: {
       variant: {
-        default: 'text-foreground-0/70 hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5',
-        transparent: 'text-foreground-0/70',
+        default: 'text-foreground-1 hover:bg-foreground-0/5',
+        outline:
+          'border-foreground-0/5 bg-foreground-0/5 text-foreground-1 hover:bg-foreground-0/10 border text-xs',
+        transparent: 'text-foreground-3',
       },
       size: {
         default: 'h-8 rounded-md px-3 text-sm',
+        sm: 'h-6 justify-center rounded-md px-2 text-sm',
         icon: 'size-8 justify-center rounded-md',
       },
       disabled: {

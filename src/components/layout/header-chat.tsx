@@ -30,7 +30,7 @@ export const HeaderChat = () => {
 
       <DropdownRoot>
         <DropdownTrigger asChild disabled={isProcessing}>
-          <Button className={cn('text-sm', isProcessing && 'hidden')} size="icon">
+          <Button className={cn('text-sm group-focus-within:bg-foreground-0/5', isProcessing && 'hidden')} size="icon">
             <Ellipsis className="size-5" />
           </Button>
         </DropdownTrigger>

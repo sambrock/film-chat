@@ -10,7 +10,7 @@ import { GlobalStoreProvider } from '@/providers/global-store-provider';
 import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
 import { SessionInit } from './session-init';
 
-import './styles.css';
+import './globals.css';
 
 import { Sidebar } from '@/components/layout/sidebar';
 

@@ -32,6 +32,7 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
           {message.recommendations.map((recommendation, index) => (
             <ChatMovieRecommendation
               key={index}
+              messageId={message.messageId}
               recommendation={recommendation}
               movie={message.movies.find((movie) => movie.movieId === recommendation.movieId)}
               library={message.library.find((library) => library.movieId === recommendation.movieId)}

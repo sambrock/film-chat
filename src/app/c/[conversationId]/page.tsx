@@ -20,6 +20,8 @@ export default async function ConversationPage({ params }: Props) {
   if (conversationId) {
     await queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }));
     await queryClient.prefetchQuery(trpc.conversation.queryOptions({ conversationId }));
+
+    // TODO: if movie modal open, get movie id from query and prefetch
   }
 
   return (
