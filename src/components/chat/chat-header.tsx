@@ -3,16 +3,16 @@
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import { cn, timeAgo } from '@/lib/utils';
-import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useMutationDeleteConversation } from '@/hooks/use-mutation-delete-conversation';
 import { useQueryConversation } from '@/hooks/use-query-conversation';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
-import { Header } from './header';
+import { Header } from '../layout/header';
+import { useChatContext } from './chat-context';
 
-export const HeaderChat = () => {
-  const { conversationId } = useConversationContext();
+export const ChatHeader = () => {
+  const { conversationId } = useChatContext();
 
   const { data } = useQueryConversation(conversationId);
   const deleteConversationMutation = useMutationDeleteConversation();
@@ -30,7 +30,10 @@ export const HeaderChat = () => {
 
       <DropdownRoot>
         <DropdownTrigger asChild disabled={isProcessing}>
-          <Button className={cn('text-sm group-focus-within:bg-foreground-0/5', isProcessing && 'hidden')} size="icon">
+          <Button
+            className={cn('group-focus-within:bg-foreground-0/5 text-sm', isProcessing && 'hidden')}
+            size="icon"
+          >
             <Ellipsis className="size-5" />
           </Button>
         </DropdownTrigger>

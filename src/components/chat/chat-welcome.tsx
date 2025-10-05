@@ -3,9 +3,9 @@
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
+import { useChatContext } from './chat-context';
 
 type Props = React.ComponentProps<'div'>;
 
@@ -17,7 +17,7 @@ const EXAMPLE_MESSAGES = [
 ];
 
 export const ChatWelcome = ({ className, ...props }: Props) => {
-  const { conversationId } = useConversationContext();
+  const { conversationId } = useChatContext();
 
   const { data } = useQueryConversationHistory(conversationId);
 

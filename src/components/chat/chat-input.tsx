@@ -4,16 +4,16 @@ import { useParams } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
+import { useChatContext } from './chat-context';
 import { ChatModelSelect } from './chat-model-select';
 
 type Props = React.ComponentProps<'div'>;
 
 export const ChatInput = ({ className, ...props }: Props) => {
-  const { conversationId } = useConversationContext();
+  const { conversationId } = useChatContext();
 
   const params = useParams<{ conversationId: string }>();
 

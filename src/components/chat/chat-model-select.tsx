@@ -4,13 +4,13 @@ import { ChevronDown } from 'lucide-react';
 
 import { models } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
-import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
+import { useChatContext } from './chat-context';
 
 export const ChatModelSelect = () => {
-  const { conversationId } = useConversationContext();
+  const { conversationId } = useChatContext();
 
   const selectedModel = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
@@ -18,7 +18,7 @@ export const ChatModelSelect = () => {
   return (
     <DropdownRoot>
       <DropdownTrigger asChild>
-        <Button className="!px-2 !text-foreground-0/60">
+        <Button className="!text-foreground-0/60 !px-2">
           {models.get(selectedModel)?.name}
           <ChevronDown className="size-5" />
         </Button>

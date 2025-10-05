@@ -23,8 +23,8 @@ export type GlobalStoreAction =
       payload: { conversationId: string };
     }
   | {
-      type: 'OPEN_MOVIE_MODAL';
-      payload: { movieId: string };
+      type: 'OPEN_RECOMMENDATION_MOVIE_MODAL';
+      payload: { recommendationId: string };
     }
   | {
       type: 'CLOSE_MOVIE_MODAL';
@@ -54,16 +54,16 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
         draft.isProcessing.delete(payload.conversationId);
       });
     }
-    case 'OPEN_MOVIE_MODAL': {
+    case 'OPEN_RECOMMENDATION_MOVIE_MODAL': {
       return produce(state, (draft) => {
-        draft.movieModalOpen = true;
-        draft.movieModalMovieId = payload.movieId;
+        draft.modalOpenRecommendationId = payload.recommendationId;
+        draft.modalOpenShouldAnimate = state.modalOpenRecommendationId === '';
       });
     }
     case 'CLOSE_MOVIE_MODAL': {
       return produce(state, (draft) => {
-        draft.movieModalOpen = false;
-        // draft.movieModalMovieId = undefined;
+        draft.modalOpenRecommendationId = '';
+        draft.modalOpenShouldAnimate = true;
       });
     }
     default: {

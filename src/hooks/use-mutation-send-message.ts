@@ -8,11 +8,11 @@ import type { ChatSSEData, ConversationBody } from '@/app/api/conversation/route
 import { useTRPC } from '@/lib/trpc/client';
 import { parseRecommendations } from '@/lib/utils';
 import { randomUuid } from '@/lib/utils/uuid';
-import { useConversationContext } from '@/providers/conversation-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
+import { useChatContext } from '@/components/chat/chat-context';
 
 export const useMutationSendMessage = () => {
-  const { conversationId } = useConversationContext();
+  const { conversationId } = useChatContext();
 
   const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);

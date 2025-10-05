@@ -6,7 +6,8 @@ import { Model, models } from '@/lib/ai/models';
 import type { MessageAssistant } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { SpinnerEllipsis } from '../common/spinner';
-import { ChatMovieRecommendation } from './chat-movie-recommendation';
+import { ChatRecommendationContextProvider } from './chat-context';
+import { ChatRecommendation } from './chat-recommendation';
 
 type Props = {
   message: MessageAssistant;
@@ -30,13 +31,15 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
       {message.recommendations.length > 0 && (
         <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
           {message.recommendations.map((recommendation, index) => (
-            <ChatMovieRecommendation
-              key={index}
-              messageId={message.messageId}
-              recommendation={recommendation}
-              movie={message.movies.find((movie) => movie.movieId === recommendation.movieId)}
-              library={message.library.find((library) => library.movieId === recommendation.movieId)}
-            />
+            <ChatRecommendationContextProvider
+              value={{
+                recommendation,
+                movie: message.movies.find((movie) => movie.movieId === recommendation.movieId),
+                library: message.library.find((library) => library.movieId === recommendation.movieId),
+              }}
+            >
+              <ChatRecommendation key={index} />
+            </ChatRecommendationContextProvider>
           ))}
         </div>
       )}
