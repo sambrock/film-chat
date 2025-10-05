@@ -32,13 +32,14 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
         <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
           {message.recommendations.map((recommendation, index) => (
             <ChatRecommendationContextProvider
+              key={recommendation.recommendationId}
               value={{
                 recommendation,
                 movie: message.movies.find((movie) => movie.movieId === recommendation.movieId),
                 library: message.library.find((library) => library.movieId === recommendation.movieId),
               }}
             >
-              <ChatRecommendation key={index} />
+              <ChatRecommendation />
             </ChatRecommendationContextProvider>
           ))}
         </div>

@@ -1,22 +1,22 @@
 'use client';
 
 import { Movie } from '@/lib/definitions';
-import { backdropSrc, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
+import { backdropSrc, cn, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useQueryMovie } from '@/hooks/use-query-movie';
 import { Carousel, CarouselItem } from '../common/carousel';
 import { Modal, ModalContentDrawer, ModalDescription, ModalTitle } from '../common/modal';
 import { MovieDetailsContext } from './movie-details-context';
-import { MovieDetailsModalHeader } from './movie-details-modal-header';
 
 type Props = {
   isOpen: boolean;
   movieId: string;
   initialData: Movie;
-  addToWatchlistButton?: React.ReactNode;
+  headerComponent?: React.ReactNode;
 };
 
-export const MovieDetailsModal = ({ isOpen, movieId, initialData, addToWatchlistButton }: Props) => {
+export const MovieDetailsModal = ({ isOpen, movieId, initialData, headerComponent }: Props) => {
+  const shouldAnimate = useGlobalStore((s) => s.modalOpenShouldAnimate);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const { data } = useQueryMovie(movieId, initialData);
@@ -30,11 +30,11 @@ export const MovieDetailsModal = ({ isOpen, movieId, initialData, addToWatchlist
         open={isOpen}
         onOpenChange={(open) => !open && dispatch({ type: 'CLOSE_MOVIE_MODAL', payload: undefined })}
       >
-        <ModalContentDrawer>
+        <ModalContentDrawer shouldAnimate={shouldAnimate}>
           <ModalTitle className="sr-only"></ModalTitle>
           <ModalDescription className="sr-only"></ModalDescription>
 
-          <MovieDetailsModalHeader addToWatchlistButton={addToWatchlistButton} />
+          {headerComponent}
 
           <div className="mb-12 flex flex-col">
             <div className="relative">

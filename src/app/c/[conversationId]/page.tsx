@@ -29,10 +29,10 @@ export default async function ConversationPage({ params, query }: Props) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ChatContextProvider value={{ conversationId: conversationId ?? randomUuid() }}>
-        <main className="relative mx-auto grid w-full grid-rows-[48px_calc(100vh-70px)_20px] overflow-y-hidden">
+        <main className="relative mx-auto grid w-full grid-rows-[0px_calc(100vh-20px)_20px] overflow-y-hidden">
           <ChatHeader />
 
-          <div className="mx-auto w-full overflow-y-scroll p-3">
+          <div className="mx-auto w-full overflow-y-scroll p-3 pt-12">
             <ChatWelcome className="mx-auto mt-[20vh] justify-self-center lg:w-3xl" />
             <ChatMessages className="mx-auto lg:w-3xl" />
           </div>

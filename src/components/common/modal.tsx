@@ -75,17 +75,20 @@ export const ModalContentDrawer = ({
   className,
   children,
   showCloseButton = true,
+  shouldAnimate = true,
   ...props
 }: React.ComponentProps<typeof ModalPrimitive.Content> & {
   showCloseButton?: boolean;
+  shouldAnimate?: boolean;
 }) => {
   return (
     <ModalPortal data-slot="modal-portal">
-      <ModalOverlay />
+      <ModalOverlay className={cn(!shouldAnimate && '!duration-0')} />
       <ModalPrimitive.Content
         className={cn(
           'bg-background-0 border-foreground-0/5 fixed top-0 right-0 z-50 h-screen w-3xl overflow-y-auto border-l outline-none',
           'bg-background data-[state=open]:animate-in data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full data-[state=closed]:animate-out duration-150',
+          !shouldAnimate && '!duration-0',
           className
         )}
         data-slot="Modal-content"
