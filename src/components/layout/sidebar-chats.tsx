@@ -3,15 +3,15 @@
 import { Fragment } from 'react';
 
 import { useQueryConversations } from '@/hooks/use-query-conversations';
-import { SidebarButtonConversation } from './sidebar-button-conversation';
+import { SidebarButtonChat } from './sidebar-button-chat';
 
-export const SidebarConversations = () => {
+export const SidebarChats = () => {
   const { data } = useQueryConversations();
 
   return (
     <Fragment>
       {data?.map((conversation) => (
-        <SidebarButtonConversation key={conversation.conversationId} conversation={conversation} />
+        <SidebarButtonChat key={conversation.conversationId} conversation={conversation} />
       ))}
     </Fragment>
   );

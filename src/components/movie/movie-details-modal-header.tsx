@@ -14,20 +14,21 @@ type Props = {
 
 export const MovieDetailsModalHeader = ({ addToWatchlistButton, nextMovie, previousMovie }: Props) => {
   return (
-    <Header className="bg-background-1/80 sticky top-0 z-50 backdrop-blur-md">
+    <Header className="sticky top-0 z-50">
       <ModalClose asChild>
-        <Button className="!mix-blend-difference" size="icon">
+        <Button size="icon">
           <ChevronsRight className="size-5" strokeWidth={2.5} />
         </Button>
       </ModalClose>
+
       <div className="ml-auto flex items-center gap-1">
-        <Button className="!mix-blend-difference" size="icon" onClick={previousMovie}>
+        <Button size="icon" onClick={previousMovie}>
           <ChevronUp className="size-5" strokeWidth={2.5} />
         </Button>
-        <Button className="!mix-blend-difference" size="icon" onClick={nextMovie}>
+        <Button size="icon" onClick={nextMovie}>
           <ChevronDown className="size-5" strokeWidth={2.5} />
         </Button>
-        {addToWatchlistButton}
+        {/* {addToWatchlistButton} */}
       </div>
     </Header>
   );

@@ -18,7 +18,7 @@ export const ChatModelSelect = () => {
   return (
     <DropdownRoot>
       <DropdownTrigger asChild>
-        <Button className="!text-foreground-0/60 !px-2">
+        <Button variant="ghost" className="!text-foreground-0/60 !rounded-full !px-2">
           {models.get(selectedModel)?.name}
           <ChevronDown className="size-5" />
         </Button>

@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient, trpc } from '@/lib/trpc/ssr';
+import { Panel } from '../common/panel';
 import { SidebarButtonNewChat } from './sidebar-button-new-chat';
 import { SidebarButtonWatchlist } from './sidebar-button-watchlist';
-import { SidebarConversations } from './sidebar-conversations';
+import { SidebarChats } from './sidebar-chats';
 
 export const Sidebar = () => {
   return (
-    <nav className="bg-background-0 border-foreground-0/5 h-screen w-[260px] shrink-0 grow-0 border-r p-2">
+    <Panel className="h-full w-[240px]">
       <div className="mb-3 px-3 py-2">
         <Link href="/">
           <Image
@@ -26,22 +27,22 @@ export const Sidebar = () => {
       <SidebarButtonNewChat />
       <SidebarButtonWatchlist />
 
-      <div className="text-foreground-1 mt-6 mb-2 px-3 text-sm font-medium">Chats</div>
+      <div className="text-foreground-1 mt-6 mb-2 px-3 text-sm font-medium antialiased">Chats</div>
 
       <Suspense>
-        <SidebarConversationsSuspense />
+        <SidebarChatsSuspense />
       </Suspense>
-    </nav>
+    </Panel>
   );
 };
 
-const SidebarConversationsSuspense = async () => {
+const SidebarChatsSuspense = async () => {
   const queryClient = getQueryClient();
   await queryClient.prefetchQuery(trpc.conversations.queryOptions(undefined));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <SidebarConversations />
+      <SidebarChats />
     </HydrationBoundary>
   );
 };

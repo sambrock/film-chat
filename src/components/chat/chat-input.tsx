@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
+import { Icon } from '../common/icon';
 import { useChatContext } from './chat-context';
 import { ChatModelSelect } from './chat-model-select';
 
@@ -46,11 +47,14 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   return (
     <div
-      className={cn('border-foreground-0/5 bg-background-2 flex flex-col rounded-xl border px-2', className)}
+      className={cn(
+        'border-foreground-0/10 bg-background-2/90 flex flex-col rounded-xl border px-2 shadow-[inset_0_1px_0px_rgba(255,255,255,0.3),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
+        className
+      )}
       {...props}
     >
       <textarea
-        className="text-foreground-0 placeholder:text-foreground-0/35 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
+        className="text-foreground-0 placeholder:text-foreground-1/80 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
         placeholder="Type your message here..."
         value={value}
         rows={1}
@@ -67,7 +71,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
           size="icon"
           disabled={isSendDisabled}
         >
-          <ArrowUp className="size-5" strokeWidth={2.5} />
+          <Icon icon={ArrowUp} />
         </Button>
       </div>
     </div>

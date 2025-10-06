@@ -37,11 +37,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </head>
 
-      <body className={cn('text-foreground-0 bg-background-0', fontSans.className)}>
+      <body className={cn('text-foreground-0 bg-background-1', fontSans.className)}>
         <QueryClientTRPCProvider>
           <GlobalStoreProvider>
             <div className="relative flex h-full w-screen">
-              <Sidebar />
+              <div className="h-screen p-2">
+                <Sidebar />
+              </div>
               <div className="bg-background-1 w-full">{props.children}</div>
             </div>
           </GlobalStoreProvider>

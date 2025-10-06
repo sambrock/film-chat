@@ -36,7 +36,7 @@ export const MovieDetailsModal = ({ isOpen, movieId, initialData, headerComponen
 
           {headerComponent}
 
-          <div className="mb-12 flex flex-col">
+          <div className="mb-12 flex flex-col -mt-12">
             <div className="relative">
               <img className="" src={backdropSrc(data.tmdb.backdrop_path!, 'w1280')} />
               <div className="to-background-0 absolute inset-0 z-10 bg-gradient-to-b from-transparent" />

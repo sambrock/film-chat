@@ -2,12 +2,13 @@
 
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
-import { Conversation } from '@/lib/definitions';
+import type { Conversation } from '@/lib/definitions';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useMutationDeleteConversation } from '@/hooks/use-mutation-delete-conversation';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
+import { Icon } from '../common/icon';
 import { SpinnerEllipsis } from '../common/spinner';
 import { SidebarButton } from './sidebar-button';
 
@@ -15,7 +16,7 @@ type Props = {
   conversation: Conversation;
 };
 
-export const SidebarButtonConversation = ({ conversation }: Props) => {
+export const SidebarButtonChat = ({ conversation }: Props) => {
   const deleteConversationMutation = useMutationDeleteConversation();
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
@@ -23,7 +24,7 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
   return (
     <div className="group relative flex items-center">
       <SidebarButton
-        className="group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2 "
+        className="group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2"
         href={`/c/${conversation.conversationId}`}
         asChild
       >
@@ -35,14 +36,14 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
       <DropdownRoot>
         <DropdownTrigger asChild disabled={isProcessing}>
           <Button
+            variant="transparent"
             className={cn(
-              'absolute top-0 right-2 ml-auto -mr-2 text-sm opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100',
+              'absolute top-0 right-2 -mr-2 ml-auto text-sm opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100',
               isProcessing && 'hidden'
             )}
-            variant="transparent"
             size="icon"
           >
-            <Ellipsis className="size-5" />
+            <Icon icon={Ellipsis} />
           </Button>
         </DropdownTrigger>
 
@@ -50,13 +51,13 @@ export const SidebarButtonConversation = ({ conversation }: Props) => {
           <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
 
           <DropdownItem>
-            <Pencil className="size-4" strokeWidth={2} />
+            <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
           <DropdownItem
             onClick={() => deleteConversationMutation.mutate({ conversationId: conversation.conversationId })}
           >
-            <Trash2 className="size-4 text-red-400" strokeWidth={2} />
+            <Icon icon={Trash2} className="text-red-400" size="xs" />
             <div className="text-sm font-medium text-red-400">Delete</div>
           </DropdownItem>
 
