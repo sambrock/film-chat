@@ -14,14 +14,14 @@ import { useChatContext } from './chat-context';
 export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
-  const { data } = useQueryConversation(conversationId);
+  // const { data } = useQueryConversation(conversationId);
   const deleteConversationMutation = useMutationDeleteConversation();
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
   return (
     <Header className="group sticky border-b bg-background-1/90 backdrop-blur-sm">
-      <div className="text-foreground-0/80 text-sm font-medium">{data?.title}</div>
+      {/* <div className="text-foreground-0/80 text-sm font-medium">{data?.title}</div>
       <div className="text-foreground-1 text-xs font-medium">{data?.moviesCount} films</div>
 
       <div className="text-foreground-2 ml-auto text-xs font-medium">
@@ -56,7 +56,7 @@ export const ChatHeader = () => {
             Created {data?.createdAt && timeAgo(data.createdAt)}
           </div>
         </DropdownContent>
-      </DropdownRoot>
+      </DropdownRoot> */}
     </Header>
   );
 };

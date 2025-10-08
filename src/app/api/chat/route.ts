@@ -1,12 +1,13 @@
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
+import { BatchItem } from 'drizzle-orm/batch';
 import superjson from 'superjson';
 import z from 'zod';
 
 import { streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
 import { auth } from '@/lib/auth/server';
-import { Conversation, ConversationMessage } from '@/lib/definitions';
+import { Conversation, Message, Movie, Recommendation } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';
 import { conversations, messages, movies, recommendations } from '@/lib/drizzle/schema';
 import { tmdbFindMovie, tmdbGetMovieById } from '@/lib/tmdb/client';
@@ -19,7 +20,7 @@ const BodySchema = z.object({
   model: z.string(),
 });
 
-export type ConversationBody = z.infer<typeof BodySchema>;
+export type ChatBody = z.infer<typeof BodySchema>;
 
 export async function POST(req: Request) {
   const session = await auth.api.getSession(req);
@@ -47,6 +48,8 @@ export async function POST(req: Request) {
       })
     : [];
 
+  const batch: BatchItem<'pg'>[] = [];
+
   const modelStream = streamText({
     model: streamTextModel(parsed.data.model),
     messages: [
@@ -69,9 +72,12 @@ export async function POST(req: Request) {
       .returning();
   }
 
-  const messageUser: ConversationMessage = {
+  const messageUser: Message = {
     messageId: randomUuid(),
+    userId: session.user.id,
     conversationId: conversation.conversationId,
+    parentId: null,
+    serial: undefined!,
     content,
     model: parsed.data.model,
     role: 'user',
@@ -80,42 +86,53 @@ export async function POST(req: Request) {
     updatedAt: new Date(),
   };
 
-  const messageAssistant: ConversationMessage = {
+  const messageAssistant: Message = {
     messageId: randomUuid(),
+    userId: session.user.id,
     conversationId: conversation.conversationId,
     parentId: messageUser.messageId,
+    serial: undefined!,
     content: '',
     model: parsed.data.model,
     role: 'assistant',
     status: 'processing',
-    recommendations: [],
-    movies: [],
-    library: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  await db.insert(messages).values([messageUser, messageAssistant]);
+  batch.push(db.insert(messages).values([messageUser, messageAssistant]));
 
   const transformStream = new TransformStream({
     start: async (controller) => {
       controller.enqueue(encodeSSE({ type: 'conversation', v: conversation }));
-      controller.enqueue(encodeSSE({ type: 'message_done', v: messageUser }));
-      controller.enqueue(encodeSSE({ type: 'message_processing', v: messageAssistant }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
     },
     transform: async (chunk: TextStreamPart<ToolSet>, controller) => {
       if (chunk.type === 'text-delta') {
-        controller.enqueue(encodeSSE({ type: 'content', v: chunk.text }));
+        controller.enqueue(encodeSSE({ type: 'content', v: chunk.text, id: messageAssistant.messageId }));
         messageAssistant.content += chunk.text;
-        messageAssistant.recommendations = parseRecommendations(
-          messageAssistant.content,
-          messageAssistant.messageId
-        );
       }
       if (chunk.type === 'finish') {
         messageAssistant.status = 'done';
-        messageAssistant.recommendations = await Promise.all(
-          messageAssistant.recommendations.map(async (recommendation, i) => {
+        batch.push(
+          db.update(messages).set(messageAssistant).where(eq(messages.messageId, messageAssistant.messageId))
+        );
+        controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+
+        const parsedRecommendations = await Promise.all(
+          parseRecommendations(messageAssistant.content).map(async (parsed) => {
+            const recommendation: Recommendation = {
+              recommendationId: randomUuid(),
+              userId: session.user.id,
+              messageId: messageAssistant.messageId,
+              movieId: null,
+              title: parsed.title,
+              releaseYear: parsed.releaseYear,
+              why: parsed.why,
+              createdAt: new Date(),
+            };
+
             const found = await tmdbFindMovie(recommendation.title, recommendation.releaseYear.toString());
             if (!found) {
               return recommendation;
@@ -125,26 +142,25 @@ export async function POST(req: Request) {
               return recommendation;
             }
 
-            const movieId = uuidFromString(found.id.toString());
-            await db
-              .insert(movies)
-              .values({ movieId, tmdbId: found.id, tmdb: source, createdAt: new Date() })
-              .onConflictDoNothing();
-
-            return {
-              ...recommendation,
-              movieId,
+            const movie: Movie = {
+              movieId: uuidFromString(found.id.toString()),
+              tmdbId: found.id,
+              tmdb: source,
+              createdAt: new Date(),
             };
+            recommendation.movieId = movie.movieId;
+
+            batch.push(db.insert(movies).values(movie).onConflictDoNothing());
+            controller.enqueue(encodeSSE({ type: 'movie', v: movie }));
+
+            return recommendation;
           })
         );
 
-        await db.insert(recommendations).values(messageAssistant.recommendations);
-        await db
-          .update(messages)
-          .set(messageAssistant)
-          .where(eq(messages.messageId, messageAssistant.messageId));
-
-        controller.enqueue(encodeSSE({ type: 'message_done', v: messageAssistant }));
+        if (parsedRecommendations.length > 0) {
+          batch.push(db.insert(recommendations).values(parsedRecommendations));
+          controller.enqueue(encodeSSE({ type: 'recommendations', v: parsedRecommendations }));
+        }
 
         if (shouldGenerateConversationTitle) {
           const generatedTitle = await generateText({
@@ -152,10 +168,12 @@ export async function POST(req: Request) {
             prompt: `Generate a concise title for in 3 words or less: "Movies for this prompt: ${messageAssistant.content}"`,
           });
 
-          await db
-            .update(conversations)
-            .set({ title: generatedTitle.text })
-            .where(eq(conversations.conversationId, conversation!.conversationId));
+          batch.push(
+            db
+              .update(conversations)
+              .set({ title: generatedTitle.text })
+              .where(eq(conversations.conversationId, conversation!.conversationId))
+          );
 
           controller.enqueue(
             encodeSSE({ type: 'conversation', v: { ...conversation, title: generatedTitle.text } })
@@ -164,6 +182,8 @@ export async function POST(req: Request) {
 
         controller.enqueue(encodeSSE('end'));
         controller.terminate();
+
+        await db.batch(batch as [BatchItem<'pg'>]);
       }
     },
   });
@@ -179,9 +199,10 @@ export async function POST(req: Request) {
 
 export type ChatSSEData =
   | { type: 'conversation'; v: Conversation }
-  | { type: 'message_processing'; v: ConversationMessage }
-  | { type: 'message_done'; v: ConversationMessage }
-  | { type: 'content'; v: string }
+  | { type: 'message'; v: Message }
+  | { type: 'recommendations'; v: Recommendation[] }
+  | { type: 'movie'; v: Movie }
+  | { type: 'content'; v: string; id: string }
   | { type: 'end' };
 
 const encodeSSE = (data: ChatSSEData | 'end') => {

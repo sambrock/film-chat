@@ -89,6 +89,9 @@ export const conversations = pgTable('conversations', {
 
 export const messages = pgTable('messages', {
   messageId: uuid('message_id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
   conversationId: uuid('conversation_id')
     .notNull()
     .references(() => conversations.conversationId, { onDelete: 'cascade' }),
@@ -107,6 +110,9 @@ export const messages = pgTable('messages', {
 
 export const recommendations = pgTable('recommendations', {
   recommendationId: uuid('recommendation_id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
   messageId: uuid('message_id')
     .notNull()
     .references(() => messages.messageId, { onDelete: 'cascade' }),
@@ -167,6 +173,10 @@ export const conversationsRelations = relations(conversations, ({ one, many }) =
 }));
 
 export const messageRelations = relations(messages, ({ one, many }) => ({
+  user: one(users, {
+    fields: [messages.userId],
+    references: [users.id],
+  }),
   conversation: one(conversations, {
     fields: [messages.conversationId],
     references: [conversations.conversationId],
@@ -179,6 +189,10 @@ export const messageRelations = relations(messages, ({ one, many }) => ({
 }));
 
 export const recommendationsRelations = relations(recommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [recommendations.userId],
+    references: [users.id],
+  }),
   message: one(messages, {
     fields: [recommendations.messageId],
     references: [messages.messageId],

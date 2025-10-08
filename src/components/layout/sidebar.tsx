@@ -38,7 +38,7 @@ export const Sidebar = () => {
 
 const SidebarChatsSuspense = async () => {
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.conversations.queryOptions(undefined));
+  await queryClient.prefetchQuery(trpc.syncConversations.queryOptions());
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

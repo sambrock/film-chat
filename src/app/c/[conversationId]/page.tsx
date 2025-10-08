@@ -10,20 +10,17 @@ import { ChatWelcome } from '@/components/chat/chat-welcome';
 
 type Props = {
   params?: Promise<{ conversationId: string }>;
-  query?: Promise<{ m?: string }>; // movieId
 };
 
-export default async function ConversationPage({ params, query }: Props) {
+export default async function ConversationPage({ params }: Props) {
   const { conversationId } = params ? await params : {};
-  const { m } = query ? await query : {};
 
   const queryClient = getQueryClient();
   await Promise.all([
-    conversationId
-      ? queryClient.prefetchQuery(trpc.conversationHistory.queryOptions({ conversationId }))
-      : null,
-    conversationId ? queryClient.prefetchQuery(trpc.conversation.queryOptions({ conversationId })) : null,
-    m ? queryClient.prefetchQuery(trpc.movie.queryOptions({ movieId: m })) : null,
+    queryClient.prefetchQuery(trpc.syncConversations.queryOptions()),
+    queryClient.prefetchQuery(trpc.syncMessages.queryOptions()),
+    queryClient.prefetchQuery(trpc.syncRecommendations.queryOptions()),
+    queryClient.prefetchQuery(trpc.syncMovies.queryOptions()),
   ]);
 
   return (

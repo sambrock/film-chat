@@ -1,6 +1,6 @@
 'use client';
 
-import type { ConversationMessage, Library, Movie, Recommendation } from '@/lib/definitions';
+import type { ConversationMessage, Library, Message, Movie, Recommendation } from '@/lib/definitions';
 import { createContextFactory } from '@/lib/utils/create-context-factory';
 
 export const [ChatContextProvider, useChatContext] = createContextFactory<{
@@ -8,7 +8,7 @@ export const [ChatContextProvider, useChatContext] = createContextFactory<{
 }>('ChatContext');
 
 export const [ChatMessageContextProvider, useChatMessageContext] = createContextFactory<{
-  message: ConversationMessage;
+  message: Message;
 }>('MessageContext');
 
 export const [ChatRecommendationContextProvider, useChatRecommendationContext] = createContextFactory<{

@@ -36,7 +36,7 @@ export const genreName = (name: string) => {
   return name;
 };
 
-export const parseRecommendations = (content: string, messageId: string) => {
+export const parseRecommendations = (content: string) => {
   const titleRegex = /"title":\s*"([^"]+)"?/g;
   const releaseYearRegex = /"release_year":\s*"?(\d{4})?/g;
   const whyRegex = /"why":\s*"([^"]+)"?/g;
@@ -52,7 +52,8 @@ export const parseRecommendations = (content: string, messageId: string) => {
   for (let i = 0; i < length; i++) {
     recommendations.push({
       recommendationId: randomUuid(),
-      messageId,
+      messageId: '',
+      userId: '',
       movieId: null,
       title: titles[i] || '',
       releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
