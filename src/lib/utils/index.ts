@@ -103,4 +103,5 @@ export type Prettify<T> = {
 
 export type StringLiterals<T> = T extends string ? (string extends T ? never : T) : never;
 
-export type MapKey<T> = T extends Map<infer K, any> ? K : never;
+// @ts-nocheck
+export type MapKey<T> = T extends Map<infer K, unknown> ? K : never;

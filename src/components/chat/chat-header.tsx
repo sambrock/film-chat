@@ -4,8 +4,6 @@ import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useMutationDeleteConversation } from '@/hooks/use-mutation-delete-conversation';
-import { useQueryConversation } from '@/hooks/use-query-conversation';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Header } from '../layout/header';
@@ -15,12 +13,11 @@ export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
   // const { data } = useQueryConversation(conversationId);
-  const deleteConversationMutation = useMutationDeleteConversation();
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
   return (
-    <Header className="group sticky border-b bg-background-1/90 backdrop-blur-sm">
+    <Header className="group bg-background-1/90 sticky border-b backdrop-blur-sm">
       {/* <div className="text-foreground-0/80 text-sm font-medium">{data?.title}</div>
       <div className="text-foreground-1 text-xs font-medium">{data?.moviesCount} films</div>
 

@@ -18,52 +18,52 @@ export const ChatRecommendationMovieDetailsModal = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const nextPrevMovie = (direction: 'next' | 'prev') => {
-    const recommendations = queryClient
-      .getQueryData(trpc.conversationHistory.queryKey({ conversationId }))
-      ?.filter((m) => m.role === 'assistant')
-      .map((m) => m.recommendations)
-      .reverse()
-      .flat();
+  // const nextPrevMovie = (direction: 'next' | 'prev') => {
+  //   const recommendations = queryClient
+  //     .getQueryData(trpc.conversationHistory.queryKey({ conversationId }))
+  //     ?.filter((m) => m.role === 'assistant')
+  //     .map((m) => m.recommendations)
+  //     .reverse()
+  //     .flat();
 
-    if (recommendations) {
-      const currentIndex = recommendations.findIndex(
-        (r) => r.recommendationId === recommendation.recommendationId
-      );
+  //   if (recommendations) {
+  //     const currentIndex = recommendations.findIndex(
+  //       (r) => r.recommendationId === recommendation.recommendationId
+  //     );
 
-      const nextRecommendation = recommendations[currentIndex + 1];
-      if (nextRecommendation && direction === 'next') {
-        dispatch({
-          type: 'OPEN_RECOMMENDATION_MOVIE_MODAL',
-          payload: { recommendationId: nextRecommendation.recommendationId },
-        });
-      }
+  //     const nextRecommendation = recommendations[currentIndex + 1];
+  //     if (nextRecommendation && direction === 'next') {
+  //       dispatch({
+  //         type: 'OPEN_RECOMMENDATION_MOVIE_MODAL',
+  //         payload: { recommendationId: nextRecommendation.recommendationId },
+  //       });
+  //     }
 
-      const prevRecommendation = recommendations[currentIndex - 1];
-      if (prevRecommendation && direction === 'prev') {
-        dispatch({
-          type: 'OPEN_RECOMMENDATION_MOVIE_MODAL',
-          payload: { recommendationId: prevRecommendation.recommendationId },
-        });
-      }
-    }
-  };
+  //     const prevRecommendation = recommendations[currentIndex - 1];
+  //     if (prevRecommendation && direction === 'prev') {
+  //       dispatch({
+  //         type: 'OPEN_RECOMMENDATION_MOVIE_MODAL',
+  //         payload: { recommendationId: prevRecommendation.recommendationId },
+  //       });
+  //     }
+  //   }
+  // };
 
   if (!movie) {
     return null;
   }
-  return (
-    <MovieDetailsModal
-      isOpen={isOpen}
-      movieId={movie.movieId}
-      initialData={movie}
-      headerComponent={
-        <MovieDetailsModalHeader
-          addToWatchlistButton={<ChatMovieActionButtonAddToWatchlist />}
-          nextMovie={() => nextPrevMovie('next')}
-          previousMovie={() => nextPrevMovie('prev')}
-        />
-      }
-    />
-  );
+  // return (
+  //   <MovieDetailsModal
+  //     isOpen={isOpen}
+  //     movieId={movie.movieId}
+  //     initialData={movie}
+  //     headerComponent={
+  //       <MovieDetailsModalHeader
+  //         addToWatchlistButton={<ChatMovieActionButtonAddToWatchlist />}
+  //         nextMovie={() => nextPrevMovie('next')}
+  //         previousMovie={() => nextPrevMovie('prev')}
+  //       />
+  //     }
+  //   />
+  // );
 };

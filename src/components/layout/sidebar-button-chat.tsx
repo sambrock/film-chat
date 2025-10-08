@@ -5,7 +5,6 @@ import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 import type { Conversation } from '@/lib/definitions';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useMutationDeleteConversation } from '@/hooks/use-mutation-delete-conversation';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Icon } from '../common/icon';
@@ -17,8 +16,6 @@ type Props = {
 };
 
 export const SidebarButtonChat = ({ conversation }: Props) => {
-  const deleteConversationMutation = useMutationDeleteConversation();
-
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
   return (
@@ -55,7 +52,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
           <DropdownItem
-            onClick={() => deleteConversationMutation.mutate({ conversationId: conversation.conversationId })}
+          // onClick={() => deleteConversationMutation.mutate({ conversationId: conversation.conversationId })}
           >
             <Icon icon={Trash2} className="text-red-400" size="xs" />
             <div className="text-sm font-medium text-red-400">Delete</div>

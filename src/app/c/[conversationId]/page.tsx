@@ -7,6 +7,7 @@ import { ChatHeader } from '@/components/chat/chat-header';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatWelcome } from '@/components/chat/chat-welcome';
+import { ClientOnly } from '@/components/common/client-only';
 
 type Props = {
   params?: Promise<{ conversationId: string }>;
@@ -17,7 +18,6 @@ export default async function ConversationPage({ params }: Props) {
 
   const queryClient = getQueryClient();
   await Promise.all([
-    queryClient.prefetchQuery(trpc.syncConversations.queryOptions()),
     queryClient.prefetchQuery(trpc.syncMessages.queryOptions()),
     queryClient.prefetchQuery(trpc.syncRecommendations.queryOptions()),
     queryClient.prefetchQuery(trpc.syncMovies.queryOptions()),

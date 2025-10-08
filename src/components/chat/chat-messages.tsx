@@ -1,27 +1,15 @@
 'use client';
 
-import { Fragment, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { eq, useLiveQuery } from '@tanstack/react-db';
-import { useIsClient } from 'usehooks-ts';
 
 import { messagesCollection } from '@/lib/collections';
-import { MessageAssistant, MessageUser } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
-import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
 import { ChatMessageContextProvider, useChatContext } from './chat-context';
 import { ChatMessageAssistant } from './chat-message-assistant';
 import { ChatMessageUser } from './chat-message-user';
 
 type Props = React.ComponentProps<'div'>;
-
-export const ClientOnly = ({
-  children,
-  ...props
-}: { children: React.ReactNode } & React.ComponentProps<'div'>) => {
-  const isClient = useIsClient();
-  if (!isClient) return null;
-  return <Fragment>{children}</Fragment>;
-};
 
 export const ChatMessages = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
@@ -46,14 +34,16 @@ export const ChatMessages = ({ className, ...props }: Props) => {
   return (
     <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-8', className)} {...props}>
       {data &&
-        data.map((message) => (
-          <ChatMessageContextProvider value={{ message }} key={message.messageId}>
-            {message.role === 'user' && <ChatMessageUser message={message} />}
-            {message.role === 'assistant' && (
-              <ChatMessageAssistant message={message} scrollToEnd={scrollToEnd} />
-            )}
-          </ChatMessageContextProvider>
-        ))}
+        data
+          .sort((a, b) => a.serial - b.serial)
+          .map((message) => (
+            <ChatMessageContextProvider value={{ message }} key={message.messageId}>
+              {message.role === 'user' && <ChatMessageUser message={message} />}
+              {message.role === 'assistant' && (
+                <ChatMessageAssistant message={message} scrollToEnd={scrollToEnd} />
+              )}
+            </ChatMessageContextProvider>
+          ))}
     </div>
   );
 };

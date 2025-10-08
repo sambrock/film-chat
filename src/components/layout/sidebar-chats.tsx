@@ -11,9 +11,11 @@ export const SidebarChats = () => {
 
   return (
     <Fragment>
-      {data?.map((chat) => (
-        <SidebarButtonChat key={chat.conversationId} conversation={chat} />
-      ))}
+      {data
+        ?.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+        .map((chat) => (
+          <SidebarButtonChat key={chat.conversationId} conversation={chat} />
+        ))}
     </Fragment>
   );
 };

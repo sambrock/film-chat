@@ -1,4 +1,3 @@
-
 import { db } from '../drizzle/db';
 import { protectedProcedure, router } from './server';
 
@@ -17,7 +16,7 @@ export const appRouter = router({
   syncMessages: protectedProcedure.query(async ({ ctx }) => {
     const data = await db.query.messages.findMany({
       where: (messages, { eq }) => eq(messages.userId, ctx.session.user.id),
-      orderBy: (messages, { asc }) => [asc(messages.serial)],
+      orderBy: (messages, { desc }) => [desc(messages.serial)],
     });
 
     return data;

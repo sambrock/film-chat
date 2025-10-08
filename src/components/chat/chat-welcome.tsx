@@ -4,7 +4,6 @@ import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useQueryConversationHistory } from '@/hooks/use-query-conversation-history';
 import { useChatContext } from './chat-context';
 
 type Props = React.ComponentProps<'div'>;

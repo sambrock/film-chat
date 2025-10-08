@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import superjson from 'superjson';
 
-import { ChatBody, ChatSSEData } from '@/app/api/chat/route';
+import type { ChatBody, ChatSSEData } from '@/app/api/chat/route';
 import {
   chatsCollection,
   messagesCollection,
@@ -77,6 +77,7 @@ export const useMutationSendMessage = () => {
               });
             }
           }
+
           if (event === 'end') {
           }
         }
