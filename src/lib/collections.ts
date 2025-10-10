@@ -4,12 +4,14 @@ import { queryCollectionOptions } from '@tanstack/query-db-collection';
 import { createCollection } from '@tanstack/react-db';
 
 import { queryClient } from '@/providers/query-client-trpc-provider';
+import { Library, Movie } from './definitions';
 import { trpc, trpcClient } from './trpc/client';
 
 export const chatsCollection = createCollection(
   queryCollectionOptions({
     queryClient,
     queryKey: trpc.syncChats.queryKey(),
+    startSync: true,
     queryFn: () => trpcClient.syncChats.query(),
     getKey: (item) => item.conversationId,
   })
@@ -19,6 +21,7 @@ export const messagesCollection = createCollection(
   queryCollectionOptions({
     queryClient,
     queryKey: trpc.syncMessages.queryKey(),
+    startSync: true,
     queryFn: () => trpcClient.syncMessages.query(),
     getKey: (item) => item.messageId,
   })
@@ -28,6 +31,7 @@ export const recommendationsCollection = createCollection(
   queryCollectionOptions({
     queryClient,
     queryKey: trpc.syncRecommendations.queryKey(),
+    startSync: true,
     queryFn: () => trpcClient.syncRecommendations.query(),
     getKey: (item) => item.recommendationId,
   })
@@ -37,6 +41,7 @@ export const moviesCollection = createCollection(
   queryCollectionOptions({
     queryClient,
     queryKey: trpc.syncMovies.queryKey(),
+    startSync: true,
     queryFn: () => trpcClient.syncMovies.query(),
     getKey: (item) => item.movieId,
   })
@@ -46,7 +51,27 @@ export const libraryCollection = createCollection(
   queryCollectionOptions({
     queryClient,
     queryKey: trpc.syncLibrary.queryKey(),
+    startSync: true,
     queryFn: () => trpcClient.syncLibrary.query(),
     getKey: (item) => item.movieId,
+    onInsert: async ({ transaction }) => {
+      await trpcClient.saveTransaction.mutate(
+        transaction.mutations.map((data) => ({
+          type: 'insert',
+          schema: 'library',
+          data: data.changes as Library,
+        }))
+      );
+    },
+    onUpdate: async ({ transaction }) => {
+      await trpcClient.saveTransaction.mutate(
+        transaction.mutations.map((data) => ({
+          type: 'update',
+          schema: 'library',
+          key: data.key,
+          data: data.changes,
+        }))
+      );
+    },
   })
 );

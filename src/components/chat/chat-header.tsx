@@ -1,28 +1,69 @@
 'use client';
 
-import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
+import { and, count, eq, not, useLiveQuery } from '@tanstack/react-db';
+import { Ellipsis, Pencil } from 'lucide-react';
 
+import { chatsCollection, messagesCollection, recommendationsCollection } from '@/lib/collections';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
+import { Icon } from '../common/icon';
 import { Header } from '../layout/header';
 import { useChatContext } from './chat-context';
 
 export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
-  // const { data } = useQueryConversation(conversationId);
+  const chatQuery = useLiveQuery((q) =>
+    q
+      .from({ chats: chatsCollection })
+      .where(({ chats }) => eq(chats.conversationId, conversationId))
+      .findOne()
+  );
+
+  const countQuery = useLiveQuery((q) =>
+    q
+      .from({ messages: messagesCollection })
+      .join(
+        { recommendations: recommendationsCollection },
+        ({ messages, recommendations }) => eq(messages.messageId, recommendations.messageId),
+        'inner'
+      )
+      .where(({ messages, recommendations }) =>
+        and(eq(messages.conversationId, conversationId), not(eq(recommendations.movieId, null)))
+      )
+      .select(({ recommendations }) => ({
+        count: count(recommendations.recommendationId),
+      }))
+      .distinct()
+  );
+
+  const lastMessageUpdatedAtQuery = useLiveQuery((q) =>
+    q
+      .from({ messages: messagesCollection })
+      .where(({ messages }) => eq(messages.conversationId, conversationId))
+      .orderBy(({ messages }) => messages.updatedAt, 'desc')
+      .select(({ messages }) => ({
+        updatedAt: messages.updatedAt,
+      }))
+      .findOne()
+  );
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
+  if (!chatQuery || !chatQuery.data) {
+    return <div></div>;
+  }
   return (
     <Header className="group bg-background-1/90 sticky border-b backdrop-blur-sm">
-      {/* <div className="text-foreground-0/80 text-sm font-medium">{data?.title}</div>
-      <div className="text-foreground-1 text-xs font-medium">{data?.moviesCount} films</div>
+      <div className="text-foreground-0/80 text-sm font-medium">{chatQuery.data.title}</div>
+      {countQuery.data?.[0]?.count && (
+        <div className="text-foreground-1 text-xs font-medium">{countQuery.data[0].count} films</div>
+      )}
 
       <div className="text-foreground-2 ml-auto text-xs font-medium">
-        Updated {data?.updatedAt && timeAgo(data.updatedAt)}
+        Updated {timeAgo(lastMessageUpdatedAtQuery.data?.updatedAt || new Date())}
       </div>
 
       <DropdownRoot>
@@ -31,7 +72,7 @@ export const ChatHeader = () => {
             className={cn('group-focus-within:bg-foreground-0/5 text-sm', isProcessing && 'hidden')}
             size="icon"
           >
-            <Ellipsis className="size-5" />
+            <Icon icon={Ellipsis} />
           </Button>
         </DropdownTrigger>
 
@@ -39,21 +80,21 @@ export const ChatHeader = () => {
           <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
 
           <DropdownItem>
-            <Pencil className="size-4" strokeWidth={2} />
+            <Icon icon={Pencil} />
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
-          <DropdownItem onClick={() => deleteConversationMutation.mutate({ conversationId })}>
+          {/* <DropdownItem onClick={() => deleteConversationMutation.mutate({ conversationId })}>
             <Trash2 className="size-4 text-red-400" strokeWidth={2} />
             <div className="text-sm font-medium text-red-400">Delete</div>
-          </DropdownItem>
+          </DropdownItem> */}
 
           <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
           <div className="text-foreground-2 px-2 py-1 text-xs select-none">
-            Created {data?.createdAt && timeAgo(data.createdAt)}
+            Created {chatQuery.data.createdAt && timeAgo(chatQuery.data.createdAt)}
           </div>
         </DropdownContent>
-      </DropdownRoot> */}
+      </DropdownRoot>
     </Header>
   );
 };

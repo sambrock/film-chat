@@ -35,6 +35,11 @@ export const useMutationSendMessage = () => {
           updatedAt: new Date(),
         });
         window.history.replaceState({}, '', `/c/${conversationId}`);
+      } else {
+        chatsCollection.utils.writeUpdate({
+          conversationId,
+          updatedAt: new Date(),
+        });
       }
 
       const response = await fetch('/api/chat', {

@@ -1,6 +1,10 @@
+import { TRPCError } from '@trpc/server';
+import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 
 import { db } from '../drizzle/db';
+import { library } from '../drizzle/schema';
+import { LibrarySchema } from '../drizzle/zod';
 import { tmdbGetMovieByIdWithCredits } from '../tmdb/client';
 import { protectedProcedure, publicProcedure, router } from './server';
 
@@ -58,8 +62,58 @@ export const appRouter = router({
     return data;
   }),
 
-  movieDetails: publicProcedure.input(z.number()).query(async ({ input, ctx }) => {
-    const details = await tmdbGetMovieByIdWithCredits(input);
+  saveTransaction: protectedProcedure
+    .input(
+      z
+        .discriminatedUnion('type', [
+          z.object({
+            type: z.literal('insert'),
+            schema: z.literal('library'),
+            data: LibrarySchema,
+          }),
+          z.object({
+            type: z.literal('update'),
+            schema: z.literal('library'),
+            key: z.string(),
+            data: LibrarySchema.partial(),
+          }),
+        ])
+        .array()
+    )
+    .mutation(async ({ input, ctx }) => {
+      for (const op of input) {
+        // TODO: transactions not supported with neon-http
+        if (op.type === 'insert' && op.schema === 'library') {
+          await db
+            .insert(library)
+            .values({
+              ...op.data,
+              userId: ctx.session.user.id,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .onConflictDoNothing()
+            .execute();
+        }
+        if (op.type === 'update' && op.schema === 'library') {
+          await db
+            .update(library)
+            .set({ ...op.data, updatedAt: new Date() })
+            .where(and(eq(library.userId, ctx.session.user.id), eq(library.movieId, op.key)))
+            .execute();
+        }
+      }
+    }),
+
+  movieDetails: publicProcedure.input(z.string()).query(async ({ input }) => {
+    const movie = await db.query.movies.findFirst({
+      where: (movies, { eq }) => eq(movies.movieId, input),
+    });
+    if (!movie) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Movie not found' });
+    }
+
+    const details = await tmdbGetMovieByIdWithCredits(movie.tmdbId);
 
     return details;
   }),

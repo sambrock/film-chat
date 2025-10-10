@@ -1,8 +1,12 @@
 'use client';
 
-import { ChevronDown, ChevronsRight, ChevronUp, Plus } from 'lucide-react';
+import { useRef } from 'react';
+import { eq, useLiveQuery } from '@tanstack/react-db';
+import { Check, ChevronDown, ChevronsRight, ChevronUp, Minus, Plus } from 'lucide-react';
+import { useHover } from 'usehooks-ts';
 
 import { libraryCollection, recommendationsCollection } from '@/lib/collections';
+import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button } from '../common/button';
 import { Icon } from '../common/icon';
@@ -62,7 +66,7 @@ const ButtonPrevMovie = () => {
 
   return (
     <Button size="icon" onClick={handlePrev} disabled={!getPrevMovieId()}>
-      <Icon icon={ChevronDown} />
+      <Icon icon={ChevronDown} className="mt-0.5" />
     </Button>
   );
 };
@@ -98,7 +102,7 @@ const ButtonNextMovie = () => {
 
   return (
     <Button size="icon" onClick={handleNext} disabled={!getNextMovieId()}>
-      <Icon icon={ChevronUp} />
+      <Icon icon={ChevronUp} className="mb-0.5" />
     </Button>
   );
 };
@@ -106,9 +110,17 @@ const ButtonNextMovie = () => {
 const ButtonAddToWatchlist = () => {
   const modal = useGlobalStore((s) => s.movieModal!);
 
+  const library = useLiveQuery(
+    (q) =>
+      q
+        .from({ library: libraryCollection })
+        .where(({ library }) => eq(library.movieId, modal.movieId!))
+        .findOne(),
+    [modal.movieId]
+  );
+
   const handleAdd = () => {
-    const hasMovie = libraryCollection.has(modal.movieId);
-    if (hasMovie) {
+    if (library.data) {
       libraryCollection.update(modal.movieId, (draft) => {
         draft.watchlist = !draft.watchlist;
       });
@@ -126,10 +138,30 @@ const ButtonAddToWatchlist = () => {
     }
   };
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const isHover = useHover(buttonRef as React.RefObject<HTMLElement>);
+
   return (
-    <Button pill onClick={handleAdd}>
-      <Icon icon={Plus} className="mr-1 -ml-1" />
-      Add to watchlist
+    <Button
+      ref={buttonRef}
+      className={cn(
+        'min-w-[180px] justify-center transition-all',
+        library.data?.watchlist && isHover && 'text-red-400'
+      )}
+      onClick={handleAdd}
+      pill
+    >
+      {library.data?.watchlist ? (
+        <>
+          <Icon icon={Check} className="mr-1 -ml-1" />
+          Added to watchlist
+        </>
+      ) : (
+        <>
+          <Icon icon={Plus} className="mr-1 -ml-1" />
+          Add to watchlist
+        </>
+      )}
     </Button>
   );
 };

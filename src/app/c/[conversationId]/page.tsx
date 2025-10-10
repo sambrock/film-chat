@@ -14,6 +14,8 @@ type Props = {
 };
 
 export default async function ConversationPage({ params }: Props) {
+  'use cache';
+
   const { conversationId } = params ? await params : {};
 
   const queryClient = getQueryClient();

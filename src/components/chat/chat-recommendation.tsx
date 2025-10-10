@@ -1,9 +1,11 @@
 'use client';
 
+import { useRef } from 'react';
 import { eq, useLiveQuery } from '@tanstack/react-db';
-import { PanelRight } from 'lucide-react';
+import { Check, Minus, PanelRight, Plus } from 'lucide-react';
+import { useHover } from 'usehooks-ts';
 
-import { moviesCollection } from '@/lib/collections';
+import { libraryCollection, moviesCollection } from '@/lib/collections';
 import { Recommendation } from '@/lib/definitions';
 import { cn, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
@@ -65,10 +67,10 @@ export const ChatRecommendation = ({ recommendation }: Props) => {
       </div>
 
       {movieQuery.data && (
-        <div className="absolute right-2 bottom-2 flex items-center gap-1 self-end opacity-0 transition group-hover:opacity-100">
-          {/* <ChatMovieActionButtonAddToWatchlist movie /> */}
-          <Button className={cn('!rounded-full')} size="sm" onClick={handleOpen}>
-            <Icon icon={PanelRight} size="xs" className="mr-1 -ml-1" />
+        <div className="absolute right-2 bottom-2 flex items-center gap-1 self-end opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100">
+          <ButtonAddToWatchlist movieId={movieQuery.data.movieId} />
+          <Button size="sm" onClick={handleOpen} pill>
+            <Icon icon={PanelRight} size="sm" className="mr-1" />
             Open
           </Button>
         </div>
@@ -76,5 +78,60 @@ export const ChatRecommendation = ({ recommendation }: Props) => {
 
       {/* <ChatRecommendationMovieDetailsModal /> */}
     </div>
+  );
+};
+
+const ButtonAddToWatchlist = ({ movieId }: { movieId: string }) => {
+  const library = useLiveQuery(
+    (q) =>
+      q
+        .from({ library: libraryCollection })
+        .where(({ library }) => eq(library.movieId, movieId))
+        .findOne(),
+    [movieId]
+  );
+
+  const handleAdd = () => {
+    if (library.data) {
+      libraryCollection.update(movieId, (draft) => {
+        draft.watchlist = !draft.watchlist;
+      });
+    } else {
+      libraryCollection.insert({
+        movieId,
+        userId: '',
+        watchlist: true,
+        liked: false,
+        watched: false,
+        ignore: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  };
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const isHover = useHover(buttonRef as React.RefObject<HTMLElement>);
+
+  return (
+    <Button
+      ref={buttonRef}
+      className={cn('justify-center transition-all', library.data?.watchlist && isHover && 'text-red-400')}
+      size="sm"
+      onClick={handleAdd}
+      pill
+    >
+      {library.data?.watchlist ? (
+        <>
+          <Icon icon={Check} size="sm" className="mr-1" />
+          Added to watchlist
+        </>
+      ) : (
+        <>
+          <Icon icon={Plus} size="sm" className="mr-1" />
+          Add to watchlist
+        </>
+      )}
+    </Button>
   );
 };

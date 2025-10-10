@@ -5,8 +5,8 @@ import { eq, useLiveQuery } from '@tanstack/react-db';
 import { moviesCollection } from '@/lib/collections';
 import { backdropSrc, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { Carousel, CarouselItem } from '../common/carousel';
 import { Modal, ModalContentDrawer, ModalDescription, ModalTitle } from '../common/modal';
+import { MovieDetailsCast, MovieDetailsCrew } from './movie-details-credits';
 import { MovieDetailsModalHeader } from './movie-details-modal-header';
 
 export const MovieDetailsModal = () => {
@@ -31,13 +31,13 @@ export const MovieDetailsModal = () => {
       onOpenChange={(open) => !open && dispatch({ type: 'CLOSE_MOVIE_MODAL', payload: undefined })}
     >
       <ModalContentDrawer shouldAnimate={modal.shouldAnimate}>
-        <ModalTitle className="sr-only"></ModalTitle>
-        <ModalDescription className="sr-only"></ModalDescription>
+        <ModalTitle className="sr-only">{movieData.data.tmdb.title}</ModalTitle>
+        <ModalDescription className="sr-only">{movieData.data.tmdb.overview}</ModalDescription>
 
         <MovieDetailsModalHeader movieId={modal.movieId} />
 
         <div className="-mt-12 mb-12 flex flex-col">
-          <div className="relative h-[430px] overflow-clip bg-background-1">
+          <div className="bg-background-1 relative h-[430px] overflow-clip">
             <img className="" src={backdropSrc(movieData.data.tmdb.backdrop_path!, 'w1280')} />
             <div className="to-background-0 absolute inset-0 z-10 bg-gradient-to-b from-transparent" />
           </div>
@@ -69,72 +69,11 @@ export const MovieDetailsModal = () => {
                 {movieData.data.tmdb.overview}
               </div>
 
-              {/* <div className="text-foreground-2 mt-12">
-                <h2 className="text-foreground-2 mb-4 text-sm font-medium">Crew</h2>
+              <h2 className="text-foreground-1 mt-12 mb-4 text-sm font-medium">Crew</h2>
+              <MovieDetailsCrew movieId={modal.movieId} />
 
-                {movieData.data.credits?.crew?.length && (
-                  <div className="no-scrollbar flex gap-3 overflow-x-auto">
-                    {data.credits?.crew
-                      ?.filter((crew) => ['Director', 'Producer', 'Screenplay', 'Writer'].includes(crew.job!))
-                      .sort((a, b) => {
-                        const order = ['Director', 'Producer', 'Writer', 'Screenplay'];
-                        return order.indexOf(a.job!) - order.indexOf(b.job!);
-                      })
-                      .slice(0, 10)
-                      .reduce(
-                        (acc, crew) => {
-                          const existing = acc.find((item) => item.name === crew.name);
-                          if (existing) {
-                            existing.jobs.push(crew.job!);
-                          } else {
-                            acc.push({ id: crew.id, name: crew.name!, jobs: [crew.job!] });
-                          }
-                          return acc;
-                        },
-                        [] as { id: number; name: string; jobs: string[] }[]
-                      )
-                      .map((crew) => (
-                        <div key={crew.id} className="flex w-32 flex-col">
-                          <div className="mt-1 text-sm font-medium">
-                            <div className="text-foreground-0 w-32 font-medium" title={crew.name}>
-                              {crew.name}
-                            </div>
-                          </div>
-                          <div className="text-foreground-1 mt-1 text-xs font-normal">
-                            {crew.jobs.join(', ')}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div> */}
-
-              {/* <div className="mt-6">
-                <h2 className="text-foreground-2 mb-4 text-sm font-medium">Cast</h2>
-
-                <Carousel className="flex gap-2 overflow-x-auto">
-                  {data.credits?.cast?.slice(0, 10).map((cast) => (
-                    <CarouselItem key={cast.cast_id} className="flex flex-col">
-                      <div className="bg-background-1 mb-1 aspect-square h-42 w-32 overflow-clip rounded-sm">
-                        {cast.profile_path ? (
-                          <img
-                            className="object-fit brightness-90"
-                            src={posterSrc(cast.profile_path, 'w154')}
-                            alt={cast.name}
-                          />
-                        ) : (
-                          <div className="bg-foreground-0/5 text-foreground-1 flex h-full w-full">
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-1 text-sm font-medium">
-                        <div className="w-32 font-medium">{cast.name}</div>
-                        <div className="text-foreground-1 mt-1 text-xs font-normal">{cast.character}</div>
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </Carousel>
-              </div> */}
+              <h2 className="text-foreground-1 mt-6 mb-4 text-sm font-medium">Cast</h2>
+              <MovieDetailsCast movieId={modal.movieId} />
             </div>
           </div>
         </div>

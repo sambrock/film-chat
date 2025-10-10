@@ -24,7 +24,7 @@ export type GlobalStoreAction =
     }
   | {
       type: 'OPEN_MOVIE_MODAL';
-      payload: { movieId: string; source: 'recommendation' | 'library', conversationId?: string };
+      payload: { movieId: string; source: 'recommendation' | 'library'; conversationId?: string };
     }
   | {
       type: 'SET_MOVIE_MODAL_MOVIE_ID';
@@ -71,7 +71,7 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
     }
     case 'SET_MOVIE_MODAL_MOVIE_ID': {
       return produce(state, (draft) => {
-        if (!draft.movieModal) return;
+        if (!draft.movieModal) return state;
         draft.movieModal = {
           ...draft.movieModal,
           movieId: payload.movieId,
@@ -81,7 +81,9 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
     }
     case 'CLOSE_MOVIE_MODAL': {
       return produce(state, (draft) => {
-        draft.movieModal = undefined;
+        if (!draft.movieModal) return state;
+        draft.movieModal.isOpen = false;
+        draft.movieModal.shouldAnimate = true;
       });
     }
     default: {
