@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
 import { eq, useLiveQuery } from '@tanstack/react-db';
 
 import { messagesCollection } from '@/lib/collections';
@@ -13,8 +13,6 @@ type Props = React.ComponentProps<'div'>;
 
 export const ChatMessages = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
-
-  // const { data } = useQueryConversationHistory(conversationId);
 
   const { data } = useLiveQuery((q) =>
     q.from({ message: messagesCollection }).where(({ message }) => eq(message.conversationId, conversationId))
@@ -37,12 +35,12 @@ export const ChatMessages = ({ className, ...props }: Props) => {
         data
           .sort((a, b) => a.serial - b.serial)
           .map((message) => (
-            <ChatMessageContextProvider value={{ message }} key={message.messageId}>
+            <Fragment key={message.messageId}>
               {message.role === 'user' && <ChatMessageUser message={message} />}
               {message.role === 'assistant' && (
                 <ChatMessageAssistant message={message} scrollToEnd={scrollToEnd} />
               )}
-            </ChatMessageContextProvider>
+            </Fragment>
           ))}
     </div>
   );

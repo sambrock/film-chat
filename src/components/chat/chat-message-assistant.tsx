@@ -16,16 +16,17 @@ type Props = {
 } & React.ComponentProps<'div'>;
 
 export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props }: Props) => {
-  const { data } = useLiveQuery((q) =>
+  const recommendationsQuery = useLiveQuery((q) =>
     q
       .from({ recommendation: recommendationsCollection })
       .where(({ recommendation }) => eq(recommendation.messageId, message.messageId))
   );
 
   const getRecommendations = () => {
-    if (data && data.length > 0) {
-      return data;
+    if (recommendationsQuery.data && recommendationsQuery.data.length > 0) {
+      return recommendationsQuery.data;
     }
+    // Parse recommendations from message content as it streams in
     if (message.content) {
       return parseRecommendations(message.content);
     }
@@ -41,7 +42,7 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
 
   return (
     <div className={cn('mb-10', className)} {...props} data-message-id={message.messageId}>
-      {message.status === 'processing' && data.length === 0 && (
+      {message.status === 'processing' && getRecommendations().length === 0 && (
         <SpinnerEllipsis className="text-foreground-1 size-10" />
       )}
 

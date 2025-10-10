@@ -7,7 +7,7 @@ import { ChatHeader } from '@/components/chat/chat-header';
 import { ChatInput } from '@/components/chat/chat-input';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ChatWelcome } from '@/components/chat/chat-welcome';
-import { ClientOnly } from '@/components/common/client-only';
+import { MovieDetailsModal } from '@/components/movie/movie-details-modal';
 
 type Props = {
   params?: Promise<{ conversationId: string }>;
@@ -21,6 +21,7 @@ export default async function ConversationPage({ params }: Props) {
     queryClient.prefetchQuery(trpc.syncMessages.queryOptions()),
     queryClient.prefetchQuery(trpc.syncRecommendations.queryOptions()),
     queryClient.prefetchQuery(trpc.syncMovies.queryOptions()),
+    queryClient.prefetchQuery(trpc.syncLibrary.queryOptions()),
   ]);
 
   return (
@@ -39,6 +40,8 @@ export default async function ConversationPage({ params }: Props) {
           </div>
         </main>
       </ChatContextProvider>
+
+      <MovieDetailsModal />
     </HydrationBoundary>
   );
 }

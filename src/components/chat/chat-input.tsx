@@ -30,7 +30,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
-      type: 'SET_CONVERSATION_VALUE',
+      type: 'SET_CHAT_VALUE',
       payload: {
         conversationId: params.conversationId === conversationId ? conversationId : 'new',
         value: e.target.value,

@@ -13,8 +13,13 @@ export type GlobalState = {
   inputValue: Map<string, string>; // Map<conversationId, inputValue>
   isProcessing: Set<string>; // Set<conversationId>
 
-  modalOpenRecommendationId: string;
-  modalOpenShouldAnimate: boolean;
+  movieModal?: {
+    isOpen: boolean;
+    movieId: string;
+    shouldAnimate: boolean;
+    source?: 'recommendation' | 'library';
+    conversationId?: string;
+  };
 };
 
 export type GlobalStore = GlobalState & {
@@ -32,8 +37,7 @@ export const createGlobalStore = () => {
         inputValue: new Map(),
         isProcessing: new Set(),
 
-        modalOpenRecommendationId: '',
-        modalOpenShouldAnimate: true,
+        movieModal: undefined,
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

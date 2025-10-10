@@ -17,6 +17,10 @@ const variants = cva(
         sm: 'h-7 rounded-md px-2 text-xs',
         icon: 'size-8 justify-center rounded-full',
       },
+      pill: {
+        true: '!rounded-full',
+        false: '',
+      },
       disabled: {
         true: 'cursor-not-allowed opacity-50',
         false: 'cursor-pointer',
@@ -33,11 +37,11 @@ const variants = cva(
 export type ButtonProps = React.ComponentProps<'button'> &
   VariantProps<typeof variants> & { asChild?: boolean };
 
-export const Button = ({ asChild, variant, size, className, disabled, ...props }: ButtonProps) => {
+export const Button = ({ asChild, variant, size, className, disabled, pill, ...props }: ButtonProps) => {
   const Comp = asChild ? Slot.Root : 'button';
 
   return (
-    <Comp className={variants({ className, variant, size, disabled })} disabled={disabled} {...props}>
+    <Comp className={variants({ className, variant, size, disabled, pill })} disabled={disabled} {...props}>
       {props.children}
     </Comp>
   );

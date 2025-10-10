@@ -1,6 +1,6 @@
 'use client';
 
-import type { ConversationMessage, Library, Message, Movie, Recommendation } from '@/lib/definitions';
+import type { Library, Message, Movie, Recommendation } from '@/lib/definitions';
 import { createContextFactory } from '@/lib/utils/create-context-factory';
 
 export const [ChatContextProvider, useChatContext] = createContextFactory<{

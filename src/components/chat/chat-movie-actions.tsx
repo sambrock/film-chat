@@ -1,25 +1,17 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
 import { PanelRight, Plus } from 'lucide-react';
 
-import { useTRPC } from '@/lib/trpc/client';
+import { Movie } from '@/lib/definitions';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button, ButtonProps } from '../common/button';
 import { Icon } from '../common/icon';
-import { useChatContext, useChatMessageContext, useChatRecommendationContext } from './chat-context';
+import { useChatRecommendationContext } from './chat-context';
 
-type Props = ButtonProps;
+type Props = { movie: Movie } & ButtonProps;
 
-export const ChatMovieActionButtonAddToWatchlist = ({ className, ...props }: Props) => {
-  const { conversationId } = useChatContext();
-  const { message } = useChatMessageContext();
-  const { movie, library } = useChatRecommendationContext();
-
-  const trpc = useTRPC();
-  const queryClient = useQueryClient();
-
+export const ChatMovieActionButtonAddToWatchlist = ({ movie, className, ...props }: Props) => {
   if (!movie) return null;
   return (
     <Button className={cn(className, '!rounded-full')} size="sm" {...props}>
@@ -60,22 +52,3 @@ export const ChatMovieActionButtonAddToWatchlist = ({ className, ...props }: Pro
   // );
 };
 
-export const ChatMovieActionButtonOpen = ({ className, ...props }: Props) => {
-  const dispatch = useGlobalStore((s) => s.dispatch);
-  const { recommendation, movie } = useChatRecommendationContext();
-
-  const handleClick = () => {
-    if (!movie) return;
-    dispatch({
-      type: 'OPEN_RECOMMENDATION_MOVIE_MODAL',
-      payload: { recommendationId: recommendation.recommendationId },
-    });
-  };
-
-  return (
-    <Button className={cn(className, '!rounded-full')} size="sm" onClick={handleClick} {...props}>
-      <Icon icon={PanelRight} size="xs" className="mr-1 -ml-1" />
-      Open
-    </Button>
-  );
-};

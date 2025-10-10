@@ -41,3 +41,12 @@ export const moviesCollection = createCollection(
     getKey: (item) => item.movieId,
   })
 );
+
+export const libraryCollection = createCollection(
+  queryCollectionOptions({
+    queryClient,
+    queryKey: trpc.syncLibrary.queryKey(),
+    queryFn: () => trpcClient.syncLibrary.query(),
+    getKey: (item) => item.movieId,
+  })
+);

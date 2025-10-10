@@ -104,7 +104,7 @@ export async function POST(req: Request) {
 
   const transformStream = new TransformStream({
     start: async (controller) => {
-      controller.enqueue(encodeSSE({ type: 'conversation', v: conversation }));
+      controller.enqueue(encodeSSE({ type: 'chat', v: conversation }));
       controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
       controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
     },
@@ -176,7 +176,7 @@ export async function POST(req: Request) {
           );
 
           controller.enqueue(
-            encodeSSE({ type: 'conversation', v: { ...conversation, title: generatedTitle.text } })
+            encodeSSE({ type: 'chat', v: { ...conversation, title: generatedTitle.text } })
           );
         }
 
@@ -198,7 +198,7 @@ export async function POST(req: Request) {
 }
 
 export type ChatSSEData =
-  | { type: 'conversation'; v: Conversation }
+  | { type: 'chat'; v: Conversation }
   | { type: 'message'; v: Message }
   | { type: 'recommendations'; v: Recommendation[] }
   | { type: 'movie'; v: Movie }
