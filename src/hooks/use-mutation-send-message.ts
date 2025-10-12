@@ -10,8 +10,8 @@ import {
   moviesCollection,
   recommendationsCollection,
 } from '@/lib/collections';
+import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useChatContext } from '@/components/chat/chat-context';
 
 export const useMutationSendMessage = () => {
   const { conversationId } = useChatContext();
@@ -27,24 +27,16 @@ export const useMutationSendMessage = () => {
 
       const isNewChat = !chatsCollection.has(conversationId);
       if (isNewChat) {
-        chatsCollection.utils.writeInsert({
-          conversationId,
-          userId: '',
-          title: 'New chat',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
         window.history.replaceState({}, '', `/c/${conversationId}`);
-      } else {
-        chatsCollection.utils.writeUpdate({
-          conversationId,
-          updatedAt: new Date(),
-        });
       }
 
       const response = await fetch('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({ conversationId, content, model } as ChatBody),
+        body: JSON.stringify({
+          conversationId: conversationId !== 'new' ? conversationId : undefined,
+          content,
+          model,
+        } as ChatBody),
       });
 
       if (!response.body) {
@@ -68,6 +60,7 @@ export const useMutationSendMessage = () => {
 
           if (parsed.type === 'chat') {
             chatsCollection.utils.writeUpsert(parsed.v);
+            router.push(`/c/${parsed.v.conversationId}`);
           }
           if (parsed.type === 'message') {
             messagesCollection.utils.writeUpsert(parsed.v);
@@ -90,9 +83,6 @@ export const useMutationSendMessage = () => {
 
         if (event === 'end') {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
-          if (isNewChat) {
-            router.push(`/c/${conversationId}`);
-          }
         }
       }
     },

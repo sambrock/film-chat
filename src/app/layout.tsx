@@ -1,18 +1,16 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Schibsted_Grotesk } from 'next/font/google';
-import { headers } from 'next/headers';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { auth } from '@/lib/auth/server';
 import { cn } from '@/lib/utils';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
 import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
-import { SessionInit } from './session-init';
+import { Sidebar } from '@/components/layout/sidebar';
 
 import './globals.css';
 
-import { Sidebar } from '@/components/layout/sidebar';
+import { Sync } from './sync';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -46,14 +44,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
               </div>
               <div className="bg-background-1 w-full">{props.children}</div>
             </div>
+
+            <Suspense>
+              <Sync />
+            </Suspense>
           </GlobalStoreProvider>
           <ReactQueryDevtools />
         </QueryClientTRPCProvider>
-        <Suspense>
-          <SessionInit
-            shouldSignInAnonymously={(await auth.api.getSession({ headers: await headers() })) === null}
-          />
-        </Suspense>
       </body>
     </html>
   );

@@ -5,9 +5,10 @@ import { eq, useLiveQuery } from '@tanstack/react-db';
 
 import { messagesCollection } from '@/lib/collections';
 import { cn } from '@/lib/utils';
-import { ChatMessageContextProvider, useChatContext } from './chat-context';
+
 import { ChatMessageAssistant } from './chat-message-assistant';
 import { ChatMessageUser } from './chat-message-user';
+import { useChatContext } from '@/providers/chat-context-provider';
 
 type Props = React.ComponentProps<'div'>;
 

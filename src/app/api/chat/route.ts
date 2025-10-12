@@ -15,7 +15,7 @@ import { parseRecommendations } from '@/lib/utils';
 import { randomUuid, uuidFromString } from '@/lib/utils/uuid';
 
 const BodySchema = z.object({
-  conversationId: z.uuid(),
+  conversationId: z.uuid().optional(),
   content: z.string(),
   model: z.string(),
 });
@@ -23,8 +23,8 @@ const BodySchema = z.object({
 export type ChatBody = z.infer<typeof BodySchema>;
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession(req);
-  if (!session) {
+  const session = (await auth.api.getSession(req)) ?? (await auth.api.signInAnonymous());
+  if (!session?.user) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -34,21 +34,33 @@ export async function POST(req: Request) {
     return new Response(parsed.error.message, { status: 400 });
   }
 
-  const { conversationId, content } = parsed.data;
+  const { content } = parsed.data;
+  let { conversationId } = parsed.data;
 
-  let conversation = await db.query.conversations.findFirst({
-    where: (conversations, { eq }) => eq(conversations.conversationId, conversationId),
-  });
+  const batch: BatchItem<'pg'>[] = [];
 
-  const conversationHistory = conversation
+  let conversation: Conversation | undefined;
+  let isNewChat = false;
+  if (!conversationId) {
+    conversationId = randomUuid();
+    isNewChat = true;
+    conversation = {
+      conversationId,
+      userId: session.user.id,
+      title: 'New chat',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    batch.push(db.insert(conversations).values(conversation));
+  }
+
+  const conversationHistory = !isNewChat
     ? await db.query.messages.findMany({
         where: (messages, { eq }) => eq(messages.conversationId, conversationId),
         orderBy: (messages, { asc }) => [asc(messages.serial)],
         limit: 10,
       })
     : [];
-
-  const batch: BatchItem<'pg'>[] = [];
 
   const modelStream = streamText({
     model: streamTextModel(parsed.data.model),
@@ -59,23 +71,10 @@ export async function POST(req: Request) {
     ],
   });
 
-  let shouldGenerateConversationTitle = false;
-  if (!conversation) {
-    shouldGenerateConversationTitle = true;
-    [conversation] = await db
-      .insert(conversations)
-      .values({
-        conversationId,
-        userId: session.user.id,
-        title: 'New chat',
-      })
-      .returning();
-  }
-
   const messageUser: Message = {
     messageId: randomUuid(),
     userId: session.user.id,
-    conversationId: conversation.conversationId,
+    conversationId,
     parentId: null,
     serial: undefined!,
     content,
@@ -89,7 +88,7 @@ export async function POST(req: Request) {
   const messageAssistant: Message = {
     messageId: randomUuid(),
     userId: session.user.id,
-    conversationId: conversation.conversationId,
+    conversationId,
     parentId: messageUser.messageId,
     serial: undefined!,
     content: '',
@@ -104,7 +103,9 @@ export async function POST(req: Request) {
 
   const transformStream = new TransformStream({
     start: async (controller) => {
-      controller.enqueue(encodeSSE({ type: 'chat', v: conversation }));
+      if (isNewChat) {
+        controller.enqueue(encodeSSE({ type: 'chat', v: conversation! }));
+      }
       controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
       controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
     },
@@ -162,10 +163,10 @@ export async function POST(req: Request) {
           controller.enqueue(encodeSSE({ type: 'recommendations', v: parsedRecommendations }));
         }
 
-        if (shouldGenerateConversationTitle) {
+        if (isNewChat) {
           const generatedTitle = await generateText({
             model: openai('gpt-4.1-nano'),
-            prompt: `Generate a concise title for in 3 words or less: "Movies for this prompt: ${messageAssistant.content}"`,
+            prompt: `Generate a short title for this prompt in 3 words or less (don't use the word "movie"): "Movie picks for prompt: ${content}"`,
           });
 
           batch.push(
@@ -176,7 +177,7 @@ export async function POST(req: Request) {
           );
 
           controller.enqueue(
-            encodeSSE({ type: 'chat', v: { ...conversation, title: generatedTitle.text } })
+            encodeSSE({ type: 'chat', v: { ...conversation!, title: generatedTitle.text } })
           );
         }
 

@@ -4,10 +4,10 @@ import { ChevronDown } from 'lucide-react';
 
 import { models } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
+import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
-import { useChatContext } from './chat-context';
 
 export const ChatModelSelect = () => {
   const { conversationId } = useChatContext();

@@ -5,12 +5,12 @@ import { Ellipsis, Pencil } from 'lucide-react';
 
 import { chatsCollection, messagesCollection, recommendationsCollection } from '@/lib/collections';
 import { cn, timeAgo } from '@/lib/utils';
+import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Icon } from '../common/icon';
 import { Header } from '../layout/header';
-import { useChatContext } from './chat-context';
 
 export const ChatHeader = () => {
   const { conversationId } = useChatContext();
@@ -39,7 +39,7 @@ export const ChatHeader = () => {
       .distinct()
   );
 
-  const lastMessageUpdatedAtQuery = useLiveQuery((q) =>
+  const lastUpdatedAtQuery = useLiveQuery((q) =>
     q
       .from({ messages: messagesCollection })
       .where(({ messages }) => eq(messages.conversationId, conversationId))
@@ -63,7 +63,7 @@ export const ChatHeader = () => {
       )}
 
       <div className="text-foreground-2 ml-auto text-xs font-medium">
-        Updated {timeAgo(lastMessageUpdatedAtQuery.data?.updatedAt || new Date())}
+        Updated {timeAgo(lastUpdatedAtQuery.data?.updatedAt || new Date())}
       </div>
 
       <DropdownRoot>
@@ -95,6 +95,17 @@ export const ChatHeader = () => {
           </div>
         </DropdownContent>
       </DropdownRoot>
+    </Header>
+  );
+};
+
+export const ChatHeaderSkeleton = () => {
+  return (
+    <Header className="bg-background-1/90 sticky border-b backdrop-blur-sm">
+      <div className="bg-foreground-0/10 h-4 w-32 animate-pulse rounded"></div>
+      <div className="bg-foreground-0/10 h-3 w-20 animate-pulse rounded"></div>
+      <div className="bg-foreground-0/10 ml-auto h-2 w-24 animate-pulse rounded"></div>
+      <div className="bg-foreground-0/10 h-8 w-8 rounded"></div>
     </Header>
   );
 };

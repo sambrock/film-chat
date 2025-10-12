@@ -3,7 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import z from 'zod';
 
 import { db } from '../drizzle/db';
-import { library } from '../drizzle/schema';
+import { conversations, library } from '../drizzle/schema';
 import { LibrarySchema } from '../drizzle/zod';
 import { tmdbGetMovieByIdWithCredits } from '../tmdb/client';
 import { protectedProcedure, publicProcedure, router } from './server';
@@ -11,36 +11,52 @@ import { protectedProcedure, publicProcedure, router } from './server';
 export type AppRouter = typeof appRouter;
 
 export const appRouter = router({
-  syncChats: protectedProcedure.query(async ({ ctx }) => {
+  syncChats: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      return [];
+    }
+
     const data = await db.query.conversations.findMany({
-      where: (conversations, { eq }) => eq(conversations.userId, ctx.session.user.id),
+      where: (conversations, { eq }) => eq(conversations.userId, ctx.userId!),
       orderBy: (conversations, { desc }) => [desc(conversations.updatedAt)],
     });
 
     return data;
   }),
 
-  syncMessages: protectedProcedure.query(async ({ ctx }) => {
+  syncMessages: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      return [];
+    }
+
     const data = await db.query.messages.findMany({
-      where: (messages, { eq }) => eq(messages.userId, ctx.session.user.id),
+      where: (messages, { eq }) => eq(messages.userId, ctx.userId!),
       orderBy: (messages, { desc }) => [desc(messages.serial)],
     });
 
     return data;
   }),
 
-  syncRecommendations: protectedProcedure.query(async ({ ctx }) => {
+  syncRecommendations: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      return [];
+    }
+
     const data = await db.query.recommendations.findMany({
-      where: (messages, { eq }) => eq(messages.userId, ctx.session.user.id),
+      where: (messages, { eq }) => eq(messages.userId, ctx.userId!),
     });
 
     return data;
   }),
 
-  syncMovies: protectedProcedure.query(async ({ ctx }) => {
+  syncMovies: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      return [];
+    }
+
     const recommendations = await db.query.recommendations.findMany({
       where: (messages, { and, eq, isNotNull }) =>
-        and(eq(messages.userId, ctx.session.user.id), isNotNull(messages.movieId)),
+        and(eq(messages.userId, ctx.userId!), isNotNull(messages.movieId)),
     });
 
     const data = await db.query.movies.findMany({
@@ -54,9 +70,13 @@ export const appRouter = router({
     return data;
   }),
 
-  syncLibrary: protectedProcedure.query(async ({ ctx }) => {
+  syncLibrary: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      return [];
+    }
+
     const data = await db.query.library.findMany({
-      where: (library, { eq }) => eq(library.userId, ctx.session.user.id),
+      where: (library, { eq }) => eq(library.userId, ctx.userId!),
     });
 
     return data;
@@ -66,6 +86,11 @@ export const appRouter = router({
     .input(
       z
         .discriminatedUnion('type', [
+          z.object({
+            type: z.literal('delete'),
+            schema: z.literal('chat'),
+            key: z.string(),
+          }),
           z.object({
             type: z.literal('insert'),
             schema: z.literal('library'),
@@ -82,25 +107,26 @@ export const appRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       for (const op of input) {
+        if (op.type === 'delete' && op.schema === 'chat') {
+          await db.delete(conversations).where(eq(conversations.conversationId, op.key));
+        }
         // TODO: transactions not supported with neon-http
         if (op.type === 'insert' && op.schema === 'library') {
           await db
             .insert(library)
             .values({
               ...op.data,
-              userId: ctx.session.user.id,
+              userId: ctx.userId!,
               createdAt: new Date(),
               updatedAt: new Date(),
             })
-            .onConflictDoNothing()
-            .execute();
+            .onConflictDoNothing();
         }
         if (op.type === 'update' && op.schema === 'library') {
           await db
             .update(library)
             .set({ ...op.data, updatedAt: new Date() })
-            .where(and(eq(library.userId, ctx.session.user.id), eq(library.movieId, op.key)))
-            .execute();
+            .where(and(eq(library.userId, ctx.userId!), eq(library.movieId, op.key)));
         }
       }
     }),

@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { eq, useLiveQuery } from '@tanstack/react-db';
-import { Check, Minus, PanelRight, Plus } from 'lucide-react';
+import { Check,  PanelRight, Plus } from 'lucide-react';
 import { useHover } from 'usehooks-ts';
 
 import { libraryCollection, moviesCollection } from '@/lib/collections';

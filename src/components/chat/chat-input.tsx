@@ -4,11 +4,11 @@ import { useParams } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
 import { Icon } from '../common/icon';
-import { useChatContext } from './chat-context';
 import { ChatModelSelect } from './chat-model-select';
 
 type Props = React.ComponentProps<'div'>;
