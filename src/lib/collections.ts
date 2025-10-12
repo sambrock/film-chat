@@ -12,6 +12,7 @@ export const chatsCollection = createCollection(
     queryClient,
     queryKey: trpc.syncChats.queryKey(),
     staleTime: 60 * 1000 * 5, // 5 minutes
+    startSync: true,
     queryFn: () => trpcClient.syncChats.query(),
     getKey: (item) => item.conversationId,
     onDelete: async ({ transaction }) => {
@@ -31,6 +32,7 @@ export const messagesCollection = createCollection(
     queryClient,
     queryKey: trpc.syncMessages.queryKey(),
     staleTime: 60 * 1000 * 5,
+    startSync: true,
     queryFn: () => trpcClient.syncMessages.query(),
     getKey: (item) => item.messageId,
   })
@@ -41,6 +43,7 @@ export const recommendationsCollection = createCollection(
     queryClient,
     queryKey: trpc.syncRecommendations.queryKey(),
     staleTime: 60 * 1000 * 5,
+    startSync: true,
     queryFn: () => trpcClient.syncRecommendations.query(),
     getKey: (item) => item.recommendationId,
   })
@@ -51,6 +54,7 @@ export const moviesCollection = createCollection(
     queryClient,
     queryKey: trpc.syncMovies.queryKey(),
     staleTime: 60 * 1000 * 5,
+    startSync: true,
     queryFn: () => trpcClient.syncMovies.query(),
     getKey: (item) => item.movieId,
   })
@@ -61,7 +65,7 @@ export const libraryCollection = createCollection(
     queryClient,
     queryKey: trpc.syncLibrary.queryKey(),
     staleTime: 60 * 1000 * 5,
-
+    startSync: true,
     queryFn: () => trpcClient.syncLibrary.query(),
     getKey: (item) => item.movieId,
     onInsert: async ({ transaction }) => {
