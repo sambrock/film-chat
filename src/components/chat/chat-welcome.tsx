@@ -1,37 +1,33 @@
 'use client';
 
-import { useQuery } from 'convex/react';
+import { ArrowUp } from 'lucide-react';
 
-import { api } from '@/infra/convex/_generated/api';
 import { cn } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
-import { useApiSendMessage } from '@/hooks/use-api-send-message';
+import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 
-type Props = { initialActive: boolean } & React.ComponentProps<'div'>;
+type Props = React.ComponentProps<'div'>;
 
 const EXAMPLE_MESSAGES = [
-  "Recommend me a hidden gem I probably haven't seen",
-  'I want a mind-bending thriller with a twist ending',
-  'Suggest a cozy movie for a rainy day',
-  'New York City in the 80s',
+  `Recommend me a hidden gem I probably haven't seen`,
+  `I want a mind-bending thriller with a twist ending`,
+  `Suggest a cozy movie for a rainy day`,
+  `What are some must-watch documentaries?`,
 ];
 
-export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
-  const { threadId } = useThreadContext();
+export const ChatWelcome = ({ className, ...props }: Props) => {
+  const isInput = useGlobalStore((s) => s.defaultInputValue.length > 0);
 
-  const isActive = useQuery(api.messages.getByThreadId, { threadId })?.length === 0 || initialActive;
-  const isPending = useGlobalStore((s) => s.chatPending.has(threadId) || s.chatPending.has('new'));
-  const isInput =
-    useGlobalStore((s) => s.chatInputValue.get(threadId) || s.chatInputValue.get('new') || '').length > 0;
+  const sendMessage = useMutationSendMessage();
 
-  const sendMessage = useApiSendMessage();
-
-  if (!isActive || isInput || isPending) {
+  if (isInput) {
     return null;
   }
   return (
-    <div className={cn('flex flex-col justify-center px-6', className)} {...props}>
+    <div
+      className={cn('flex flex-col justify-center px-6', 'animate-in zoom-in-90 fade-in', className)}
+      {...props}
+    >
       <h1 className="text-foreground-0/90 mb-6 text-2xl font-bold antialiased">
         What do you feel like watching today?
       </h1>
@@ -40,10 +36,14 @@ export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
         {EXAMPLE_MESSAGES.map((message, i) => (
           <li key={i} className="border-foreground-0/5 border-b py-2 last:border-0">
             <button
-              className="text-foreground-1 hover:bg-foreground-0/5 w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm font-medium transition"
+              className="group text-foreground-1 hover:bg-foreground-0/5 focus-visible:ring-ring flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm font-medium whitespace-nowrap transition select-none focus:outline-none focus-visible:ring-2"
               onClick={() => sendMessage.mutate(message)}
             >
               {message}
+              <ArrowUp
+                className="text-foreground-1 invisible ml-auto size-5 transition group-hover:visible group-focus:visible"
+                strokeWidth={1.5}
+              />
             </button>
           </li>
         ))}
@@ -51,29 +51,3 @@ export const ChatWelcome = ({ initialActive, className, ...props }: Props) => {
     </div>
   );
 };
-
-{
-  /* <li className="border-foreground-0/5 border-b py-1 text-base">
-          <button
-            className="text-foreground-1 px-3 py-2 text-sm font-medium"
-            onClick={() => sendMessage("Recommend me a hidden gem I probably haven't seen")}
-          >
-            Recommend me a hidden gem I probably haven't seen
-          </button>
-        </li>
-        <li className="border-foreground-0/5 border-b py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            I want a mind-bending thriller with a twist ending
-          </div>
-        </li>
-        <li className="border-foreground-0/5 border-b py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            Suggest a cozy movie for a rainy day
-          </div>
-        </li>
-        <li className="py-1 text-base">
-          <div className="text-foreground-1 px-3 py-2 text-sm font-medium">
-            Pick a random underrated indie film for me
-          </div>
-        </li> */
-}

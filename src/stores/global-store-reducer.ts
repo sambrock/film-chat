@@ -1,93 +1,89 @@
 import { enableMapSet, produce } from 'immer';
 
-import { Model } from '@/lib/models';
+import { Model } from '@/lib/ai/models';
 import { GlobalState } from './global-store';
 
 enableMapSet();
 
 export type GlobalStoreAction =
   | {
-      type: 'SET_ACTIVE_THREAD_ID';
-      payload: { threadId: string };
-    }
-  | {
       type: 'SET_MODEL';
-      payload: { threadId: string; model: Model };
+      payload: { conversationId: string; model: Model };
     }
   | {
-      type: 'SET_INPUT_VALUE';
-      payload: { threadId: string; value?: string; isPersisted: boolean };
+      type: 'SET_CHAT_VALUE';
+      payload: { conversationId: string; value: string };
     }
   | {
-      type: 'SET_MESSAGE_PENDING_CONTENT';
-      payload: { messageId: string; content?: string; append?: boolean };
+      type: 'SET_CHAT_PROCESSING';
+      payload: { conversationId: string };
     }
   | {
-      type: 'MESSAGE_PENDING';
-      payload: { threadId: string; isPersisted: boolean };
+      type: 'SET_CHAT_DONE';
+      payload: { conversationId: string };
     }
   | {
-      type: 'MESSAGE_DONE';
-      payload: { threadId: string };
+      type: 'OPEN_MOVIE_MODAL';
+      payload: { movieId: string; source: 'recommendation' | 'library'; conversationId?: string };
+    }
+  | {
+      type: 'SET_MOVIE_MODAL_MOVIE_ID';
+      payload: { movieId: string };
+    }
+  | {
+      type: 'CLOSE_MOVIE_MODAL';
+      payload: undefined;
     };
 
 export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction) => {
   switch (type) {
-    case 'SET_ACTIVE_THREAD_ID': {
-      return produce(state, (draft) => {
-        draft.activeThreadId = payload.threadId;
-        draft.chatUnseenUpdates.delete(payload.threadId);
-      });
-    }
     case 'SET_MODEL': {
       return produce(state, (draft) => {
-        draft.model = payload.model;
-        draft.chatModel.set(payload.threadId, payload.model);
+        draft.model.set(payload.conversationId, payload.model);
       });
     }
-    case 'SET_INPUT_VALUE': {
+    case 'SET_CHAT_VALUE': {
       return produce(state, (draft) => {
-        if (!payload.value) {
-          draft.chatInputValue.delete(payload.threadId);
-          draft.chatInputValue.delete('new');
-          return;
-        }
-        if (!payload.isPersisted) {
-          draft.chatInputValue.set('new', payload.value);
-          return;
-        }
-        draft.chatInputValue.set(payload.threadId, payload.value);
+        draft.inputValue.set(payload.conversationId, payload.value);
+        draft.defaultInputValue = payload.value;
       });
     }
-    case 'SET_MESSAGE_PENDING_CONTENT': {
+    case 'SET_CHAT_PROCESSING': {
       return produce(state, (draft) => {
-        if (!payload.content) {
-          draft.messagePendingContent.delete(payload.messageId);
-          return;
-        }
-        if (payload.append) {
-          const existing = draft.messagePendingContent.get(payload.messageId) || '';
-          draft.messagePendingContent.set(payload.messageId, existing + payload.content);
-          return;
-        }
-        draft.messagePendingContent.set(payload.messageId, payload.content);
+        draft.isProcessing.add(payload.conversationId);
       });
     }
-    case 'MESSAGE_PENDING': {
+    case 'SET_CHAT_DONE': {
       return produce(state, (draft) => {
-        draft.chatPending.add(payload.threadId);
-        draft.chatInputValue.delete(payload.threadId);
-        if (!payload.isPersisted) {
-          draft.chatInputValue.delete('new');
-        }
+        draft.isProcessing.delete(payload.conversationId);
       });
     }
-    case 'MESSAGE_DONE': {
+    case 'OPEN_MOVIE_MODAL': {
       return produce(state, (draft) => {
-        draft.chatPending.delete(payload.threadId);
-        if (draft.activeThreadId !== payload.threadId) {
-          draft.chatUnseenUpdates.add(payload.threadId);
-        }
+        draft.movieModal = {
+          isOpen: true,
+          movieId: payload.movieId,
+          shouldAnimate: true,
+          source: payload.source,
+          conversationId: payload.conversationId,
+        };
+      });
+    }
+    case 'SET_MOVIE_MODAL_MOVIE_ID': {
+      return produce(state, (draft) => {
+        if (!draft.movieModal) return state;
+        draft.movieModal = {
+          ...draft.movieModal,
+          movieId: payload.movieId,
+          shouldAnimate: false,
+        };
+      });
+    }
+    case 'CLOSE_MOVIE_MODAL': {
+      return produce(state, (draft) => {
+        if (!draft.movieModal) return state;
+        draft.movieModal.isOpen = false;
+        draft.movieModal.shouldAnimate = true;
       });
     }
     default: {

@@ -1,15 +1,16 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Schibsted_Grotesk } from 'next/font/google';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { cn } from '@/lib/utils';
-import { ConvexClientProvider } from '@/providers/convex-client-provider';
 import { GlobalStoreProvider } from '@/providers/global-store-provider';
-import { QueryClientProvider } from '@/providers/query-client-provider';
-import { UserContextProvider } from '@/providers/use-context-provider';
-import { Sidebar } from '@/components/sidebar/sidebar';
-import { SidebarMobile } from '@/components/sidebar/sidebar-mobile';
+import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider';
+import { Sidebar } from '@/components/layout/sidebar';
 
 import './globals.css';
+
+import { Sync } from './sync';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
     'Get personalized movie recommendations powered by AI. Chat and discover your next favorite film!',
 };
 
-export default async function RootLayout(props: { children: React.ReactNode; modal?: React.ReactNode }) {
+export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -33,21 +34,23 @@ export default async function RootLayout(props: { children: React.ReactNode; mod
         <meta name="apple-mobile-web-app-title" content="Film Chat" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </head>
-      <body className={cn('text-foreground-0 bg-background-0', fontSans.className)}>
-        <QueryClientProvider>
-          <ConvexClientProvider>
-            <UserContextProvider>
-              <GlobalStoreProvider>
-                <div className="flex h-screen overflow-hidden">
-                  <Sidebar className="hidden h-screen shrink-0 lg:block lg:w-[260px]" />
-                  <SidebarMobile className="lg:hidden" sidebarComponent={<Sidebar />} />
-                  <div className="bg-background-1 w-full">{props.children}</div>
-                  {props?.modal}
-                </div>
-              </GlobalStoreProvider>
-            </UserContextProvider>
-          </ConvexClientProvider>
-        </QueryClientProvider>
+
+      <body className={cn('text-foreground-0 bg-background-1', fontSans.className)}>
+        <QueryClientTRPCProvider>
+          <GlobalStoreProvider>
+            <div className="relative flex h-full w-screen">
+              <div className="h-screen p-2">
+                <Sidebar />
+              </div>
+              <div className="bg-background-1 w-full">{props.children}</div>
+            </div>
+
+            <Suspense>
+              <Sync />
+            </Suspense>
+          </GlobalStoreProvider>
+          <ReactQueryDevtools />
+        </QueryClientTRPCProvider>
       </body>
     </html>
   );

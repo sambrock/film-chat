@@ -1,9 +1,25 @@
-import { ArrowUp, ChevronDown, type LucideProps } from 'lucide-react';
+import { cva, VariantProps } from 'class-variance-authority';
+import { LucideProps, type LucideIcon } from 'lucide-react';
 
-export const IconArrowUp = (props: LucideProps) => {
-  return <ArrowUp {...props} />;
-};
+import { cn } from '@/lib/utils';
 
-export const IconChevronDown = (props: LucideProps) => {
-  return <ChevronDown {...props} />;
+const variants = cva('antialiased', {
+  variants: {
+    size: {
+      default: 'size-5 stroke-[2.5]',
+      sm: 'size-4.5 stroke-2',
+      xs: 'size-4 stroke-2',
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+  },
+});
+
+type Props = { icon: LucideIcon } & LucideProps & VariantProps<typeof variants>;
+
+export const Icon = ({ className, size, icon, ...props }: Props) => {
+  const Comp = icon;
+
+  return <Comp className={cn(variants({ size }), className)} {...props} />;
 };

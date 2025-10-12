@@ -1,68 +1,77 @@
 'use client';
 
+import { useParams } from 'next/navigation';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
-import { useApiSendMessage } from '@/hooks/use-api-send-message';
+import { useMutationSendMessage } from '@/hooks/use-mutation-send-message';
 import { Button } from '../common/button';
+import { Icon } from '../common/icon';
 import { ChatModelSelect } from './chat-model-select';
 
 type Props = React.ComponentProps<'div'>;
 
 export const ChatInput = ({ className, ...props }: Props) => {
-  const { threadId, getThreadIsPersisted } = useThreadContext();
+  const { conversationId } = useChatContext();
 
-  const value = useGlobalStore((s) =>
-    getThreadIsPersisted() ? (s.chatInputValue.get(threadId) ?? '') : (s.chatInputValue.get('new') ?? '')
+  const params = useParams<{ conversationId: string }>();
+
+  const value = useGlobalStore(
+    (s) => s.inputValue.get(params.conversationId === conversationId ? conversationId : 'new') || ''
   );
-  const isPending = useGlobalStore((s) => s.chatPending.has(threadId));
+  const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const isDisabled = isPending || !value.trim();
+  const isSendDisabled = isProcessing || !value.trim();
 
-  const sendMessage = useApiSendMessage();
+  const sendMessage = useMutationSendMessage();
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    dispatch({
+      type: 'SET_CHAT_VALUE',
+      payload: {
+        conversationId: params.conversationId === conversationId ? conversationId : 'new',
+        value: e.target.value,
+      },
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage.mutate(value);
+    }
+  };
 
   return (
     <div
       className={cn(
-        'border-foreground-0/5 bg-background-2 flex flex-col rounded-xl border px-2',
-
+        'border-foreground-0/10 bg-background-2/90 flex flex-col rounded-xl border px-2 shadow-[inset_0_1px_0px_rgba(255,255,255,0.3),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
         className
       )}
       {...props}
     >
       <textarea
-        className="text-foreground-0 placeholder:text-foreground-0/35 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
-        placeholder="Type your message..."
+        className="text-foreground-0 placeholder:text-foreground-1/80 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
+        placeholder="Type your message here..."
         value={value}
         rows={1}
+        maxLength={250}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
         autoFocus
-        onChange={(e) => {
-          dispatch({
-            type: 'SET_INPUT_VALUE',
-            payload: { threadId, value: e.target.value, isPersisted: getThreadIsPersisted() },
-          });
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage.mutate(value);
-          }
-        }}
       />
 
       <div className="flex items-center gap-1 py-1 pb-1">
         <ChatModelSelect />
-
         <Button
-          className={cn('ml-auto', isDisabled && 'pointer-events-none')}
+          className={cn('ml-auto', isSendDisabled && 'pointer-events-none')}
           size="icon"
-          variant="ghost"
-          disabled={isDisabled}
+          disabled={isSendDisabled}
         >
-          <ArrowUp className="size-5" strokeWidth={2.5} />
+          <Icon icon={ArrowUp} />
         </Button>
       </div>
     </div>

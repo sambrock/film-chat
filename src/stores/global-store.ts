@@ -2,18 +2,24 @@ import superjson from 'superjson';
 import { persist, StorageValue } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
-import { Model } from '@/lib/models';
+import { Model } from '@/lib/ai/models';
 import { GlobalStoreAction, reducer } from './global-store-reducer';
 
 export type GlobalState = {
-  activeThreadId: string;
-  model: Model;
+  defaultModel: Model;
+  defaultInputValue: string;
 
-  chatPending: Set<string>; // threadId
-  chatUnseenUpdates: Set<string>; // threadId
-  chatInputValue: Map<string, string>; // threadId, value
-  chatModel: Map<string, Model>; // threadId, model
-  messagePendingContent: Map<string, string>; // messageId, content
+  model: Map<string, Model>; // Map<conversationId, model>
+  inputValue: Map<string, string>; // Map<conversationId, inputValue>
+  isProcessing: Set<string>; // Set<conversationId>
+
+  movieModal?: {
+    isOpen: boolean;
+    movieId: string;
+    shouldAnimate: boolean;
+    source?: 'recommendation' | 'library';
+    conversationId?: string;
+  };
 };
 
 export type GlobalStore = GlobalState & {
@@ -24,14 +30,14 @@ export const createGlobalStore = () => {
   return createStore<GlobalStore>()(
     persist(
       (set) => ({
-        activeThreadId: '',
-        model: 'openai/gpt-4.1-nano',
+        defaultModel: 'openai/gpt-4.1-nano',
+        defaultInputValue: '',
 
-        chatPending: new Set(),
-        chatUnseenUpdates: new Set(),
-        chatInputValue: new Map(),
-        chatModel: new Map(),
-        messagePendingContent: new Map(),
+        model: new Map(),
+        inputValue: new Map(),
+        isProcessing: new Set(),
+
+        movieModal: undefined,
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

@@ -1,41 +1,48 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
-import { useQuery } from 'convex/react';
+import { Fragment, useLayoutEffect, useRef } from 'react';
+import { eq, useLiveQuery } from '@tanstack/react-db';
 
-import { api } from '@/infra/convex/_generated/api';
-import { Doc } from '@/infra/convex/_generated/dataModel';
+import { messagesCollection } from '@/lib/collections';
 import { cn } from '@/lib/utils';
-import { MessageContextProvider } from '@/providers/message-context-provider';
-import { useThreadContext } from '@/providers/thread-context-provider';
-import { MessageAssistant } from './message-assistant';
-import { MessageUser } from './message-user';
 
-type Props = {
-  initialData: Doc<'messages'>[];
-} & React.ComponentProps<'div'>;
+import { ChatMessageAssistant } from './chat-message-assistant';
+import { ChatMessageUser } from './chat-message-user';
+import { useChatContext } from '@/providers/chat-context-provider';
 
-export const ChatMessages = ({ initialData, className, ...props }: Props) => {
-  const { threadId } = useThreadContext();
+type Props = React.ComponentProps<'div'>;
 
-  const messages = useQuery(api.messages.getByThreadId, { threadId }) || initialData;
+export const ChatMessages = ({ className, ...props }: Props) => {
+  const { conversationId } = useChatContext();
+
+  const { data } = useLiveQuery((q) =>
+    q.from({ message: messagesCollection }).where(({ message }) => eq(message.conversationId, conversationId))
+  );
 
   const divRef = useRef<HTMLDivElement>(null);
 
+  const scrollToEnd = () => {
+    if (!divRef.current) return;
+    divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
+  };
+
   useLayoutEffect(() => {
-    if (divRef.current) {
-      divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
-    }
-  }, [messages.length]);
+    scrollToEnd();
+  }, [data?.length]);
 
   return (
-    <div id="chatMessages" ref={divRef} className={cn('mt-20 space-y-4 pb-20 lg:mt-8', className)} {...props}>
-      {messages.map((message) => (
-        <MessageContextProvider key={message.messageId} message={message}>
-          {message.role === 'user' && <MessageUser />}
-          {message.role === 'assistant' && <MessageAssistant />}
-        </MessageContextProvider>
-      ))}
+    <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-8', className)} {...props}>
+      {data &&
+        data
+          .sort((a, b) => a.serial - b.serial)
+          .map((message) => (
+            <Fragment key={message.messageId}>
+              {message.role === 'user' && <ChatMessageUser message={message} />}
+              {message.role === 'assistant' && (
+                <ChatMessageAssistant message={message} scrollToEnd={scrollToEnd} />
+              )}
+            </Fragment>
+          ))}
     </div>
   );
 };
