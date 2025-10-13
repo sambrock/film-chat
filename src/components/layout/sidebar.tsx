@@ -1,9 +1,6 @@
-import { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import { getQueryClient, trpc } from '@/lib/trpc/ssr';
 import { ClientOnly } from '../common/client-only';
 import { Panel } from '../common/panel';
 import { SidebarButtonNewChat } from './sidebar-button-new-chat';
@@ -30,22 +27,20 @@ export const Sidebar = () => {
 
       <div className="text-foreground-1 mt-6 mb-2 px-3 text-sm font-medium">Chats</div>
 
-      <Suspense>
-        <SidebarChatsSuspense />
-      </Suspense>
+      <ClientOnly>
+        <SidebarChats />
+      </ClientOnly>
     </Panel>
   );
 };
 
-const SidebarChatsSuspense = async () => {
-  const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(trpc.syncChats.queryOptions());
+// const SidebarChatsSuspense = async () => {
+//   const queryClient = getQueryClient();
+//   // await queryClient.prefetchQuery(trpc.syncChats.queryOptions());
 
-  return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientOnly>
-        <SidebarChats />
-      </ClientOnly>
-    </HydrationBoundary>
-  );
-};
+//   return (
+//     <ClientOnly>
+//       <SidebarChats />
+//     </ClientOnly>
+//   );
+// };

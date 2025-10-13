@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
@@ -180,6 +181,11 @@ export async function POST(req: Request) {
             encodeSSE({ type: 'chat', v: { ...conversation!, title: generatedTitle.text } })
           );
         }
+
+        revalidateTag('sync-chats', session.user.id);
+        revalidateTag('sync-messages', session.user.id);
+        revalidateTag('sync-recommendations', session.user.id);
+        revalidateTag('sync-movies', session.user.id);
 
         controller.enqueue(encodeSSE('end'));
         controller.terminate();

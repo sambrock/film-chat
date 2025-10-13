@@ -15,5 +15,10 @@ export default async function Layout(props: React.PropsWithChildren) {
   //   return <HydrationBoundary state={dehydrate(queryClient)}>{props.children}</HydrationBoundary>;
   // };
 
-  return <Suspense>{props.children}</Suspense>;
+  return (
+    <Suspense>
+      {props.children}
+      {/* <WithSync /> */}
+    </Suspense>
+  );
 }

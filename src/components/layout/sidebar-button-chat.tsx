@@ -57,9 +57,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
             <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
-          <DropdownItem
-            onClick={handleDelete}
-          >
+          <DropdownItem onClick={handleDelete}>
             <Icon icon={Trash2} className="text-red-400" size="xs" />
             <div className="text-sm font-medium text-red-400">Delete</div>
           </DropdownItem>
