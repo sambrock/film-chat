@@ -26,7 +26,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const isSendDisabled = isProcessing || !value.trim();
 
-  const sendMessage = useMutationSendMessage();
+  const sendMessageMutation = useMutationSendMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({
@@ -41,7 +41,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage.mutate(value);
+      sendMessageMutation.mutate(value);
     }
   };
 

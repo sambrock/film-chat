@@ -2,7 +2,7 @@
 
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
-import { chatsCollection } from '@/lib/collections';
+
 import type { Conversation } from '@/lib/definitions';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
@@ -20,7 +20,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
   const handleDelete = () => {
-    chatsCollection.delete(conversation.conversationId);
+    // chatsCollection.delete(conversation.conversationId);
   };
 
   return (
@@ -57,9 +57,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
             <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
-          <DropdownItem
-            onClick={handleDelete}
-          >
+          <DropdownItem onClick={handleDelete}>
             <Icon icon={Trash2} className="text-red-400" size="xs" />
             <div className="text-sm font-medium text-red-400">Delete</div>
           </DropdownItem>

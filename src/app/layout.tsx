@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Schibsted_Grotesk } from 'next/font/google';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -9,8 +8,6 @@ import { QueryClientTRPCProvider } from '@/providers/query-client-trpc-provider'
 import { Sidebar } from '@/components/layout/sidebar';
 
 import './globals.css';
-
-import { Sync } from './sync';
 
 const fontSans = Schibsted_Grotesk({
   subsets: ['latin'],
@@ -44,10 +41,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
               </div>
               <div className="bg-background-1 w-full">{props.children}</div>
             </div>
-
-            <Suspense>
-              <Sync />
-            </Suspense>
           </GlobalStoreProvider>
           <ReactQueryDevtools />
         </QueryClientTRPCProvider>

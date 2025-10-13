@@ -1,34 +1,26 @@
 'use client';
 
 import { useLayoutEffect } from 'react';
-import { eq, useLiveQuery } from '@tanstack/react-db';
 
 import { Model, models } from '@/lib/ai/models';
-import { recommendationsCollection } from '@/lib/collections';
-import type { Message } from '@/lib/definitions';
+import type { MessageAssistant } from '@/lib/definitions';
 import { cn, parseRecommendations } from '@/lib/utils';
 import { SpinnerEllipsis } from '../common/spinner';
 import { ChatRecommendation } from './chat-recommendation';
 
 type Props = {
-  message: Message;
+  message: MessageAssistant;
   scrollToEnd: () => void;
 } & React.ComponentProps<'div'>;
 
 export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props }: Props) => {
-  const recommendationsQuery = useLiveQuery((q) =>
-    q
-      .from({ recommendation: recommendationsCollection })
-      .where(({ recommendation }) => eq(recommendation.messageId, message.messageId))
-  );
-
   const getRecommendations = () => {
-    if (recommendationsQuery.data && recommendationsQuery.data.length > 0) {
-      return recommendationsQuery.data;
+    if (message.recommendations && message.recommendations.length > 0) {
+      return message.recommendations;
     }
     // Parse recommendations from message content as it streams in
     if (message.content) {
-      return parseRecommendations(message.content);
+      return parseRecommendations(message.content) as MessageAssistant['recommendations'];
     }
     return [];
   };
@@ -49,7 +41,11 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
       {getRecommendations().length > 0 && (
         <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
           {getRecommendations().map((recommendation) => (
-            <ChatRecommendation key={recommendation.recommendationId} recommendation={recommendation} />
+            <ChatRecommendation
+              key={recommendation.recommendationId}
+              recommendation={recommendation}
+              movie={message.movies.find((m) => m.movieId === recommendation.movieId)}
+            />
           ))}
         </div>
       )}

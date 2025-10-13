@@ -21,7 +21,7 @@ export const MessageAssistantSchema = MessageSchema.omit({ serial: true }).exten
   role: z.literal('assistant'),
   recommendations: RecommendationSchema.array(),
   movies: MovieSchema.array(),
-  library: LibrarySchema.array(),
+  libraries: LibrarySchema.array(),
 });
 
-export const ConversationMessageSchema = MessageUserSchema.or(MessageAssistantSchema);
+export const ChatMessageSchema = MessageUserSchema.or(MessageAssistantSchema);

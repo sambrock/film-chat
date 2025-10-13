@@ -15,18 +15,28 @@ const getQueryClient = () => {
     // Server: always make a new query client
     return makeQueryClient();
   }
+
   // Browser: make a new query client if we don't already have one
   // This is very important, so we don't re-make a new client if React
   // suspends during the initial render. This may not be needed if we
   // have a suspense boundary BELOW the creation of the query client
   if (!browserQueryClient) browserQueryClient = makeQueryClient();
+  // persistQueryClient({
+  //   queryClient: browserQueryClient,
+  //   persister: createAsyncStoragePersister({
+  //     storage: window.localStorage,
+  //     serialize: (data) => superjson.stringify(data),
+  //     deserialize: (data) => superjson.parse(data),
+  //   }),
+  //   maxAge: Infinity,
+  // });
   return browserQueryClient;
 };
 
 const getUrl = () => {
   const base = (() => {
     if (typeof window !== 'undefined') return '';
-    if (process.env.NEXT_PUBLIC_BASE_URL) return process.env.NEXT_PUBLIC_BASE_URL;
+    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
     return 'http://localhost:3000';
   })();
   return `${base}/api/trpc`;

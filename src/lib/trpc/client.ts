@@ -8,7 +8,7 @@ import type { AppRouter } from './router';
 export const { TRPCProvider, useTRPC, useTRPCClient } = createTRPCContext<AppRouter>();
 
 export const trpcClient = createTRPCClient<AppRouter>({
-  links: [httpBatchLink({ url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/trpc`, transformer: superjson })],
+  links: [httpBatchLink({ url: `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'}/api/trpc`, transformer: superjson })],
 });
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({

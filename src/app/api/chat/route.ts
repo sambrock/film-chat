@@ -7,7 +7,7 @@ import z from 'zod';
 
 import { streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
 import { auth } from '@/lib/auth/server';
-import { Conversation, Message, Movie, Recommendation } from '@/lib/definitions';
+import { Conversation, MessageAssistant, MessageUser, Movie, Recommendation } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';
 import { conversations, messages, movies, recommendations } from '@/lib/drizzle/schema';
 import { tmdbFindMovie, tmdbGetMovieById } from '@/lib/tmdb/client';
@@ -15,7 +15,7 @@ import { parseRecommendations } from '@/lib/utils';
 import { randomUuid, uuidFromString } from '@/lib/utils/uuid';
 
 const BodySchema = z.object({
-  conversationId: z.uuid().optional(),
+  conversationId: z.uuid(),
   content: z.string(),
   model: z.string(),
 });
@@ -34,16 +34,16 @@ export async function POST(req: Request) {
     return new Response(parsed.error.message, { status: 400 });
   }
 
-  const { content } = parsed.data;
-  let { conversationId } = parsed.data;
+  const { conversationId, content } = parsed.data;
 
   const batch: BatchItem<'pg'>[] = [];
 
-  let conversation: Conversation | undefined;
-  let isNewChat = false;
-  if (!conversationId) {
-    conversationId = randomUuid();
-    isNewChat = true;
+  const conversationExists = await db.query.conversations.findFirst({
+    where: (conversations, { eq }) => eq(conversations.conversationId, conversationId),
+  });
+
+  let conversation = conversationExists;
+  if (!conversationExists) {
     conversation = {
       conversationId,
       userId: session.user.id,
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     batch.push(db.insert(conversations).values(conversation));
   }
 
-  const conversationHistory = !isNewChat
+  const conversationHistory = conversationExists
     ? await db.query.messages.findMany({
         where: (messages, { eq }) => eq(messages.conversationId, conversationId),
         orderBy: (messages, { asc }) => [asc(messages.serial)],
@@ -71,12 +71,10 @@ export async function POST(req: Request) {
     ],
   });
 
-  const messageUser: Message = {
+  const messageUser: MessageUser = {
     messageId: randomUuid(),
     userId: session.user.id,
     conversationId,
-    parentId: null,
-    serial: undefined!,
     content,
     model: parsed.data.model,
     role: 'user',
@@ -85,29 +83,31 @@ export async function POST(req: Request) {
     updatedAt: new Date(),
   };
 
-  const messageAssistant: Message = {
+  const messageAssistant: MessageAssistant = {
     messageId: randomUuid(),
     userId: session.user.id,
     conversationId,
     parentId: messageUser.messageId,
-    serial: undefined!,
     content: '',
     model: parsed.data.model,
     role: 'assistant',
     status: 'processing',
     createdAt: new Date(),
     updatedAt: new Date(),
+    recommendations: [],
+    movies: [],
+    libraries: [],
   };
 
   batch.push(db.insert(messages).values([messageUser, messageAssistant]));
 
   const transformStream = new TransformStream({
     start: async (controller) => {
-      if (isNewChat) {
+      if (!conversationExists) {
         controller.enqueue(encodeSSE({ type: 'chat', v: conversation! }));
       }
-      controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
-      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageUser, id: messageUser.messageId }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant, id: messageAssistant.messageId }));
     },
     transform: async (chunk: TextStreamPart<ToolSet>, controller) => {
       if (chunk.type === 'text-delta') {
@@ -119,7 +119,9 @@ export async function POST(req: Request) {
         batch.push(
           db.update(messages).set(messageAssistant).where(eq(messages.messageId, messageAssistant.messageId))
         );
-        controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+        controller.enqueue(
+          encodeSSE({ type: 'message', v: messageAssistant, id: messageAssistant.messageId })
+        );
 
         const parsedRecommendations = await Promise.all(
           parseRecommendations(messageAssistant.content).map(async (parsed) => {
@@ -152,7 +154,7 @@ export async function POST(req: Request) {
             recommendation.movieId = movie.movieId;
 
             batch.push(db.insert(movies).values(movie).onConflictDoNothing());
-            controller.enqueue(encodeSSE({ type: 'movie', v: movie }));
+            controller.enqueue(encodeSSE({ type: 'movie', v: movie, id: messageAssistant.messageId }));
 
             return recommendation;
           })
@@ -160,10 +162,12 @@ export async function POST(req: Request) {
 
         if (parsedRecommendations.length > 0) {
           batch.push(db.insert(recommendations).values(parsedRecommendations));
-          controller.enqueue(encodeSSE({ type: 'recommendations', v: parsedRecommendations }));
+          controller.enqueue(
+            encodeSSE({ type: 'recommendations', v: parsedRecommendations, id: messageAssistant.messageId })
+          );
         }
 
-        if (isNewChat) {
+        if (!conversationExists) {
           const generatedTitle = await generateText({
             model: openai('gpt-4.1-nano'),
             prompt: `Generate a short title for this prompt in 3 words or less (don't use the word "movie"): "Movie picks for prompt: ${content}"`,
@@ -200,9 +204,9 @@ export async function POST(req: Request) {
 
 export type ChatSSEData =
   | { type: 'chat'; v: Conversation }
-  | { type: 'message'; v: Message }
-  | { type: 'recommendations'; v: Recommendation[] }
-  | { type: 'movie'; v: Movie }
+  | { type: 'message'; v: MessageUser | MessageAssistant; id: string }
+  | { type: 'recommendations'; v: Recommendation[]; id: string }
+  | { type: 'movie'; v: Movie; id: string }
   | { type: 'content'; v: string; id: string }
   | { type: 'end' };
 

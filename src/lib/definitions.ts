@@ -1,7 +1,7 @@
 import z from 'zod';
 
 import {
-  ConversationMessageSchema,
+  ChatMessageSchema,
   ConversationSchema,
   LibrarySchema,
   MessageAssistantSchema,
@@ -30,4 +30,4 @@ export type Recommendation = z.infer<typeof RecommendationSchema>;
 
 export type MessageUser = z.infer<typeof MessageUserSchema>;
 export type MessageAssistant = Prettify<z.infer<typeof MessageAssistantSchema>>;
-export type ConversationMessage = z.infer<typeof ConversationMessageSchema>;
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
