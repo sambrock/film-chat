@@ -1,4 +1,3 @@
-import { revalidateTag } from 'next/cache';
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
@@ -8,7 +7,7 @@ import z from 'zod';
 
 import { streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '@/lib/ai/get-model';
 import { auth } from '@/lib/auth/server';
-import { Conversation, Message, Movie, Recommendation } from '@/lib/definitions';
+import { Conversation, MessageAssistant, MessageUser, Movie, Recommendation } from '@/lib/definitions';
 import { db } from '@/lib/drizzle/db';
 import { conversations, messages, movies, recommendations } from '@/lib/drizzle/schema';
 import { tmdbFindMovie, tmdbGetMovieById } from '@/lib/tmdb/client';
@@ -72,12 +71,10 @@ export async function POST(req: Request) {
     ],
   });
 
-  const messageUser: Message = {
+  const messageUser: MessageUser = {
     messageId: randomUuid(),
     userId: session.user.id,
     conversationId,
-    parentId: null,
-    serial: undefined!,
     content,
     model: parsed.data.model,
     role: 'user',
@@ -86,18 +83,20 @@ export async function POST(req: Request) {
     updatedAt: new Date(),
   };
 
-  const messageAssistant: Message = {
+  const messageAssistant: MessageAssistant = {
     messageId: randomUuid(),
     userId: session.user.id,
     conversationId,
     parentId: messageUser.messageId,
-    serial: undefined!,
     content: '',
     model: parsed.data.model,
     role: 'assistant',
     status: 'processing',
     createdAt: new Date(),
     updatedAt: new Date(),
+    recommendations: [],
+    movies: [],
+    libraries: [],
   };
 
   batch.push(db.insert(messages).values([messageUser, messageAssistant]));
@@ -107,8 +106,8 @@ export async function POST(req: Request) {
       if (!conversationExists) {
         controller.enqueue(encodeSSE({ type: 'chat', v: conversation! }));
       }
-      controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
-      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageUser, id: messageUser.messageId }));
+      controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant, id: messageAssistant.messageId }));
     },
     transform: async (chunk: TextStreamPart<ToolSet>, controller) => {
       if (chunk.type === 'text-delta') {
@@ -120,7 +119,9 @@ export async function POST(req: Request) {
         batch.push(
           db.update(messages).set(messageAssistant).where(eq(messages.messageId, messageAssistant.messageId))
         );
-        controller.enqueue(encodeSSE({ type: 'message', v: messageAssistant }));
+        controller.enqueue(
+          encodeSSE({ type: 'message', v: messageAssistant, id: messageAssistant.messageId })
+        );
 
         const parsedRecommendations = await Promise.all(
           parseRecommendations(messageAssistant.content).map(async (parsed) => {
@@ -153,7 +154,7 @@ export async function POST(req: Request) {
             recommendation.movieId = movie.movieId;
 
             batch.push(db.insert(movies).values(movie).onConflictDoNothing());
-            controller.enqueue(encodeSSE({ type: 'movie', v: movie }));
+            controller.enqueue(encodeSSE({ type: 'movie', v: movie, id: messageAssistant.messageId }));
 
             return recommendation;
           })
@@ -161,7 +162,9 @@ export async function POST(req: Request) {
 
         if (parsedRecommendations.length > 0) {
           batch.push(db.insert(recommendations).values(parsedRecommendations));
-          controller.enqueue(encodeSSE({ type: 'recommendations', v: parsedRecommendations }));
+          controller.enqueue(
+            encodeSSE({ type: 'recommendations', v: parsedRecommendations, id: messageAssistant.messageId })
+          );
         }
 
         if (!conversationExists) {
@@ -182,11 +185,6 @@ export async function POST(req: Request) {
           );
         }
 
-        revalidateTag('sync-chats', session.user.id);
-        revalidateTag('sync-messages', session.user.id);
-        revalidateTag('sync-recommendations', session.user.id);
-        revalidateTag('sync-movies', session.user.id);
-
         controller.enqueue(encodeSSE('end'));
         controller.terminate();
 
@@ -206,9 +204,9 @@ export async function POST(req: Request) {
 
 export type ChatSSEData =
   | { type: 'chat'; v: Conversation }
-  | { type: 'message'; v: Message }
-  | { type: 'recommendations'; v: Recommendation[] }
-  | { type: 'movie'; v: Movie }
+  | { type: 'message'; v: MessageUser | MessageAssistant; id: string }
+  | { type: 'recommendations'; v: Recommendation[]; id: string }
+  | { type: 'movie'; v: Movie; id: string }
   | { type: 'content'; v: string; id: string }
   | { type: 'end' };
 

@@ -2,7 +2,7 @@
 
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
-import { chatsCollection } from '@/lib/collections';
+
 import type { Conversation } from '@/lib/definitions';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
@@ -20,7 +20,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
   const handleDelete = () => {
-    chatsCollection.delete(conversation.conversationId);
+    // chatsCollection.delete(conversation.conversationId);
   };
 
   return (

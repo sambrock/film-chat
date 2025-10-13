@@ -23,15 +23,15 @@ const getQueryClient = () => {
   // suspends during the initial render. This may not be needed if we
   // have a suspense boundary BELOW the creation of the query client
   if (!browserQueryClient) browserQueryClient = makeQueryClient();
-  persistQueryClient({
-    queryClient: browserQueryClient,
-    persister: createAsyncStoragePersister({
-      storage: window.localStorage,
-      serialize: (data) => superjson.stringify(data),
-      deserialize: (data) => superjson.parse(data),
-    }),
-    maxAge: Infinity,
-  });
+  // persistQueryClient({
+  //   queryClient: browserQueryClient,
+  //   persister: createAsyncStoragePersister({
+  //     storage: window.localStorage,
+  //     serialize: (data) => superjson.stringify(data),
+  //     deserialize: (data) => superjson.parse(data),
+  //   }),
+  //   maxAge: Infinity,
+  // });
   return browserQueryClient;
 };
 
