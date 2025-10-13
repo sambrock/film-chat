@@ -16,7 +16,7 @@ import { parseRecommendations } from '@/lib/utils';
 import { randomUuid, uuidFromString } from '@/lib/utils/uuid';
 
 const BodySchema = z.object({
-  conversationId: z.uuid().optional(),
+  conversationId: z.uuid(),
   content: z.string(),
   model: z.string(),
 });
@@ -35,16 +35,16 @@ export async function POST(req: Request) {
     return new Response(parsed.error.message, { status: 400 });
   }
 
-  const { content } = parsed.data;
-  let { conversationId } = parsed.data;
+  const { conversationId, content } = parsed.data;
 
   const batch: BatchItem<'pg'>[] = [];
 
-  let conversation: Conversation | undefined;
-  let isNewChat = false;
-  if (!conversationId) {
-    conversationId = randomUuid();
-    isNewChat = true;
+  const conversationExists = await db.query.conversations.findFirst({
+    where: (conversations, { eq }) => eq(conversations.conversationId, conversationId),
+  });
+
+  let conversation = conversationExists;
+  if (!conversationExists) {
     conversation = {
       conversationId,
       userId: session.user.id,
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     batch.push(db.insert(conversations).values(conversation));
   }
 
-  const conversationHistory = !isNewChat
+  const conversationHistory = conversationExists
     ? await db.query.messages.findMany({
         where: (messages, { eq }) => eq(messages.conversationId, conversationId),
         orderBy: (messages, { asc }) => [asc(messages.serial)],
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
 
   const transformStream = new TransformStream({
     start: async (controller) => {
-      if (isNewChat) {
+      if (!conversationExists) {
         controller.enqueue(encodeSSE({ type: 'chat', v: conversation! }));
       }
       controller.enqueue(encodeSSE({ type: 'message', v: messageUser }));
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
           controller.enqueue(encodeSSE({ type: 'recommendations', v: parsedRecommendations }));
         }
 
-        if (isNewChat) {
+        if (!conversationExists) {
           const generatedTitle = await generateText({
             model: openai('gpt-4.1-nano'),
             prompt: `Generate a short title for this prompt in 3 words or less (don't use the word "movie"): "Movie picks for prompt: ${content}"`,

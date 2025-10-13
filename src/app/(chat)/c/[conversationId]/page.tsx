@@ -9,8 +9,6 @@ type Props = {
   params: Promise<{ conversationId: string }>;
 };
 
-export const experimental_ppr = true;
-
 export default async function ChatPage({ params }: Props) {
   const { conversationId } = await params;
 

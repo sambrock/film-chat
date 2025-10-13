@@ -10,6 +10,7 @@ import {
   moviesCollection,
   recommendationsCollection,
 } from '@/lib/collections';
+import { randomUuid } from '@/lib/utils/uuid';
 import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 
@@ -26,14 +27,55 @@ export const useMutationSendMessage = () => {
       dispatch({ type: 'SET_CHAT_PROCESSING', payload: { conversationId } });
 
       const isNewChat = !chatsCollection.has(conversationId);
+
       if (isNewChat) {
-        window.history.replaceState({}, '', `/c/${conversationId}`);
+        chatsCollection.utils.writeInsert({
+          conversationId,
+          title: 'New chat',
+          userId: 'anon',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
       }
+
+      window.history.replaceState({}, '', `/c/${conversationId}`);
+
+      let tempMessageUserId = randomUuid();
+      let tempMessageAssistantId = randomUuid();
+
+      messagesCollection.utils.writeBatch(() => [
+        messagesCollection.utils.writeInsert({
+          messageId: tempMessageUserId,
+          conversationId,
+          parentId: null,
+          userId: 'anon',
+          serial: 1000,
+          content,
+          model,
+          role: 'user',
+          status: 'processing',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+        messagesCollection.utils.writeInsert({
+          messageId: tempMessageAssistantId,
+          conversationId,
+          parentId: tempMessageUserId,
+          userId: 'anon',
+          serial: 1001,
+          content: '',
+          model,
+          role: 'assistant',
+          status: 'processing',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      ]);
 
       const response = await fetch('/api/chat', {
         method: 'POST',
         body: JSON.stringify({
-          conversationId: conversationId !== 'new' ? conversationId : undefined,
+          conversationId,
           content,
           model,
         } as ChatBody),
@@ -60,10 +102,17 @@ export const useMutationSendMessage = () => {
 
           if (parsed.type === 'chat') {
             chatsCollection.utils.writeUpsert(parsed.v);
-            router.push(`/c/${parsed.v.conversationId}`);
           }
           if (parsed.type === 'message') {
-            messagesCollection.utils.writeUpsert(parsed.v);
+            messagesCollection.utils.writeBatch(() => [
+              parsed.v.role === 'user' &&
+                messagesCollection.has(tempMessageUserId) &&
+                messagesCollection.utils.writeDelete(tempMessageUserId),
+              parsed.v.role === 'assistant' &&
+                messagesCollection.has(tempMessageAssistantId) &&
+                messagesCollection.utils.writeDelete(tempMessageAssistantId),
+              messagesCollection.utils.writeUpsert(parsed.v),
+            ]);
           }
           if (parsed.type === 'recommendations') {
             recommendationsCollection.utils.writeBatch(() =>
@@ -83,6 +132,9 @@ export const useMutationSendMessage = () => {
 
         if (event === 'end') {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
+          if (isNewChat) {
+            requestAnimationFrame(() => router.push(`/c/${conversationId}`));
+          }
         }
       }
     },
