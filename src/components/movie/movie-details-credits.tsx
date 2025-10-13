@@ -1,13 +1,13 @@
 'use client';
 
 import { posterSrc } from '@/lib/utils';
-import { useQueryMovieDetails } from '@/hooks/use-query-get-movie';
+import { useQueryGetMovie } from '@/hooks/use-query-get-movie';
 import { Carousel, CarouselItem } from '../common/carousel';
 
 type Props = { movieId: string };
 
 export const MovieDetailsCrew = ({ movieId }: Props) => {
-  const movieData = useQueryMovieDetails(movieId);
+  const movieData = useQueryGetMovie(movieId);
 
   if (movieData.isLoading || !movieData.data) {
     return <div>Loading...</div>;
@@ -51,7 +51,7 @@ export const MovieDetailsCrew = ({ movieId }: Props) => {
 };
 
 export const MovieDetailsCast = ({ movieId }: Props) => {
-  const movieData = useQueryMovieDetails(movieId);
+  const movieData = useQueryGetMovie(movieId);
 
   if (movieData.isLoading || !movieData.data) {
     return <div>Loading...</div>;

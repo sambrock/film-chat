@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { persistQueryClient } from '@tanstack/react-query-persist-client';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 
