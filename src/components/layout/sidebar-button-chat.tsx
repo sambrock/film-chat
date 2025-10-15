@@ -6,6 +6,7 @@ import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 import type { Conversation } from '~/lib/definitions';
 import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/providers/global-store-provider';
+import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Icon } from '../common/icon';
@@ -20,9 +21,10 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
   const location = useLocation();
+  const deleteChatMutation = useMutationDeleteChat();
 
   const handleDelete = () => {
-    // chatsCollection.delete(conversation.conversationId);
+    deleteChatMutation.mutate(conversation.conversationId);
   };
 
   return (

@@ -207,11 +207,6 @@ export const useMutationSendMessage = () => {
             queryClient.refetchQueries({
               queryKey: queryGetChatMessagesOptions(conversationId).queryKey,
             });
-            navigate({
-              to: '/chat/$conversationId',
-              params: { conversationId },
-              replace: true,
-            });
           }
         }
       }

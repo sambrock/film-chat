@@ -1,10 +1,11 @@
 'use client';
 
-import { Ellipsis, Pencil } from 'lucide-react';
+import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import { cn, timeAgo } from '~/lib/utils';
 import { useChatContext } from '~/providers/chat-context-provider';
 import { useGlobalStore } from '~/providers/global-store-provider';
+import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
 import { useDerivedChat, useDerivedChatExists } from '~/hooks/use-query-get-chats';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
@@ -17,7 +18,14 @@ export const ChatHeader = () => {
   const chat = useDerivedChat(conversationId);
   const chatExists = useDerivedChatExists(conversationId);
 
+  const deleteConversationMutation = useMutationDeleteChat();
+
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
+
+  const handleDelete = () => {
+    if (!chat) return;
+    deleteConversationMutation.mutate(chat.conversationId);
+  };
 
   if (!chatExists) {
     return <div />;
@@ -48,13 +56,13 @@ export const ChatHeader = () => {
           <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
 
           <DropdownItem>
-            <Icon icon={Pencil} />
+            <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
           </DropdownItem>
-          {/* <DropdownItem onClick={() => deleteConversationMutation.mutate({ conversationId })}>
-            <Trash2 className="size-4 text-red-400" strokeWidth={2} />
+          <DropdownItem onClick={handleDelete}>
+            <Icon icon={Trash2} className="text-red-400" size="xs" />
             <div className="text-sm font-medium text-red-400">Delete</div>
-          </DropdownItem> */}
+          </DropdownItem>
 
           <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
@@ -72,7 +80,7 @@ export const ChatHeaderSkeleton = () => {
     <Header className="bg-background-1/90 sticky border-b backdrop-blur-sm">
       <div className="bg-foreground-0/10 h-4 w-32 animate-pulse rounded"></div>
       <div className="bg-foreground-0/10 ml-auto h-2 w-24 animate-pulse rounded"></div>
-      <div className="bg-foreground-0/10 h-8 w-8 rounded"></div>
+      <div className="bg-foreground-0/10 h-8 w-8 rounded-full"></div>
     </Header>
   );
 };

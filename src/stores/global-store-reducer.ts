@@ -51,6 +51,9 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
     case 'SET_CHAT_PROCESSING': {
       return produce(state, (draft) => {
         draft.isProcessing.add(payload.conversationId);
+        draft.inputValue.set(payload.conversationId, '');
+        draft.inputValue.set('new', '');
+        draft.defaultInputValue = '';
       });
     }
     case 'SET_CHAT_DONE': {

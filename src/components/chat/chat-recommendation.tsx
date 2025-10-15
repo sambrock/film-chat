@@ -4,6 +4,7 @@ import { PanelRight } from 'lucide-react';
 
 import { Movie, Recommendation } from '~/lib/definitions';
 import { cn, genreName, posterSrc, runtimeToHoursMins } from '~/lib/utils';
+import { useChatContext } from '~/providers/chat-context-provider';
 import { useGlobalStore } from '~/providers/global-store-provider';
 import { Button } from '../common/button';
 import { Icon } from '../common/icon';
@@ -11,13 +12,14 @@ import { Icon } from '../common/icon';
 type Props = { recommendation: Recommendation; movie?: Movie };
 
 export const ChatRecommendation = ({ recommendation, movie }: Props) => {
+  const { conversationId } = useChatContext();
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const handleOpen = () => {
     if (!movie || !recommendation.movieId) return;
     dispatch({
       type: 'OPEN_MOVIE_MODAL',
-      payload: { movieId: recommendation.movieId, source: 'recommendation' },
+      payload: { movieId: recommendation.movieId, conversationId, source: 'recommendation' },
     });
   };
 
@@ -25,7 +27,8 @@ export const ChatRecommendation = ({ recommendation, movie }: Props) => {
     <div className="group border-foreground-0/5 relative flex px-2 py-2">
       <div
         className={cn(
-          'bg-background-4 w-20 shrink-0 self-start overflow-clip rounded-sm shadow-md shadow-black/20 md:aspect-[1/1.5] md:w-22'
+          'bg-background-2/40 w-20 shrink-0 self-start overflow-clip rounded-sm md:aspect-[1/1.5] md:w-22',
+          movie && 'shadow-md shadow-black/20'
         )}
       >
         {movie && (

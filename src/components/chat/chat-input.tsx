@@ -1,6 +1,6 @@
 'use client';
 
-
+import { useLocation } from '@tanstack/react-router';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '~/lib/utils';
@@ -16,11 +16,10 @@ type Props = React.ComponentProps<'div'>;
 export const ChatInput = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
 
-  // const params = useParams<{ conversationId: string }>();
-  const params = { conversationId: '' }; // --- IGNORE ---
+  const location = useLocation();
 
   const value = useGlobalStore(
-    (s) => s.inputValue.get(params.conversationId === conversationId ? conversationId : 'new') || ''
+    (s) => s.inputValue.get(location.pathname === `/chat/${conversationId}` ? conversationId : 'new') || ''
   );
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
@@ -33,7 +32,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
     dispatch({
       type: 'SET_CHAT_VALUE',
       payload: {
-        conversationId: params.conversationId === conversationId ? conversationId : 'new',
+        conversationId: location.pathname === `/chat/${conversationId}` ? conversationId : 'new',
         value: e.target.value,
       },
     });

@@ -10,13 +10,6 @@ export const MovieSchema = createSelectSchema(schema.movies);
 export const LibrarySchema = createSelectSchema(schema.library);
 export const RecommendationSchema = createSelectSchema(schema.recommendations);
 
-export const TMDbMovie = z.object({
-  title: z.string(),
-  poster_path: z.string(),
-  runtime: z.number().nullable(),
-  release_date: z.string().nullable(),
-});
-
 export const MessageUserSchema = MessageSchema.omit({
   serial: true,
   parentId: true,
@@ -27,7 +20,7 @@ export const MessageUserSchema = MessageSchema.omit({
 export const MessageAssistantSchema = MessageSchema.omit({ serial: true }).extend({
   role: z.literal('assistant'),
   recommendations: RecommendationSchema.array(),
-  movies: MovieSchema.extend({ tmdb: TMDbMovie }).array(),
+  movies: MovieSchema.array(),
   libraries: LibrarySchema.array(),
 });
 

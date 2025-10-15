@@ -23,8 +23,6 @@ export const ChatView = ({ conversationId }: Props) => {
           <ChatInput className="relative z-10 mx-auto w-full shadow-xl shadow-black/10 lg:w-3xl" />
         </div>
       </main>
-
-      {/* <MovieDetailsModal /> */}
     </ChatContextProvider>
   );
 };

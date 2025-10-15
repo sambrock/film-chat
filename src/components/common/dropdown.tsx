@@ -11,28 +11,30 @@ export const DropdownPortal = DropdownMenu.Portal;
 
 export const DropdownContent = ({ className, side, ...props }: DropdownMenu.DropdownMenuContentProps) => {
   return (
-    <Panel size="sm" asChild>
-      <DropdownMenu.Content
-        className={cn(
-          'data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:fade-out z-40 duration-75',
-          className
-          // side === 'top' &&
-          //   'data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-1 data-[state=closed]:fade-in data-[state=closed]:zoom-in-100 zoom-in-95',
-          // side === 'top' &&
-          //   'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom-1 data-[state=closed]:fade-out data-[state=closed]:zoom-out-95',
-          // side === 'bottom' &&
-          //   'data-[state=open]:animate-in data-[state=open]:slide-in-from-top-1 data-[state=closed]:fade-in data-[state=closed]:zoom-in-100 zoom-in-95',
-          // side === 'bottom' &&
-          //   'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top-1 data-[state=closed]:fade-out data-[state=closed]:zoom-out-95',
-        )}
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-        }}
-        {...props}
-      >
-        {props.children}
-      </DropdownMenu.Content>
-    </Panel>
+    <DropdownPortal>
+      <Panel size="sm" asChild>
+        <DropdownMenu.Content
+          className={cn(
+            'z-50',
+            side === 'top' &&
+              'data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-1 data-[state=closed]:fade-in data-[state=closed]:zoom-in-100 zoom-in-95',
+            side === 'top' &&
+              'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom-1 data-[state=closed]:fade-out data-[state=closed]:zoom-out-95',
+            side === 'bottom' &&
+              'data-[state=open]:animate-in data-[state=open]:slide-in-from-top-1 data-[state=closed]:fade-in data-[state=closed]:zoom-in-100 zoom-in-95',
+            side === 'bottom' &&
+              'data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top-1 data-[state=closed]:fade-out data-[state=closed]:zoom-out-95',
+            className
+          )}
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+          }}
+          {...props}
+        >
+          {props.children}
+        </DropdownMenu.Content>
+      </Panel>
+    </DropdownPortal>
   );
 };
 

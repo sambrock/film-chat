@@ -1,9 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { useTRPC } from '~/lib/trpc/client';
+import { getMovie } from '~/routes/functions/get-movie';
+
+export const queryGetMovieOptions = (movieId: string) =>
+  queryOptions({
+    queryKey: ['movie', movieId],
+    queryFn: () => getMovie({ data: { movieId } }),
+    enabled: !!movieId,
+  });
 
 export const useQueryGetMovie = (movieId: string) => {
-  const trpc = useTRPC();
-
-  return useQuery(trpc.getMovie.queryOptions(movieId));
+  return useQuery(queryGetMovieOptions(movieId));
 };
