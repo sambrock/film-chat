@@ -1,9 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { useTRPC } from '@/lib/trpc/client';
+import { getChat } from '~/server/functions/get-chat';
+
+// import { useTRPC } from '~/lib/trpc/client';
+
+export const queryGetChatOptions = (conversationId: string) =>
+  queryOptions({
+    queryKey: ['chat', conversationId],
+    queryFn: async () => getChat({ data: { conversationId } }),
+  });
 
 export const useQueryGetChat = (conversationId: string) => {
-  const trpc = useTRPC();
-
-  return useQuery(trpc.getChat.queryOptions(conversationId));
+  return useQuery(queryGetChatOptions(conversationId));
 };

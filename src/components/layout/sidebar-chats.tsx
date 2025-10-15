@@ -1,13 +1,8 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-
-import { useTRPC } from '@/lib/trpc/client';
+import { useQueryGetChats } from '~/hooks/use-query-get-chats';
 import { SidebarButtonChat } from './sidebar-button-chat';
 
 export const SidebarChats = () => {
-  const trpc = useTRPC();
-  const { data } = useQuery(trpc.getChats.queryOptions(''));
+  const { data } = useQueryGetChats();
 
   return (
     <>

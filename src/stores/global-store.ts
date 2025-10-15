@@ -2,7 +2,7 @@ import superjson from 'superjson';
 import { persist, StorageValue } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
-import { Model } from '@/lib/ai/models';
+import { Model } from '~/lib/ai/models';
 import { GlobalStoreAction, reducer } from './global-store-reducer';
 
 export type GlobalState = {

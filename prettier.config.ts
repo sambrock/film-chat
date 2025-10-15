@@ -1,8 +1,6 @@
-/**
- * @see https://prettier.io/docs/en/configuration.html
- * @type {import("prettier").Config}
- */
-module.exports = {
+import { type Config } from 'prettier';
+
+const config: Config = {
   bracketSpacing: true,
   singleQuote: true,
   jsxSingleQuote: false,
@@ -18,21 +16,21 @@ module.exports = {
     '<BUILTIN_MODULES>',
     '<THIRD_PARTY_MODULES>',
     '',
-    '^@/infra.*$',
-    '^@/actions.*$',
-    '^@/server.*$',
-    '^@/drizzle.*$',
-    '^@/app.*$',
-    '^@/lib.*$',
-    '^@/middleware.*$',
-    '^@/store.*$',
-    '^@/providers.*$',
-    '^@/hooks.*$',
-    '^@/styles.*$',
-    '^@/components.*$',
+    '^~/routes.*$',
+    '^~/server.*$',
+    '^~/app.*$',
+    '^~/lib.*$',
+    '^~/middleware.*$',
+    '^~/store.*$',
+    '^~/providers.*$',
+    '^~/hooks.*$',
+    '^~/styles.*$',
+    '^~/components.*$',
     '^[./]',
   ],
   importOrderParserPlugins: ['typescript', 'jsx', 'decorators-legacy'],
   importOrderTypeScriptVersion: '5.0.0',
   tailwindFunctions: ['tw', 'cva', 'cn'],
 };
+
+export default config;

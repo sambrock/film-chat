@@ -1,10 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 
-import { useTRPC } from '@/lib/trpc/client';
+import { getChats } from '~/server/functions/get-chats';
+
+export const queryGetChatsOptions = () =>
+  queryOptions({
+    queryKey: ['chats'],
+    queryFn: () => getChats(),
+  });
 
 export const useQueryGetChats = () => {
-  const trpc = useTRPC();
-  return useQuery(trpc.getChats.queryOptions(''));
+  return useSuspenseQuery(queryGetChatsOptions());
 };
 
 export const useDerivedChatExists = (conversationId: string) => {

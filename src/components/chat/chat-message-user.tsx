@@ -1,7 +1,7 @@
 'use client';
 
-import type { MessageUser } from '@/lib/definitions';
-import { cn } from '@/lib/utils';
+import type { MessageUser } from '~/lib/definitions';
+import { cn } from '~/lib/utils';
 
 type Props = { message: MessageUser } & React.ComponentProps<'div'>;
 

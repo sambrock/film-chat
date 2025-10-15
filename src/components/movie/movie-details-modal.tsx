@@ -2,8 +2,8 @@
 
 // import { eq, useLiveQuery } from '@tanstack/react-db';
 
-// import { backdropSrc, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
-// import { useGlobalStore } from '@/providers/global-store-provider';
+// import { backdropSrc, genreName, posterSrc, runtimeToHoursMins } from '~/lib/utils';
+// import { useGlobalStore } from '~/providers/global-store-provider';
 // import { Modal, ModalContentDrawer, ModalDescription, ModalTitle } from '../common/modal';
 // import { MovieDetailsCast, MovieDetailsCrew } from './movie-details-credits';
 

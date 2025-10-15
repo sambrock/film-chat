@@ -2,9 +2,9 @@
 
 import { Fragment, useLayoutEffect, useRef } from 'react';
 
-import { cn } from '@/lib/utils';
-import { useChatContext } from '@/providers/chat-context-provider';
-import { useQueryGetChatMessages } from '@/hooks/use-query-get-chat-messages';
+import { cn } from '~/lib/utils';
+import { useChatContext } from '~/providers/chat-context-provider';
+import { useQueryGetChatMessages } from '~/hooks/use-query-get-chat-messages';
 import { ChatMessageAssistant } from './chat-message-assistant';
 import { ChatMessageUser } from './chat-message-user';
 

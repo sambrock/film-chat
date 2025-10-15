@@ -1,7 +1,7 @@
-'use client';
-
-import { cn } from '@/lib/utils';
-import { useGlobalStore } from '@/providers/global-store-provider';
+import { cn } from '~/lib/utils';
+import { useChatContext } from '~/providers/chat-context-provider';
+import { useGlobalStore } from '~/providers/global-store-provider';
+import { useDerivedChatExists } from '~/hooks/use-query-get-chats';
 
 type Props = React.ComponentProps<'div'>;
 
@@ -13,10 +13,14 @@ const EXAMPLE_MESSAGES = [
 ];
 
 export const ChatWelcome = ({ className, ...props }: Props) => {
+  const { conversationId } = useChatContext();
+
   const isInput = useGlobalStore((s) => s.defaultInputValue.length > 0);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  if (isInput) {
+  const chatExists = useDerivedChatExists(conversationId);
+
+  if (chatExists || isInput) {
     return null;
   }
   return (

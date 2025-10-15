@@ -2,11 +2,11 @@
 
 import { Ellipsis, Pencil } from 'lucide-react';
 
-import { cn, timeAgo } from '@/lib/utils';
-import { useChatContext } from '@/providers/chat-context-provider';
-import { useGlobalStore } from '@/providers/global-store-provider';
-import { useQueryGetChat } from '@/hooks/use-query-get-chat';
-import { useDerivedChatExists } from '@/hooks/use-query-get-chats';
+import { cn, timeAgo } from '~/lib/utils';
+import { useChatContext } from '~/providers/chat-context-provider';
+import { useGlobalStore } from '~/providers/global-store-provider';
+import { useQueryGetChat } from '~/hooks/use-query-get-chat';
+import { useDerivedChatExists } from '~/hooks/use-query-get-chats';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Icon } from '../common/icon';

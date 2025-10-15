@@ -1,6 +1,6 @@
 import { enableMapSet, produce } from 'immer';
 
-import { Model } from '@/lib/ai/models';
+import { Model } from '~/lib/ai/models';
 import { GlobalState } from './global-store';
 
 enableMapSet();

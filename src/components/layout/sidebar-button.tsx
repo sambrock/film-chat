@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@tanstack/react-router';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/lib/utils';
 import { Button, type ButtonProps } from '../common/button';
 
 type Props = ButtonProps & {
@@ -16,7 +16,7 @@ type Props = ButtonProps & {
 export const SidebarButton = ({ icon, shortcut, isUnread, isProcessing, className, ...props }: Props) => {
   return (
     <Button variant="sidebar" className={cn('gap-2 text-sm', className)} asChild {...props}>
-      <Link href={props.href}>
+      <Link to={props.href}>
         {icon && icon}
         <span className="mr-6 w-full truncate">{props.children}</span>
 

@@ -2,9 +2,9 @@
 
 import { PanelRight } from 'lucide-react';
 
-import { Movie, Recommendation } from '@/lib/definitions';
-import { cn, genreName, posterSrc, runtimeToHoursMins } from '@/lib/utils';
-import { useGlobalStore } from '@/providers/global-store-provider';
+import { Movie, Recommendation } from '~/lib/definitions';
+import { cn, genreName, posterSrc, runtimeToHoursMins } from '~/lib/utils';
+import { useGlobalStore } from '~/providers/global-store-provider';
 import { Button } from '../common/button';
 import { Icon } from '../common/icon';
 

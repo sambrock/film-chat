@@ -5,9 +5,9 @@
 // import { Check, ChevronDown, ChevronsRight, ChevronUp, Minus, Plus } from 'lucide-react';
 // import { useHover } from 'usehooks-ts';
 
-// import { libraryCollection, recommendationsCollection } from '@/lib/collections';
-// import { cn } from '@/lib/utils';
-// import { useGlobalStore } from '@/providers/global-store-provider';
+// import { libraryCollection, recommendationsCollection } from '~/lib/collections';
+// import { cn } from '~/lib/utils';
+// import { useGlobalStore } from '~/providers/global-store-provider';
 // import { Button } from '../common/button';
 // import { Icon } from '../common/icon';
 // import { ModalClose } from '../common/modal';

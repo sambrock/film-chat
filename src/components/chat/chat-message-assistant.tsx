@@ -2,9 +2,9 @@
 
 import { useLayoutEffect } from 'react';
 
-import { Model, models } from '@/lib/ai/models';
-import type { MessageAssistant } from '@/lib/definitions';
-import { cn, parseRecommendations } from '@/lib/utils';
+import { Model, models } from '~/lib/ai/models';
+import type { MessageAssistant } from '~/lib/definitions';
+import { cn, parseRecommendations } from '~/lib/utils';
 import { SpinnerEllipsis } from '../common/spinner';
 import { ChatRecommendation } from './chat-recommendation';
 

@@ -1,7 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority';
 import { LucideProps, type LucideIcon } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/lib/utils';
 
 const variants = cva('antialiased', {
   variants: {

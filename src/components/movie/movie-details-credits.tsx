@@ -1,7 +1,7 @@
 'use client';
 
-import { posterSrc } from '@/lib/utils';
-import { useQueryGetMovie } from '@/hooks/use-query-get-movie';
+import { posterSrc } from '~/lib/utils';
+import { useQueryGetMovie } from '~/hooks/use-query-get-movie';
 import { Carousel, CarouselItem } from '../common/carousel';
 
 type Props = { movieId: string };

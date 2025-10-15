@@ -4,7 +4,7 @@ import { createContext, useContext, useRef } from 'react';
 import { useStore } from 'zustand';
 import { useShallow } from 'zustand/shallow';
 
-import { createGlobalStore, GlobalStore } from '@/stores/global-store';
+import { createGlobalStore, GlobalStore } from '~/stores/global-store';
 
 export type GlobalStoreApi = ReturnType<typeof createGlobalStore>;
 

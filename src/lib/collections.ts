@@ -3,7 +3,7 @@
 // import { queryCollectionOptions } from '@tanstack/query-db-collection';
 // import { createCollection } from '@tanstack/react-db';
 
-// import { queryClient } from '@/providers/query-client-trpc-provider';
+// import { queryClient } from '~/providers/query-client-trpc-provider';
 // import { Library } from './definitions';
 // import { trpc, trpcClient } from './trpc/client';
 

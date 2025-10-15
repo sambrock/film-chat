@@ -1,7 +1,6 @@
-import 'server-only';
 
 import { cache } from 'react';
-import { headers } from 'next/headers';
+
 import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
 

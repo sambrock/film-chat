@@ -1,21 +1,21 @@
-import { ChatContextProvider } from '@/providers/chat-context-provider';
+import { ChatContextProvider } from '~/providers/chat-context-provider';
 import { ChatHeader } from '../chat/chat-header';
 import { ChatInput } from '../chat/chat-input';
 import { ChatMessages } from '../chat/chat-messages';
+import { ChatWelcome } from '../chat/chat-welcome';
 
 type Props = {
   conversationId: string;
-  isNewChat: boolean;
 };
 
-export const ChatView = ({ conversationId, isNewChat }: Props) => {
+export const ChatView = ({ conversationId }: Props) => {
   return (
-    <ChatContextProvider conversationId={conversationId} isNewChat={isNewChat}>
+    <ChatContextProvider conversationId={conversationId}>
       <main className="relative mx-auto grid w-full grid-rows-[0px_calc(100vh-20px)_20px] overflow-y-hidden">
         <ChatHeader />
 
         <div className="mx-auto w-full overflow-y-scroll p-3 pt-12">
-          {/* <ChatWelcome className="mx-auto h-[calc(100vh-140px)] lg:w-3xl" /> */}
+          <ChatWelcome className="mx-auto h-[calc(100vh-140px)] lg:w-3xl" />
           <ChatMessages className="mx-auto lg:w-3xl" />
         </div>
 

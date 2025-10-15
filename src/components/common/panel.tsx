@@ -1,7 +1,7 @@
 import { cva, VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/lib/utils';
 
 const variants = cva('', {
   variants: {

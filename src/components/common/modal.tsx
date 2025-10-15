@@ -4,7 +4,7 @@ import * as React from 'react';
 import { XIcon } from 'lucide-react';
 import { Dialog as ModalPrimitive } from 'radix-ui';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/lib/utils';
 
 export const Modal = ({ ...props }: React.ComponentProps<typeof ModalPrimitive.Root>) => {
   return <ModalPrimitive.Root data-slot="modal" {...props} />;

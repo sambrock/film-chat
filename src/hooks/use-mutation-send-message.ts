@@ -1,22 +1,20 @@
-import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
 import superjson from 'superjson';
 
-import type { ChatBody, ChatSSEData } from '@/app/api/chat/route';
-import { useTRPC } from '@/lib/trpc/client';
-import { randomUuid } from '@/lib/utils/uuid';
-import { useChatContext } from '@/providers/chat-context-provider';
-import { useGlobalStore } from '@/providers/global-store-provider';
+import type { ChatBody, ChatSSEData } from '~/routes/api/chat';
+import { randomUuid } from '~/lib/utils/uuid';
+import { useChatContext } from '~/providers/chat-context-provider';
+import { useGlobalStore } from '~/providers/global-store-provider';
+import { queryGetChatOptions } from './use-query-get-chat';
+import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
+import { queryGetChatsOptions } from './use-query-get-chats';
 
 export const useMutationSendMessage = () => {
   const { conversationId } = useChatContext();
 
   const queryClient = useQueryClient();
-  const trpc = useTRPC();
-
-  const router = useRouter();
 
   const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
@@ -27,11 +25,11 @@ export const useMutationSendMessage = () => {
 
       const isNewChat =
         queryClient
-          .getQueryData(trpc.getChats.queryKey())
+          .getQueryData(queryGetChatsOptions().queryKey)
           ?.find((c) => c.conversationId === conversationId) == null;
 
       if (isNewChat) {
-        queryClient.setQueryData(trpc.getChats.queryKey(), (state) =>
+        queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
           produce(state, (draft) => {
             if (!draft) draft = [];
             draft.unshift({
@@ -45,7 +43,7 @@ export const useMutationSendMessage = () => {
           })
         );
       } else {
-        queryClient.setQueryData(trpc.getChats.queryKey(), (state) =>
+        queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
           produce(state, (draft) => {
             if (!draft) draft = [];
             const index = draft.findIndex((c) => c.conversationId === conversationId);
@@ -61,7 +59,7 @@ export const useMutationSendMessage = () => {
       let tempMessageUserId = randomUuid();
       let tempMessageAssistantId = randomUuid();
 
-      queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+      queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
         produce(state, (draft) => {
           if (!draft) draft = [];
           draft.unshift(
@@ -124,8 +122,7 @@ export const useMutationSendMessage = () => {
           const parsed = superjson.parse<ChatSSEData>(data);
 
           if (parsed.type === 'chat') {
-            console.log(conversationId, parsed.v.conversationId);
-            queryClient.setQueryData(trpc.getChats.queryKey(), (state) =>
+            queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const index = draft.findIndex((c) => c.conversationId === parsed.v.conversationId);
@@ -134,10 +131,10 @@ export const useMutationSendMessage = () => {
                 }
               })
             );
-            queryClient.setQueryData(trpc.getChat.queryKey(conversationId), parsed.v);
+            queryClient.setQueryData(queryGetChatOptions(conversationId).queryKey, parsed.v);
           }
           if (parsed.type === 'message') {
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 // Remove temp messages
@@ -164,7 +161,7 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'recommendations') {
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const message = draft.find((m) => m.messageId === parsed.id);
@@ -175,18 +172,18 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'movie') {
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const message = draft.find((m) => m.messageId === parsed.id);
                 if (message && message.role === 'assistant') {
-                  message.movies.push(parsed.v);
+                  message.movies.push(parsed.v as any);
                 }
               })
             );
           }
           if (parsed.type === 'content') {
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const message = draft.find((m) => m.messageId === parsed.id);
@@ -201,7 +198,13 @@ export const useMutationSendMessage = () => {
         if (event === 'end') {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
           if (isNewChat) {
-            requestAnimationFrame(() => router.push(`/c/${conversationId}`));
+            queryClient.invalidateQueries({
+              queryKey: queryGetChatOptions(conversationId).queryKey,
+            });
+            queryClient.invalidateQueries({
+              queryKey: queryGetChatMessagesOptions(conversationId).queryKey,
+            });
+            // requestAnimationFrame(() => router.push(`/c/${conversationId}`));
           }
         }
       }
