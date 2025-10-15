@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 
+import { authMiddleware } from '~/server/middleware';
 import { db } from '~/lib/drizzle/db';
-import { authMiddleware } from '../middleware';
 
 export const getChats = createServerFn()
   .middleware([authMiddleware])

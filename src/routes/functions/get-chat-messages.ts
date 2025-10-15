@@ -1,10 +1,12 @@
 import { createServerFn } from '@tanstack/react-start';
 import z from 'zod';
 
+import { authMiddleware } from '~/server/middleware';
 import { db } from '~/lib/drizzle/db';
 import { MessageAssistantSchema, MessageUserSchema } from '~/lib/drizzle/zod';
 
 export const getChatMessages = createServerFn()
+  .middleware([authMiddleware])
   .inputValidator(
     z.object({
       conversationId: z.string(),
@@ -26,7 +28,6 @@ export const getChatMessages = createServerFn()
       limit: 20,
     });
 
-    // return results;
     return results.map((message) => {
       if (message.role === 'user') return MessageUserSchema.parse(message);
       return MessageAssistantSchema.parse({

@@ -49,6 +49,13 @@ export const Route = createFileRoute('/api/chat')({
             updatedAt: new Date(),
           };
           batch.push(db.insert(conversations).values(conversation));
+        } else {
+          batch.push(
+            db
+              .update(conversations)
+              .set({ lastUpdateAt: new Date() })
+              .where(eq(conversations.conversationId, conversationId))
+          );
         }
 
         const conversationHistory = conversationExists
@@ -200,8 +207,6 @@ export const Route = createFileRoute('/api/chat')({
               controller.terminate();
 
               await db.batch(batch as [BatchItem<'pg'>]);
-
-              // Revalidate everything
             }
           },
         });

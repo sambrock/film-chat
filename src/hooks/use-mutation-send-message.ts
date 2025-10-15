@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
 import superjson from 'superjson';
@@ -7,7 +8,6 @@ import type { ChatBody, ChatSSEData } from '~/routes/api/chat';
 import { randomUuid } from '~/lib/utils/uuid';
 import { useChatContext } from '~/providers/chat-context-provider';
 import { useGlobalStore } from '~/providers/global-store-provider';
-import { queryGetChatOptions } from './use-query-get-chat';
 import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
 import { queryGetChatsOptions } from './use-query-get-chats';
 
@@ -15,6 +15,7 @@ export const useMutationSendMessage = () => {
   const { conversationId } = useChatContext();
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
@@ -53,8 +54,6 @@ export const useMutationSendMessage = () => {
           })
         );
       }
-
-      window.history.replaceState({}, '', `/c/${conversationId}`);
 
       let tempMessageUserId = randomUuid();
       let tempMessageAssistantId = randomUuid();
@@ -131,7 +130,11 @@ export const useMutationSendMessage = () => {
                 }
               })
             );
-            queryClient.setQueryData(queryGetChatOptions(conversationId).queryKey, parsed.v);
+            navigate({
+              to: '/chat/$conversationId',
+              params: { conversationId },
+              replace: true,
+            });
           }
           if (parsed.type === 'message') {
             queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
@@ -199,12 +202,16 @@ export const useMutationSendMessage = () => {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
           if (isNewChat) {
             queryClient.invalidateQueries({
-              queryKey: queryGetChatOptions(conversationId).queryKey,
+              queryKey: queryGetChatsOptions().queryKey,
             });
-            queryClient.invalidateQueries({
+            queryClient.refetchQueries({
               queryKey: queryGetChatMessagesOptions(conversationId).queryKey,
             });
-            // requestAnimationFrame(() => router.push(`/c/${conversationId}`));
+            navigate({
+              to: '/chat/$conversationId',
+              params: { conversationId },
+              replace: true,
+            });
           }
         }
       }

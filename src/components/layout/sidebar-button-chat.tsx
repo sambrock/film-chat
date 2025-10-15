@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocation } from '@tanstack/react-router';
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import type { Conversation } from '~/lib/definitions';
@@ -18,6 +19,8 @@ type Props = {
 export const SidebarButtonChat = ({ conversation }: Props) => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
+  const location = useLocation();
+
   const handleDelete = () => {
     // chatsCollection.delete(conversation.conversationId);
   };
@@ -25,8 +28,11 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
   return (
     <div className="group relative flex items-center">
       <SidebarButton
-        className="group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2"
-        href={`/c/${conversation.conversationId}`}
+        className={cn(
+          'group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2',
+          location.pathname === `/chat/${conversation.conversationId}` && 'bg-foreground-0/5'
+        )}
+        href={`/chat/${conversation.conversationId}`}
         title={conversation.title}
         asChild
       >
@@ -40,7 +46,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
           <Button
             variant="transparent"
             className={cn(
-              'absolute top-0 right-2 -mr-2 ml-auto text-sm opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100',
+              'absolute top-0 right-2 -mr-2 ml-auto text-sm opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100',
               isProcessing && 'hidden'
             )}
             size="icon"
