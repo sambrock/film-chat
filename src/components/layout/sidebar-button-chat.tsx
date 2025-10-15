@@ -2,7 +2,6 @@
 
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
-
 import type { Conversation } from '@/lib/definitions';
 import { cn, timeAgo } from '@/lib/utils';
 import { useGlobalStore } from '@/providers/global-store-provider';
@@ -31,7 +30,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
         title={conversation.title}
         asChild
       >
-        {conversation.title}
+        {conversation.title || 'New chat'}
       </SidebarButton>
 
       {isProcessing && <SpinnerEllipsis className="absolute right-4 size-5" />}

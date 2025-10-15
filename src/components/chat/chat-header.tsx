@@ -6,6 +6,7 @@ import { cn, timeAgo } from '@/lib/utils';
 import { useChatContext } from '@/providers/chat-context-provider';
 import { useGlobalStore } from '@/providers/global-store-provider';
 import { useQueryGetChat } from '@/hooks/use-query-get-chat';
+import { useDerivedChatExists } from '@/hooks/use-query-get-chats';
 import { Button } from '../common/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../common/dropdown';
 import { Icon } from '../common/icon';
@@ -15,25 +16,23 @@ export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
   const chatQuery = useQueryGetChat(conversationId);
+  const chatExists = useDerivedChatExists(conversationId);
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
 
-  if (chatQuery.isLoading && !chatQuery.data) {
+  if (!chatExists) {
     return <div />;
   }
-  if (!chatQuery || !chatQuery.data) {
-    return <div />;
+  if (!chatQuery || !chatQuery.data || !chatQuery.data.title) {
+    return <ChatHeaderSkeleton />;
   }
   return (
     <Header className="group bg-background-1/90 sticky border-b backdrop-blur-sm">
       <div className="text-foreground-0/80 text-sm font-medium">{chatQuery.data.title}</div>
-      {/* {countQuery.data?.[0]?.count && (
-        <div className="text-foreground-1 text-xs font-medium">{countQuery.data[0].count} films</div>
-      )} */}
 
-      {/* <div className="text-foreground-2 ml-auto text-xs font-medium">
-        Updated {timeAgo(lastUpdatedAtQuery.data?.updatedAt || new Date())}
-      </div> */}
+      <div className="text-foreground-2 ml-auto text-xs font-medium">
+        Updated {timeAgo(chatQuery.data.lastUpdateAt)}
+      </div>
 
       <DropdownRoot>
         <DropdownTrigger asChild disabled={isProcessing}>
@@ -72,7 +71,6 @@ export const ChatHeaderSkeleton = () => {
   return (
     <Header className="bg-background-1/90 sticky border-b backdrop-blur-sm">
       <div className="bg-foreground-0/10 h-4 w-32 animate-pulse rounded"></div>
-      <div className="bg-foreground-0/10 h-3 w-20 animate-pulse rounded"></div>
       <div className="bg-foreground-0/10 ml-auto h-2 w-24 animate-pulse rounded"></div>
       <div className="bg-foreground-0/10 h-8 w-8 rounded"></div>
     </Header>

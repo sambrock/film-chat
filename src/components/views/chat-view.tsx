@@ -1,18 +1,21 @@
-import { randomUuid } from '@/lib/utils/uuid';
 import { ChatContextProvider } from '@/providers/chat-context-provider';
-import { ChatHeader } from '@/components/chat/chat-header';
-import { ChatInput } from '@/components/chat/chat-input';
-import { ChatMessages } from '@/components/chat/chat-messages';
-import { ChatWelcome } from '@/components/chat/chat-welcome';
+import { ChatHeader } from '../chat/chat-header';
+import { ChatInput } from '../chat/chat-input';
+import { ChatMessages } from '../chat/chat-messages';
 
-export default function NewChatPage() {
+type Props = {
+  conversationId: string;
+  isNewChat: boolean;
+};
+
+export const ChatView = ({ conversationId, isNewChat }: Props) => {
   return (
-    <ChatContextProvider conversationId={randomUuid()}>
+    <ChatContextProvider conversationId={conversationId} isNewChat={isNewChat}>
       <main className="relative mx-auto grid w-full grid-rows-[0px_calc(100vh-20px)_20px] overflow-y-hidden">
         <ChatHeader />
 
         <div className="mx-auto w-full overflow-y-scroll p-3 pt-12">
-          <ChatWelcome className="mx-auto h-[calc(100vh-140px)] lg:w-3xl" />
+          {/* <ChatWelcome className="mx-auto h-[calc(100vh-140px)] lg:w-3xl" /> */}
           <ChatMessages className="mx-auto lg:w-3xl" />
         </div>
 
@@ -24,4 +27,4 @@ export default function NewChatPage() {
       {/* <MovieDetailsModal /> */}
     </ChatContextProvider>
   );
-}
+};

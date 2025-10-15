@@ -9,16 +9,18 @@ import { publicProcedure, router } from './server';
 export type AppRouter = typeof appRouter;
 
 export const appRouter = router({
-  getChats: publicProcedure.query(async ({ ctx }) => {
+  getChats: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
     if (!ctx.userId) {
       return [];
     }
 
-    return db.query.conversations.findMany({
+    const data = await db.query.conversations.findMany({
       where: (conversations, { eq }) => eq(conversations.userId, ctx.userId!),
-      orderBy: (conversations, { desc }) => [desc(conversations.updatedAt)],
+      orderBy: (conversations, { desc }) => [desc(conversations.lastUpdateAt)],
       limit: 20,
     });
+
+    return data;
   }),
 
   getChat: publicProcedure.input(z.string()).query(async ({ input, ctx }) => {
@@ -61,7 +63,6 @@ export const appRouter = router({
       });
     });
   }),
-
 
   getMovie: publicProcedure.input(z.string()).query(async ({ input }) => {
     const movie = await db.query.movies.findFirst({

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     // cacheComponents: true,
     // useCache: true,
   },
+
 };
 
 export default nextConfig;

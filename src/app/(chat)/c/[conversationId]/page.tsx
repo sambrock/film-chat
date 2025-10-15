@@ -1,7 +1,4 @@
-import { ChatContextProvider } from '@/providers/chat-context-provider';
-import { ChatHeader } from '@/components/chat/chat-header';
-import { ChatInput } from '@/components/chat/chat-input';
-import { ChatMessages } from '@/components/chat/chat-messages';
+import { ChatView } from '@/components/views/chat-view';
 
 type Props = {
   params: Promise<{ conversationId: string }>;
@@ -10,21 +7,5 @@ type Props = {
 export default async function ChatPage({ params }: Props) {
   const { conversationId } = await params;
 
-  return (
-    <ChatContextProvider conversationId={conversationId}>
-      <main className="relative mx-auto grid w-full grid-rows-[0px_calc(100vh-20px)_20px] overflow-y-hidden">
-        <ChatHeader />
-
-        <div className="mx-auto w-full overflow-y-scroll p-3 pt-12">
-          <ChatMessages className="mx-auto lg:w-3xl" />
-        </div>
-
-        <div className="mx-auto -mt-26 w-full p-3">
-          <ChatInput className="relative z-10 mx-auto w-full shadow-xl shadow-black/10 lg:w-3xl" />
-        </div>
-      </main>
-
-      {/* <MovieDetailsModal /> */}
-    </ChatContextProvider>
-  );
+  return <ChatView conversationId={conversationId} isNewChat={false} />;
 }

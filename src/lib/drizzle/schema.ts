@@ -19,7 +19,6 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
-  // lastMessageAt: timestamp('last_message_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()
@@ -81,6 +80,7 @@ export const conversations = pgTable('conversations', {
     .notNull()
     .references(() => users.id),
   title: text('title').notNull().default(''),
+  lastUpdateAt: timestamp('last_update_at').notNull().defaultNow(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
     .notNull()

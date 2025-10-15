@@ -1,15 +1,18 @@
 'use client';
 
-import { useQueryGetChats } from '@/hooks/use-query-get-chats';
+import { useQuery } from '@tanstack/react-query';
+
+import { useTRPC } from '@/lib/trpc/client';
 import { SidebarButtonChat } from './sidebar-button-chat';
 
 export const SidebarChats = () => {
-  const chatsQuery = useQueryGetChats();
+  const trpc = useTRPC();
+  const { data } = useQuery(trpc.getChats.queryOptions(''));
 
   return (
     <>
-      {chatsQuery.data
-        ?.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+      {data
+        ?.sort((a, b) => b.lastUpdateAt.getTime() - a.lastUpdateAt.getTime())
         .map((chat) => (
           <SidebarButtonChat key={chat.conversationId} conversation={chat} />
         ))}

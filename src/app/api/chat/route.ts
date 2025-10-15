@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache';
 import { openai } from '@ai-sdk/openai';
 import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
@@ -47,7 +48,8 @@ export async function POST(req: Request) {
     conversation = {
       conversationId,
       userId: session.user.id,
-      title: 'New chat',
+      title: '',
+      lastUpdateAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -189,6 +191,9 @@ export async function POST(req: Request) {
         controller.terminate();
 
         await db.batch(batch as [BatchItem<'pg'>]);
+
+        // Revalidate everything
+        revalidatePath('/');
       }
     },
   });
