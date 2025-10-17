@@ -8,11 +8,11 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ChatConversationIdRouteImport } from './routes/chat.$conversationId'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as rootRouteImport } from './app/__root'
+import { Route as IndexRouteImport } from './app/index'
+import { Route as ChatConversationIdRouteImport } from './app/chat/$conversationId'
+import { Route as ApiChatRouteImport } from './app/api/chat'
+import { Route as ApiAuthSplatRouteImport } from './app/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',

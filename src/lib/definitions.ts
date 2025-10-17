@@ -10,7 +10,7 @@ import {
   MovieSchema,
   RecommendationSchema,
   UserSchema,
-} from './drizzle/zod';
+} from '../server/db/zod';
 import { type operations } from './tmdb/schema-v3';
 import { Prettify } from './utils';
 

@@ -1,8 +1,8 @@
-import superjson from 'superjson';
 import { persist, StorageValue } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
 import { Model } from '~/lib/ai/models';
+import { deserialize, serialize } from '~/lib/utils';
 import { GlobalStoreAction, reducer } from './global-store-reducer';
 
 export type GlobalState = {
@@ -47,10 +47,10 @@ export const createGlobalStore = () => {
           getItem: (name) => {
             const str = localStorage.getItem(name);
             if (!str) return null;
-            return superjson.parse(str) as StorageValue<GlobalState>;
+            return deserialize<StorageValue<GlobalState>>(str);
           },
           setItem: (name, value) => {
-            localStorage.setItem(name, superjson.stringify(value));
+            localStorage.setItem(name, serialize(value));
           },
           removeItem: (name) => localStorage.removeItem(name),
         },

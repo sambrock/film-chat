@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start';
 import z from 'zod';
 
-import { authMiddleware } from '~/server/middleware';
-import { db } from '~/lib/drizzle/db';
-import { MessageAssistantSchema, MessageUserSchema } from '~/lib/drizzle/zod';
+import { db } from '../db/client';
+import { MessageAssistantSchema, MessageUserSchema } from '../db/zod';
+import { authMiddleware } from '../middleware/auth';
 
 export const getChatMessages = createServerFn()
   .middleware([authMiddleware])

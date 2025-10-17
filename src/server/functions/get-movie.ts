@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start';
 import z from 'zod';
 
-import { db } from '~/lib/drizzle/db';
 import { tmdbGetMovieByIdWithCredits } from '~/lib/tmdb/client';
+import { db } from '../db/client';
 
 export const getMovie = createServerFn()
   .inputValidator(

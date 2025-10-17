@@ -2,12 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
-import superjson from 'superjson';
 
-import type { ChatBody, ChatSSEData } from '~/routes/api/chat';
-import { randomUuid } from '~/lib/utils/uuid';
-import { useChatContext } from '~/providers/chat-context-provider';
-import { useGlobalStore } from '~/providers/global-store-provider';
+import type { ChatBody, ChatSSEData } from '~/app/api/chat';
+import { deserialize, uuidV4 } from '~/lib/utils';
+import { useGlobalStore } from '~/stores/global-store-provider';
+import { useChatContext } from '~/components/chat-page/chat-context-provider';
 import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
 import { queryGetChatsOptions } from './use-query-get-chats';
 
@@ -55,8 +54,8 @@ export const useMutationSendMessage = () => {
         );
       }
 
-      let tempMessageUserId = randomUuid();
-      let tempMessageAssistantId = randomUuid();
+      let tempMessageUserId = uuidV4();
+      let tempMessageAssistantId = uuidV4();
 
       queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
         produce(state, (draft) => {
@@ -111,6 +110,8 @@ export const useMutationSendMessage = () => {
 
       const reader = eventStream.getReader();
 
+      let messageAssistantId: string;
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -118,7 +119,7 @@ export const useMutationSendMessage = () => {
         const { event, data } = value;
 
         if (event === 'delta') {
-          const parsed = superjson.parse<ChatSSEData>(data);
+          const parsed = deserialize<ChatSSEData>(data);
 
           if (parsed.type === 'chat') {
             queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
@@ -137,6 +138,9 @@ export const useMutationSendMessage = () => {
             });
           }
           if (parsed.type === 'message') {
+            if (parsed.v.role === 'assistant') {
+              messageAssistantId = parsed.v.messageId;
+            }
             queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
@@ -167,7 +171,7 @@ export const useMutationSendMessage = () => {
             queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
                   message.recommendations = parsed.v;
                 }
@@ -178,7 +182,7 @@ export const useMutationSendMessage = () => {
             queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
                   message.movies.push(parsed.v as any);
                 }
@@ -189,7 +193,7 @@ export const useMutationSendMessage = () => {
             queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
                   message.content += parsed.v;
                 }
