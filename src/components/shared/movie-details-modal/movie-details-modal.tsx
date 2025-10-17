@@ -1,43 +1,25 @@
-'use client';
-
-import { useQueryClient } from '@tanstack/react-query';
-
 import { Movie } from '~/lib/definitions';
 import { genreName, runtimeToHoursMins, tmdbBackdropSrc, tmdbPosterSrc } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
-import { queryGetChatMessagesOptions } from '~/hooks/use-query-get-chat-messages';
-import { Modal, ModalContentDrawer, ModalDescription, ModalTitle } from '../ui/modal';
+import { Modal, ModalContentDrawer, ModalDescription, ModalTitle } from '~/components/ui/modal';
 import { MovieDetailsModalCast, MovieDetailsModalCrew } from './movie-details-modal-credits';
 import { MovieDetailsModalHeader } from './movie-details-modal-header';
 
-export const MovieDetailsModal = () => {
-  const modal = useGlobalStore((s) => s.movieModal);
+type Props = {
+  movie: Movie;
+};
+
+export const MovieDetailsModal = ({ movie }: Props) => {
+  const modal = useGlobalStore((s) => s.modalMovieDetails);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const queryClient = useQueryClient();
-
-  if (!modal) {
-    return null;
-  }
-
-  let movie: Movie | undefined;
-  if (modal.source === 'recommendation') {
-    movie = queryClient
-      .getQueryData(queryGetChatMessagesOptions(modal.conversationId!).queryKey)
-      ?.filter((m) => m.role === 'assistant')
-      .flatMap((m) => m.movies)
-      .find((m) => m.movieId === modal.movieId);
-  } else if (modal.source === 'library') {
-    movie = undefined;
-  }
-
-  if (!movie) {
+  if (!modal || modal.movieId !== movie.movieId) {
     return null;
   }
   return (
     <Modal
       open={modal.isOpen}
-      onOpenChange={(open) => !open && dispatch({ type: 'CLOSE_MOVIE_MODAL', payload: undefined })}
+      onOpenChange={(open) => !open && dispatch({ type: 'CLOSE_MODAL_MOVIE_DETAILS', payload: undefined })}
     >
       <ModalContentDrawer shouldAnimate={modal.shouldAnimate}>
         <ModalTitle className="sr-only">{movie.tmdb.title}</ModalTitle>

@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '~/lib/utils';
 
 export const Carousel = ({ className, ...props }: React.ComponentProps<'div'>) => {

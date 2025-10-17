@@ -1,12 +1,10 @@
-'use client';
-
 import { createContext, useContext } from 'react';
 
-export type ChatStoreContext = {
+export type ChatContext = {
   conversationId: string;
 };
 
-export const ChatStoreContext = createContext<ChatStoreContext | undefined>(undefined);
+export const ChatContext = createContext<ChatContext | undefined>(undefined);
 
 type Props = {
   conversationId: string;
@@ -14,14 +12,14 @@ type Props = {
 
 export const ChatContextProvider = (props: React.PropsWithChildren<Props>) => {
   return (
-    <ChatStoreContext.Provider value={{ conversationId: props.conversationId }}>
+    <ChatContext.Provider value={{ conversationId: props.conversationId }}>
       {props.children}
-    </ChatStoreContext.Provider>
+    </ChatContext.Provider>
   );
 };
 
 export const useChatContext = () => {
-  const context = useContext(ChatStoreContext);
+  const context = useContext(ChatContext);
   if (!context) {
     throw new Error('useChatContext must be used within ChatStoreProvider');
   }

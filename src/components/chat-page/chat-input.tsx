@@ -1,11 +1,10 @@
-'use client';
-
 import { useLocation } from '@tanstack/react-router';
 import { ArrowUp } from 'lucide-react';
 
 import { cn } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationSendMessage } from '~/hooks/use-mutation-send-message';
+import { useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
 import { Button } from '../ui/button';
 import { Icon } from '../ui/icon';
 import { useChatContext } from './chat-context-provider';
@@ -18,9 +17,9 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const location = useLocation();
 
-  const value = useGlobalStore(
-    (s) => s.inputValue.get(location.pathname === `/chat/${conversationId}` ? conversationId : 'new') || ''
-  );
+  const isNewChat = useDerivedIsNewChat(conversationId);
+
+  const value = useGlobalStore((s) => s.inputValue.get(isNewChat ? 'new' : conversationId) || '');
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -34,6 +33,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
       payload: {
         conversationId: location.pathname === `/chat/${conversationId}` ? conversationId : 'new',
         value: e.target.value,
+        isNewChat,
       },
     });
   };

@@ -13,6 +13,7 @@ export const parseRecommendations = (content: string) => {
 
   for (let i = 0; i < length; i++) {
     recommendations.push({
+      
       title: titles[i] || '',
       releaseYear: releaseYears[i] ? +releaseYears[i] : 0,
       why: whys[i] || '',

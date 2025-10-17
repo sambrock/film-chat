@@ -1,5 +1,3 @@
-'use client';
-
 import { useIsClient } from 'usehooks-ts';
 
 export const ClientOnly = ({

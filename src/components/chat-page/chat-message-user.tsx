@@ -1,5 +1,3 @@
-'use client';
-
 import type { MessageUser } from '~/lib/definitions';
 import { cn } from '~/lib/utils';
 

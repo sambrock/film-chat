@@ -1,11 +1,7 @@
-import { TanStackDevtools } from '@tanstack/react-devtools';
 import { QueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router';
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import { GlobalStoreProvider } from '~/stores/global-store-provider';
-import { MovieDetailsModal } from '~/components/movie-details-modal/movie-details-modal';
 import { Sidebar } from '~/components/shared/sidebar';
 import appCss from '../styles.css?url';
 
@@ -46,16 +42,15 @@ function RootLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="bg-background-1 w-full">{children}</div>
           </div>
-          <MovieDetailsModal />
         </GlobalStoreProvider>
 
-        <TanStackDevtools
+        {/* <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[
             { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
             { name: 'React Query', render: <ReactQueryDevtoolsPanel /> },
           ]}
-        />
+        /> */}
         <Scripts />
       </body>
     </html>

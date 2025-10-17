@@ -1,8 +1,6 @@
-'use client';
-
 import { tmdbPosterSrc } from '~/lib/utils';
 import { useQueryGetMovie } from '~/hooks/use-query-get-movie';
-import { Carousel, CarouselItem } from '../ui/carousel';
+import { Carousel, CarouselItem } from '~/components/ui/carousel';
 
 type Props = { movieId: string };
 

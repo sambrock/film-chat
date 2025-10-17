@@ -1,6 +1,8 @@
+import { useLocation } from '@tanstack/react-router';
+
 import { cn } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
-import { useDerivedChatExists } from '~/hooks/use-query-get-chats';
+import { useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
 import { useChatContext } from './chat-context-provider';
 
 type Props = React.ComponentProps<'div'>;
@@ -15,12 +17,13 @@ const EXAMPLE_MESSAGES = [
 export const ChatWelcome = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
 
-  const isInput = useGlobalStore((s) => s.defaultInputValue.length > 0);
+  const location = useLocation();
+
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const chatExists = useDerivedChatExists(conversationId);
+  const isNewChat = useDerivedIsNewChat(conversationId);
 
-  if (chatExists || isInput) {
+  if (!isNewChat || location.pathname !== '/') {
     return null;
   }
   return (
@@ -40,7 +43,7 @@ export const ChatWelcome = ({ className, ...props }: Props) => {
               onClick={() =>
                 dispatch({
                   type: 'SET_CHAT_VALUE',
-                  payload: { conversationId: 'new', value: message },
+                  payload: { conversationId, value: message, isNewChat },
                 })
               }
             >

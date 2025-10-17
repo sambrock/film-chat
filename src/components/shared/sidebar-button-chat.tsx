@@ -1,5 +1,3 @@
-'use client';
-
 import { useLocation } from '@tanstack/react-router';
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 

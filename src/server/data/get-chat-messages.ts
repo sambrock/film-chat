@@ -12,14 +12,18 @@ export const getChatMessages = createServerFn()
       conversationId: z.string(),
     })
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
     const results = await db.query.messages.findMany({
       where: (messages, { eq }) => eq(messages.conversationId, data.conversationId),
       with: {
         recommendations: {
           with: {
             movie: {
-              with: { libraries: true },
+              with: {
+                libraries: {
+                  where: (libraries, { eq }) => eq(libraries.userId, context.user?.id || ''),
+                },
+              },
             },
           },
         },
@@ -34,7 +38,7 @@ export const getChatMessages = createServerFn()
         ...message,
         recommendations: message.recommendations,
         movies: message.recommendations.map((r) => r.movie).filter(Boolean),
-        libraries: [],
+        libraries: message.recommendations.flatMap((r) => r.movie?.libraries).filter(Boolean),
       });
     });
   });

@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { getChatMessages } from '~/server/functions/get-chat-messages';
+import { getChatMessages } from '~/server/data/get-chat-messages';
 
 export const queryGetChatMessagesOptions = (conversationId: string) =>
   queryOptions({

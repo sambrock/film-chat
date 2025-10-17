@@ -1,5 +1,3 @@
-'use client';
-
 import { useLayoutEffect } from 'react';
 
 import { Model, models } from '~/lib/ai/models';
@@ -41,11 +39,13 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
 
       {getRecommendations().length > 0 && (
         <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
-          {getRecommendations().map((recommendation) => (
+          {getRecommendations().map((recommendation, i) => (
             <ChatRecommendation
-              key={recommendation.recommendationId}
+              key={recommendation.recommendationId || i}
+              message={message}
               recommendation={recommendation}
               movie={message.movies.find((m) => m.movieId === recommendation.movieId)}
+              library={message.libraries.find((m) => m.movieId === recommendation.movieId)}
             />
           ))}
         </div>

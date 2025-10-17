@@ -1,25 +1,25 @@
-'use client';
+import { Check, PanelRight, Plus } from 'lucide-react';
 
-import { PanelRight } from 'lucide-react';
-
-import { Movie, Recommendation } from '~/lib/definitions';
+import type { Library, MessageAssistant, Movie, Recommendation } from '~/lib/definitions';
 import { cn, genreName, runtimeToHoursMins, tmdbPosterSrc } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
+import { useMutationUpdateLibrary } from '~/hooks/use-mutation-update-library';
+import { MovieDetailsModal } from '../shared/movie-details-modal/movie-details-modal';
+import { MovieDetailsModalContextProvider } from '../shared/movie-details-modal/movie-details-modal-context-provider';
 import { Button } from '../ui/button';
 import { Icon } from '../ui/icon';
 import { useChatContext } from './chat-context-provider';
 
-type Props = { recommendation: Recommendation; movie?: Movie };
+type Props = { message: MessageAssistant; recommendation: Recommendation; movie?: Movie; library?: Library };
 
-export const ChatRecommendation = ({ recommendation, movie }: Props) => {
-  const { conversationId } = useChatContext();
+export const ChatRecommendation = ({ message, recommendation, movie, library }: Props) => {
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const handleOpen = () => {
     if (!movie || !recommendation.movieId) return;
     dispatch({
-      type: 'OPEN_MOVIE_MODAL',
-      payload: { movieId: recommendation.movieId, conversationId, source: 'recommendation' },
+      type: 'OPEN_MODAL_MOVIE_DETAILS',
+      payload: { movieId: recommendation.movieId },
     });
   };
 
@@ -60,7 +60,11 @@ export const ChatRecommendation = ({ recommendation, movie }: Props) => {
 
       {movie && (
         <div className="absolute right-2 bottom-2 flex items-center gap-1 self-end opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100">
-          {/* <ButtonAddToWatchlist movieId={recommendation.movie.movieId} /> */}
+          <ButtonAddToWatchlist
+            messageId={message.messageId}
+            movieId={movie.movieId}
+            watchlist={library?.watchlist ?? false}
+          />
           <Button size="sm" onClick={handleOpen} pill>
             <Icon icon={PanelRight} size="sm" className="mr-1" />
             Open
@@ -68,62 +72,60 @@ export const ChatRecommendation = ({ recommendation, movie }: Props) => {
         </div>
       )}
 
-      {/* <ChatRecommendationMovieDetailsModal /> */}
+      {movie && (
+        <MovieDetailsModalContextProvider
+          value={{
+            page: 'chat',
+            conversationId: message.conversationId,
+            messageId: message.messageId,
+            library,
+          }}
+        >
+          <MovieDetailsModal movie={movie} />
+        </MovieDetailsModalContextProvider>
+      )}
     </div>
   );
 };
 
-// const ButtonAddToWatchlist = ({ movieId }: { movieId: string }) => {
-//   const library = useLiveQuery(
-//     (q) =>
-//       q
-//         .from({ library: libraryCollection })
-//         .where(({ library }) => eq(library.movieId, movieId))
-//         .findOne(),
-//     [movieId]
-//   );
+const ButtonAddToWatchlist = ({
+  messageId,
+  movieId,
+  watchlist,
+}: {
+  messageId: string;
+  movieId: string;
+  watchlist: boolean;
+}) => {
+  const { conversationId } = useChatContext();
 
-//   const handleAdd = () => {
-//     if (library.data) {
-//       libraryCollection.update(movieId, (draft) => {
-//         draft.watchlist = !draft.watchlist;
-//       });
-//     } else {
-//       libraryCollection.insert({
-//         movieId,
-//         userId: '',
-//         watchlist: true,
-//         liked: false,
-//         watched: false,
-//         ignore: false,
-//         createdAt: new Date(),
-//         updatedAt: new Date(),
-//       });
-//     }
-//   };
+  const updateLibraryMutation = useMutationUpdateLibrary();
 
-//   const buttonRef = useRef<HTMLButtonElement>(null);
-//   const isHover = useHover(buttonRef as React.RefObject<HTMLElement>);
+  const handleAdd = () => {
+    updateLibraryMutation.mutate({
+      page: 'chat',
+      conversationId,
+      messageId,
+      data: {
+        movieId,
+        watchlist: !watchlist,
+      },
+    });
+  };
 
-//   return (
-//     <Button
-//       ref={buttonRef}
-//       className={cn('justify-center transition-all', library.data?.watchlist && isHover && 'text-red-400')}
-//       size="sm"
-//       onClick={handleAdd}
-//       pill
-//     >
-//       {library.data?.watchlist ? (
-//         <>
-//           <Icon icon={Check} size="sm" className="mr-1" />
-//           Added to watchlist
-//         </>
-//       ) : (
-//         <>
-//           <Icon icon={Plus} size="sm" className="mr-1" />
-//           Add to watchlist
-//         </>
-//       )}
-//     </Button>
-//   );
-// };
+  return (
+    <Button className={cn('justify-center transition-all')} size="sm" onClick={handleAdd} pill>
+      {watchlist ? (
+        <>
+          <Icon icon={Check} size="sm" className="mr-1" />
+          Added to watchlist
+        </>
+      ) : (
+        <>
+          <Icon icon={Plus} size="sm" className="mr-1" />
+          Add to watchlist
+        </>
+      )}
+    </Button>
+  );
+};

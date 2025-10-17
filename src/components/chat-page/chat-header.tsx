@@ -1,33 +1,31 @@
-'use client';
-
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
-import { useDerivedChat, useDerivedChatExists } from '~/hooks/use-query-get-chats';
+import { useDerivedChat, useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
+import { Header } from '../shared/header';
 import { Button } from '../ui/button';
 import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../ui/dropdown';
 import { Icon } from '../ui/icon';
-import { Header } from '../shared/header';
 import { useChatContext } from './chat-context-provider';
 
 export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
   const chat = useDerivedChat(conversationId);
-  const chatExists = useDerivedChatExists(conversationId);
-
-  const deleteConversationMutation = useMutationDeleteChat();
+  const isNewChat = useDerivedIsNewChat(conversationId);
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
+
+  const deleteConversationMutation = useMutationDeleteChat();
 
   const handleDelete = () => {
     if (!chat) return;
     deleteConversationMutation.mutate(chat.conversationId);
   };
 
-  if (!chatExists) {
+  if (isNewChat) {
     return <div />;
   }
   if (!chat || !chat.title) {
@@ -52,7 +50,7 @@ export const ChatHeader = () => {
           </Button>
         </DropdownTrigger>
 
-        <DropdownContent className="min-w-60 origin-top-left" align="end" side="bottom" sideOffset={2}>
+        <DropdownContent className="min-w-60 origin-top-right" align="end" side="bottom" sideOffset={2}>
           <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
 
           <DropdownItem>

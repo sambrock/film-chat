@@ -1,6 +1,6 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 
-import { getChats } from '~/server/functions/get-chats';
+import { getChats } from '~/server/data/get-chats';
 
 export const queryGetChatsOptions = () =>
   queryOptions({
@@ -17,7 +17,7 @@ export const useDerivedChat = (conversationId: string) => {
   return data?.find((c) => c.conversationId === conversationId) || null;
 };
 
-export const useDerivedChatExists = (conversationId: string) => {
+export const useDerivedIsNewChat = (conversationId: string) => {
   const { data } = useQueryGetChats();
-  return data?.some((c) => c.conversationId === conversationId) || false;
+  return data?.some((c) => c.conversationId === conversationId) === false || false;
 };
