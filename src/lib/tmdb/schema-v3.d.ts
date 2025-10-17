@@ -3179,7 +3179,7 @@ export interface operations {
                         adult: boolean;
                         /** @example /hZkgoQYus5vegHoetLkCJzb17zJ.jpg */
                         backdrop_path?: string;
-                        belongs_to_collection?: unknown;
+                        belongs_to_collection?: undefined;
                         /**
                          * @default 0
                          * @example 63000000
@@ -11466,7 +11466,7 @@ export interface operations {
                          */
                         adult: boolean;
                         backdrop_path?: unknown;
-                        belongs_to_collection?: unknown;
+                        belongs_to_collection?: undefined;
                         /**
                          * @default 0
                          * @example 0

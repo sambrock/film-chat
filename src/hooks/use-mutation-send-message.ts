@@ -1,22 +1,20 @@
-import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
-import superjson from 'superjson';
 
-import type { ChatBody, ChatSSEData } from '@/app/api/chat/route';
-import { useTRPC } from '@/lib/trpc/client';
-import { randomUuid } from '@/lib/utils/uuid';
-import { useChatContext } from '@/providers/chat-context-provider';
-import { useGlobalStore } from '@/providers/global-store-provider';
+import type { ChatBody, ChatSSEData } from '~/app/api/chat';
+import { deserialize, uuidV4 } from '~/lib/utils';
+import { useGlobalStore } from '~/stores/global-store-provider';
+import { useChatContext } from '~/components/chat-page/chat-context-provider';
+import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
+import { queryGetChatsOptions } from './use-query-get-chats';
 
 export const useMutationSendMessage = () => {
   const { conversationId } = useChatContext();
 
   const queryClient = useQueryClient();
-  const trpc = useTRPC();
-
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
@@ -25,69 +23,41 @@ export const useMutationSendMessage = () => {
     mutationFn: async (content: string) => {
       dispatch({ type: 'SET_CHAT_PROCESSING', payload: { conversationId } });
 
-      // const isNewChat = !chatsCollection.has(conversationId);
       const isNewChat =
         queryClient
-          .getQueryData(trpc.getChats.queryKey())
+          .getQueryData(queryGetChatsOptions().queryKey)
           ?.find((c) => c.conversationId === conversationId) == null;
 
       if (isNewChat) {
-        // chatsCollection.utils.writeInsert({
-        //   conversationId,
-        //   title: 'New chat',
-        //   userId: 'anon',
-        //   createdAt: new Date(),
-        //   updatedAt: new Date(),
-        // });
-        queryClient.setQueryData(trpc.getChats.queryKey(), (state) =>
+        queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
           produce(state, (draft) => {
             if (!draft) draft = [];
             draft.unshift({
               conversationId,
-              title: 'New chat',
+              title: '',
               userId: 'anon',
+              lastUpdateAt: new Date(),
               createdAt: new Date(),
               updatedAt: new Date(),
             });
           })
         );
+      } else {
+        queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
+          produce(state, (draft) => {
+            if (!draft) draft = [];
+            const index = draft.findIndex((c) => c.conversationId === conversationId);
+            if (index !== -1) {
+              draft[index].lastUpdateAt = new Date();
+            }
+          })
+        );
       }
 
-      window.history.replaceState({}, '', `/c/${conversationId}`);
+      let tempMessageUserId = uuidV4();
+      let tempMessageAssistantId = uuidV4();
 
-      let tempMessageUserId = randomUuid();
-      let tempMessageAssistantId = randomUuid();
-
-      // messagesCollection.utils.writeBatch(() => [
-      //   messagesCollection.utils.writeInsert({
-      //     messageId: tempMessageUserId,
-      //     conversationId,
-      //     parentId: null,
-      //     userId: 'anon',
-      //     serial: 1000,
-      //     content,
-      //     model,
-      //     role: 'user',
-      //     status: 'processing',
-      //     createdAt: new Date(),
-      //     updatedAt: new Date(),
-      //   }),
-      //   messagesCollection.utils.writeInsert({
-      //     messageId: tempMessageAssistantId,
-      //     conversationId,
-      //     parentId: tempMessageUserId,
-      //     userId: 'anon',
-      //     serial: 1001,
-      //     content: '',
-      //     model,
-      //     role: 'assistant',
-      //     status: 'processing',
-      //     createdAt: new Date(),
-      //     updatedAt: new Date(),
-      //   }),
-      // ]);
-
-      queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+      queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
         produce(state, (draft) => {
           if (!draft) draft = [];
           draft.unshift(
@@ -140,6 +110,8 @@ export const useMutationSendMessage = () => {
 
       const reader = eventStream.getReader();
 
+      let messageAssistantId: string;
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -147,11 +119,10 @@ export const useMutationSendMessage = () => {
         const { event, data } = value;
 
         if (event === 'delta') {
-          const parsed = superjson.parse<ChatSSEData>(data);
+          const parsed = deserialize<ChatSSEData>(data);
 
           if (parsed.type === 'chat') {
-            // chatsCollection.utils.writeUpsert(parsed.v);
-            queryClient.setQueryData(trpc.getChats.queryKey(), (state) =>
+            queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 const index = draft.findIndex((c) => c.conversationId === parsed.v.conversationId);
@@ -160,18 +131,17 @@ export const useMutationSendMessage = () => {
                 }
               })
             );
+            navigate({
+              to: '/chat/$conversationId',
+              params: { conversationId },
+              replace: true,
+            });
           }
           if (parsed.type === 'message') {
-            // messagesCollection.utils.writeBatch(() => [
-            //   parsed.v.role === 'user' &&
-            //     messagesCollection.has(tempMessageUserId) &&
-            //     messagesCollection.utils.writeDelete(tempMessageUserId),
-            //   parsed.v.role === 'assistant' &&
-            //     messagesCollection.has(tempMessageAssistantId) &&
-            //     messagesCollection.utils.writeDelete(tempMessageAssistantId),
-            //   messagesCollection.utils.writeUpsert(parsed.v),
-            // ]);
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            if (parsed.v.role === 'assistant') {
+              messageAssistantId = parsed.v.messageId;
+            }
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
                 // Remove temp messages
@@ -198,13 +168,10 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'recommendations') {
-            // recommendationsCollection.utils.writeBatch(() =>
-            //   parsed.v.map((v) => recommendationsCollection.utils.writeInsert(v))
-            // );
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
                   message.recommendations = parsed.v;
                 }
@@ -212,26 +179,21 @@ export const useMutationSendMessage = () => {
             );
           }
           if (parsed.type === 'movie') {
-            // moviesCollection.utils.writeUpsert(parsed.v);
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
-                  message.movies.push(parsed.v);
+                  message.movies.push(parsed.v as any);
                 }
               })
             );
           }
           if (parsed.type === 'content') {
-            // messagesCollection.utils.writeUpdate({
-            //   messageId: parsed.id,
-            //   content: (messagesCollection.get(parsed.id)?.content || '') + parsed.v,
-            // });
-            queryClient.setQueryData(trpc.getChatMessages.queryKey(conversationId), (state) =>
+            queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
               produce(state, (draft) => {
                 if (!draft) draft = [];
-                const message = draft.find((m) => m.messageId === parsed.id);
+                const message = draft.find((m) => m.messageId === messageAssistantId);
                 if (message && message.role === 'assistant') {
                   message.content += parsed.v;
                 }
@@ -243,7 +205,12 @@ export const useMutationSendMessage = () => {
         if (event === 'end') {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
           if (isNewChat) {
-            requestAnimationFrame(() => router.push(`/c/${conversationId}`));
+            queryClient.invalidateQueries({
+              queryKey: queryGetChatsOptions().queryKey,
+            });
+            queryClient.refetchQueries({
+              queryKey: queryGetChatMessagesOptions(conversationId).queryKey,
+            });
           }
         }
       }

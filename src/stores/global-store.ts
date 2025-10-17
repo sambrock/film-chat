@@ -1,24 +1,21 @@
-import superjson from 'superjson';
 import { persist, StorageValue } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
-import { Model } from '@/lib/ai/models';
+import { Model } from '~/lib/ai/models';
+import { deserialize, serialize } from '~/lib/utils';
 import { GlobalStoreAction, reducer } from './global-store-reducer';
 
 export type GlobalState = {
   defaultModel: Model;
-  defaultInputValue: string;
 
   model: Map<string, Model>; // Map<conversationId, model>
   inputValue: Map<string, string>; // Map<conversationId, inputValue>
   isProcessing: Set<string>; // Set<conversationId>
 
-  movieModal?: {
+  modalMovieDetails?: {
     isOpen: boolean;
     movieId: string;
     shouldAnimate: boolean;
-    source?: 'recommendation' | 'library';
-    conversationId?: string;
   };
 };
 
@@ -37,20 +34,20 @@ export const createGlobalStore = () => {
         inputValue: new Map(),
         isProcessing: new Set(),
 
-        movieModal: undefined,
+        modalMovieDetails: undefined,
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),
       {
-        name: 'fc/store',
+        name: 'fc-store',
         storage: {
           getItem: (name) => {
             const str = localStorage.getItem(name);
             if (!str) return null;
-            return superjson.parse(str) as StorageValue<GlobalState>;
+            return deserialize<StorageValue<GlobalState>>(str);
           },
           setItem: (name, value) => {
-            localStorage.setItem(name, superjson.stringify(value));
+            localStorage.setItem(name, serialize(value));
           },
           removeItem: (name) => localStorage.removeItem(name),
         },

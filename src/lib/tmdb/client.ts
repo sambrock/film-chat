@@ -2,7 +2,7 @@ import { cache } from 'react';
 import createClient from 'openapi-fetch';
 
 import { TMDbMovieDetails, TMDbMovieDetailsWithCredits, TMDbSearchMovieResult } from '../definitions';
-import { env } from '../utils/env';
+import { env } from '../env';
 import { paths } from './schema-v3';
 
 export const tmdb = createClient<paths>({
