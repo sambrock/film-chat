@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 
-import { getMovie } from '~/routes/functions/get-movie';
+import { getMovie } from '~/server/functions/get-movie';
 
 export const queryGetMovieOptions = (movieId: string) =>
   queryOptions({

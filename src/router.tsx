@@ -12,6 +12,7 @@ export function getRouter() {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreload: 'intent',
+    defaultErrorComponent: () => <div>There was an error</div>,
   });
 
   setupRouterSsrQueryIntegration({

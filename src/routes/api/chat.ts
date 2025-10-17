@@ -1,13 +1,13 @@
-import { openai } from '@ai-sdk/openai';
 import { createFileRoute } from '@tanstack/react-router';
+import { openai } from '@ai-sdk/openai';
 import { generateText, streamText, TextStreamPart, ToolSet } from 'ai';
 import { eq } from 'drizzle-orm';
 import { BatchItem } from 'drizzle-orm/batch';
 import superjson from 'superjson';
 import z from 'zod';
 
+import { authOrAnonSignInMiddleware } from '~/server/middleware';
 import { streamTextModel, SYSTEM_CONTEXT_MESSAGE } from '~/lib/ai/get-model';
-import { auth } from '~/lib/auth/server';
 import { Conversation, MessageAssistant, MessageUser, Movie, Recommendation } from '~/lib/definitions';
 import { db } from '~/lib/drizzle/db';
 import { conversations, messages, movies, recommendations } from '~/lib/drizzle/schema';
@@ -17,13 +17,9 @@ import { randomUuid, uuidFromString } from '~/lib/utils/uuid';
 
 export const Route = createFileRoute('/api/chat')({
   server: {
+    middleware: [authOrAnonSignInMiddleware],
     handlers: {
-      POST: async ({ request }) => {
-        const session = (await auth.api.getSession(request)) ?? (await auth.api.signInAnonymous());
-        if (!session?.user) {
-          return new Response('Unauthorized', { status: 401 });
-        }
-
+      POST: async ({ context, request }) => {
         const body = await request.json();
         const parsed = BodySchema.safeParse(body);
         if (parsed.success === false) {
@@ -42,7 +38,7 @@ export const Route = createFileRoute('/api/chat')({
         if (!conversationExists) {
           conversation = {
             conversationId,
-            userId: session.user.id,
+            userId: context.user.id,
             title: '',
             lastUpdateAt: new Date(),
             createdAt: new Date(),
@@ -77,7 +73,7 @@ export const Route = createFileRoute('/api/chat')({
 
         const messageUser: MessageUser = {
           messageId: randomUuid(),
-          userId: session.user.id,
+          userId: context.user.id,
           conversationId,
           content,
           model: parsed.data.model,
@@ -89,7 +85,7 @@ export const Route = createFileRoute('/api/chat')({
 
         const messageAssistant: MessageAssistant = {
           messageId: randomUuid(),
-          userId: session.user.id,
+          userId: context.user.id,
           conversationId,
           parentId: messageUser.messageId,
           content: '',
@@ -138,7 +134,7 @@ export const Route = createFileRoute('/api/chat')({
                 parseRecommendations(messageAssistant.content).map(async (parsed) => {
                   const recommendation: Recommendation = {
                     recommendationId: randomUuid(),
-                    userId: session.user.id,
+                    userId: context.user.id,
                     messageId: messageAssistant.messageId,
                     movieId: null,
                     title: parsed.title,
@@ -203,10 +199,10 @@ export const Route = createFileRoute('/api/chat')({
                 );
               }
 
+              await db.batch(batch as [BatchItem<'pg'>]);
+
               controller.enqueue(encodeSSE('end'));
               controller.terminate();
-
-              await db.batch(batch as [BatchItem<'pg'>]);
             }
           },
         });

@@ -1,19 +1,13 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import { cn } from '~/lib/utils';
 import { GlobalStoreProvider } from '~/providers/global-store-provider';
-import { queryGetChatsOptions } from '~/hooks/use-query-get-chats';
 import { Sidebar } from '~/components/layout/sidebar';
-
-import '../styles/globals.css';
-
 import { MovieDetailsModal } from '~/components/movie/movie-details-modal';
+import appCss from '../styles.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: ({ context }) => context.queryClient.ensureQueryData(queryGetChatsOptions()),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -23,8 +17,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { title: 'Film Chat - AI Movie Recommendations' },
     ],
+    links: [{ rel: 'stylesheet', href: appCss }],
   }),
-  component: RootLayout,
+  errorComponent: (error) => <div className="p-4">An unexpected error occurred: {error.error.message}</div>,
+  shellComponent: RootLayout,
 });
 
 function RootLayout() {
@@ -52,10 +48,9 @@ function RootLayout() {
           </div>
 
           <MovieDetailsModal />
-          <Scripts />
         </GlobalStoreProvider>
-        <ReactQueryDevtools />
-        <TanStackRouterDevtools position="bottom-right" />
+
+        <Scripts />
       </body>
     </html>
   );

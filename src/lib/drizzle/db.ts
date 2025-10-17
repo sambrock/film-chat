@@ -1,7 +1,8 @@
 import { neon } from '@neondatabase/serverless';
+import { env } from 'cloudflare:workers';
 import { drizzle } from 'drizzle-orm/neon-http';
 
-import { env } from '../utils/env';
+// import { env } from '../utils/env';
 import {
   accounts,
   conversations,

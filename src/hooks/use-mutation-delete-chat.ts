@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { produce } from 'immer';
 
-import { deleteChat } from '~/routes/functions/delete-chat';
+import { deleteChat } from '~/server/functions/delete-chat';
 import { queryGetChatsOptions } from './use-query-get-chats';
 
 export const useMutationDeleteChat = () => {

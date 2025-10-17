@@ -1,6 +1,7 @@
-import { type Config } from 'prettier';
+//  @ts-check
 
-const config: Config = {
+/** @type {import('prettier').Config} */
+const config = {
   bracketSpacing: true,
   singleQuote: true,
   jsxSingleQuote: false,
@@ -12,7 +13,7 @@ const config: Config = {
   plugins: ['@ianvs/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
   importOrder: [
     '^react.*$',
-    '^next.*$',
+    '^@tanstack.*$',
     '<BUILTIN_MODULES>',
     '<THIRD_PARTY_MODULES>',
     '',

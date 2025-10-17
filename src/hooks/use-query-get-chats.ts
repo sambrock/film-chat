@@ -1,6 +1,6 @@
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 
-import { getChats } from '~/routes/functions/get-chats';
+import { getChats } from '~/server/functions/get-chats';
 
 export const queryGetChatsOptions = () =>
   queryOptions({
