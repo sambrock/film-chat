@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { EventSourceParserStream } from 'eventsource-parser/stream';
 import { produce } from 'immer';
 
-import type { ChatBody, ChatSSEData } from '~/app/api/chat';
+import type { ChatBody, ChatSSEData } from '~/routes/api/chat';
 import { deserialize, uuidV4 } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useChatContext } from '~/components/chat-page/chat-context-provider';

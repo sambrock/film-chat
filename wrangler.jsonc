@@ -5,7 +5,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "vars": {
-    "BETTER_AUTH_URL": "https://film-chat.fillm-chat.workers.dev"
+    "BETTER_AUTH_URL": "https://filmchat.app",
   },
   "observability": {
     "logs": {

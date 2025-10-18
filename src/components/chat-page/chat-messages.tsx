@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useRef } from 'react';
+import { Fragment, useLayoutEffect } from 'react';
 
 import { cn } from '~/lib/utils';
 import { useQueryGetChatMessages } from '~/hooks/use-query-get-chat-messages';
@@ -13,11 +13,9 @@ export const ChatMessages = ({ className, ...props }: Props) => {
 
   const { data } = useQueryGetChatMessages(conversationId);
 
-  const divRef = useRef<HTMLDivElement>(null);
-
   const scrollToEnd = () => {
-    if (!divRef.current) return;
-    divRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
+    if (!document) return;
+    document.body.scrollIntoView({ behavior: 'instant', block: 'end' });
   };
 
   useLayoutEffect(() => {
@@ -25,7 +23,7 @@ export const ChatMessages = ({ className, ...props }: Props) => {
   }, [data?.length]);
 
   return (
-    <div ref={divRef} className={cn('mt-20 space-y-8 pb-20 lg:mt-8', className)} {...props}>
+    <div className={cn('my-8 space-y-8', className)} {...props}>
       {data &&
         [...data].reverse().map((message) => (
           <Fragment key={message.messageId}>

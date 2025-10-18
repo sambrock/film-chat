@@ -32,11 +32,10 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
   }, [message.content, message.status]);
 
   return (
-    <div className={cn('mb-10', className)} {...props} data-message-id={message.messageId}>
+    <div className={cn(className)} {...props} data-message-id={message.messageId}>
       {message.status === 'processing' && getRecommendations().length === 0 && (
         <SpinnerEllipsis className="text-foreground-1 size-10" />
       )}
-
       {getRecommendations().length > 0 && (
         <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
           {getRecommendations().map((recommendation, i) => (

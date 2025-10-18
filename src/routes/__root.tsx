@@ -18,10 +18,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
   errorComponent: (error) => <div className="p-4">An unexpected error occurred: {error.error.message}</div>,
-  shellComponent: RootLayout,
+  shellComponent: RootDocument,
 });
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+function RootDocument(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -29,28 +29,17 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
         <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
         <link rel="shortcut icon" href="/favicon/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-        <meta name="apple-mobile-web-app-title" content="Film Chat" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
       </head>
-
-      <body className="text-foreground-0 bg-background-1 font-sans">
+      <body className="text-foreground-0 bg-background-1 h-full w-full font-sans">
         <GlobalStoreProvider>
-          <div className="relative flex h-full w-screen">
-            <div className="h-screen p-2">
-              <Sidebar />
+          <div className="relative flex h-full w-full flex-row">
+            <div className="sticky top-0 z-20 h-screen w-[260px] shrink-0 py-2 pl-2">
+              <Sidebar className="h-full w-full" />
             </div>
-            <div className="bg-background-1 w-full">{children}</div>
+            <main className="bg-background-1 w-full">{props.children}</main>
           </div>
         </GlobalStoreProvider>
-
-        {/* <TanStackDevtools
-          config={{ position: 'bottom-right' }}
-          plugins={[
-            { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
-            { name: 'React Query', render: <ReactQueryDevtoolsPanel /> },
-          ]}
-        /> */}
         <Scripts />
       </body>
     </html>
