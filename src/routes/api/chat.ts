@@ -191,9 +191,10 @@ export const Route = createFileRoute('/api/chat')({
                 );
               }
 
+              controller.enqueue(encodeSSE('end'));
+
               await db.batch(batch as [BatchItem<'pg'>]);
 
-              controller.enqueue(encodeSSE('end'));
               controller.terminate();
             }
           },

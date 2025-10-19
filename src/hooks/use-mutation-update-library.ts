@@ -54,18 +54,23 @@ export const useMutationUpdateLibrary = () => {
       }
       queryClient.setQueryData(queryGetLibraryOptions().queryKey, (state) =>
         produce(state, (draft) => {
-          if (!draft) draft = [];
-          const index = draft.findIndex((l) => l.movieId === updatedLibrary.movieId);
-          if (index !== -1) {
-            draft[index].watched = updatedLibrary.watched;
-            draft[index].watchlist = updatedLibrary.watchlist;
-            draft[index].liked = updatedLibrary.liked;
+          if (!draft) draft = { pages: [], pageParams: [] };
+          for (const page of draft.pages) {
+            const index = page.results.findIndex((l) => l.movieId === updatedLibrary.movieId);
+            if (index !== -1) {
+              page.results[index].watched = updatedLibrary.watched;
+              page.results[index].watchlist = updatedLibrary.watchlist;
+              page.results[index].liked = updatedLibrary.liked;
+            }
           }
         })
       );
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryGetLibraryOptions().queryKey });
+      // Only invalidate chat messages if we're on a chat page
+      if (location.pathname.startsWith('/chat')) {
+        queryClient.invalidateQueries({ queryKey: queryGetLibraryOptions().queryKey });
+      }
     },
   });
 };

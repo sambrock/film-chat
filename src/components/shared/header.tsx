@@ -6,7 +6,7 @@ export function Header({ className, ...props }: Props) {
   return (
     <div
       className={cn(
-        'group bg-background-1/90 top-0 border-foreground-0/10 sticky z-10 flex h-12 w-full items-center gap-4 border-b px-4 backdrop-blur-sm',
+        'group bg-background-1/90 border-foreground-0/10 sticky top-0 z-10 flex h-12 w-full shrink-0 items-center gap-4 border-b px-4 backdrop-blur-sm',
         className
       )}
     >

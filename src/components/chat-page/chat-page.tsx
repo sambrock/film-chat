@@ -11,11 +11,11 @@ type Props = {
 export const ChatPage = ({ conversationId }: Props) => {
   return (
     <ChatContextProvider conversationId={conversationId}>
-      <div className="group/chat relative flex max-w-full h-full flex-1 flex-col">
+      <div className="group/chat relative flex h-full min-h-screen max-w-full flex-col">
         <ChatHeader />
 
-        <ChatWelcome className="h-full justify-center self-center lg:w-3xl" />
-        <ChatMessages className="mx-auto lg:w-3xl" />
+        <ChatWelcome className="grow justify-center self-center lg:w-3xl" />
+        <ChatMessages className="mx-auto h-full lg:w-3xl" />
 
         <div className="group/input sticky bottom-0 isolate z-10 mt-auto w-full">
           <ChatInput className="mx-auto -mb-4 w-full shadow shadow-black/10 lg:w-3xl" />

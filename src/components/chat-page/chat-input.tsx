@@ -7,6 +7,7 @@ import { useMutationSendMessage } from '~/hooks/use-mutation-send-message';
 import { useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
 import { Button } from '../ui/button';
 import { Icon } from '../ui/icon';
+import { Tooltip } from '../ui/tooltip';
 import { useChatContext } from './chat-context-provider';
 import { ChatModelSelect } from './chat-model-select';
 
@@ -27,22 +28,19 @@ export const ChatInput = ({ className, ...props }: Props) => {
 
   const sendMessageMutation = useMutationSendMessage();
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleSubmit = () => {
+    sendMessageMutation.mutate(value);
+  };
+
+  const handleInputChange = (value: string) => {
     dispatch({
       type: 'SET_CHAT_VALUE',
       payload: {
         conversationId: location.pathname === `/chat/${conversationId}` ? conversationId : 'new',
-        value: e.target.value,
+        value,
         isNewChat,
       },
     });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessageMutation.mutate(value);
-    }
   };
 
   return (
@@ -54,25 +52,39 @@ export const ChatInput = ({ className, ...props }: Props) => {
       {...props}
     >
       <textarea
+        id="chat-input"
         className="text-foreground-0 placeholder:text-foreground-1/80 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
         placeholder="Type your message here..."
         value={value}
         rows={1}
         maxLength={250}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
+        onChange={(e) => {
+          handleInputChange(e.target.value);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
         autoFocus
       />
 
       <div className="flex items-center gap-1 py-1 pb-1">
         <ChatModelSelect />
-        <Button
-          className={cn('ml-auto', isSendDisabled && 'pointer-events-none')}
-          size="icon"
-          disabled={isSendDisabled}
-        >
-          <Icon icon={ArrowUp} />
-        </Button>
+        <Tooltip>
+          <Tooltip.Content>{isSendDisabled ? 'Message requires text' : 'Send Message'}</Tooltip.Content>
+          <Tooltip.Trigger asChild>
+            <Button
+              className={cn('ml-auto', isSendDisabled && 'cursor-not-allowed opacity-50')}
+              size="icon"
+              onClick={handleSubmit}
+              disabled={isSendDisabled}
+            >
+              <Icon icon={ArrowUp} />
+            </Button>
+          </Tooltip.Trigger>
+        </Tooltip>
       </div>
     </div>
   );
