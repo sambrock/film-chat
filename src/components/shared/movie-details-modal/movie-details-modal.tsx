@@ -46,8 +46,8 @@ export const MovieDetailsModal = ({ movie }: Props) => {
                 <span>{movie.tmdb.genres?.map((genre) => genreName(genre.name!)).join(', ')}</span>
               </div>
             </div>
-            <div className="overflow-clip rounded-md">
-              <img src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w185')} />
+            <div className="overflow-clip rounded-md aspect-[1/1.5] bg-background-0 ring-1 ring-foreground-0/5">
+              <img className="w-full h-full object-cover" src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w185')} />
             </div>
 
             <div className="col-span-2 mt-6">

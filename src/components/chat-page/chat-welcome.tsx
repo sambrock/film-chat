@@ -17,11 +17,10 @@ const EXAMPLE_MESSAGES = [
 export const ChatWelcome = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
 
-  const location = useLocation();
-
+  const isNewChat = useDerivedIsNewChat(conversationId);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
-  const isNewChat = useDerivedIsNewChat(conversationId);
+  const location = useLocation();
 
   if (!isNewChat || location.pathname !== '/') {
     return null;

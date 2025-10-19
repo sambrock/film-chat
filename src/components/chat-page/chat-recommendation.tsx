@@ -1,14 +1,12 @@
-import { Check, PanelRight, Plus } from 'lucide-react';
-
 import type { Library, MessageAssistant, Movie, Recommendation } from '~/lib/definitions';
 import { cn, genreName, runtimeToHoursMins, tmdbPosterSrc } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
-import { useMutationUpdateLibrary } from '~/hooks/use-mutation-update-library';
+import { LibraryButtonLike } from '../shared/library-buttons/library-button-like';
+import { LibraryButtonWatch } from '../shared/library-buttons/library-button-watch';
+import { LibraryButtonWatchlist } from '../shared/library-buttons/library-button-watchlist';
 import { MovieDetailsModal } from '../shared/movie-details-modal/movie-details-modal';
 import { MovieDetailsModalContextProvider } from '../shared/movie-details-modal/movie-details-modal-context-provider';
-import { Button } from '../ui/button';
-import { Icon } from '../ui/icon';
-import { useChatContext } from './chat-context-provider';
+import { TooltipProvider } from '../ui/tooltip';
 
 type Props = { message: MessageAssistant; recommendation: Recommendation; movie?: Movie; library?: Library };
 
@@ -27,13 +25,18 @@ export const ChatRecommendation = ({ message, recommendation, movie, library }: 
     <div className="group border-foreground-0/5 relative flex px-2 py-2">
       <div
         className={cn(
-          'bg-background-2/40 w-20 shrink-0 self-start overflow-clip rounded-sm md:aspect-[1/1.5] md:w-22',
-          movie && 'shadow-md shadow-black/20'
+          'bg-background-2/40 w-20 shrink-0 self-start overflow-clip rounded-sm ring-1 ring-white/5 transition-shadow md:aspect-[1/1.5] md:w-22',
+          movie &&
+            'focus-visible:ring-ring hover:ring-primary/50 group-hover:ring-2 group-hover:ring-white/10 focus:outline-none focus-visible:ring-2',
+          movie && 'cursor-pointer shadow-md shadow-black/20',
+          ''
         )}
+        onClick={handleOpen}
+        tabIndex={movie ? 0 : -1}
       >
         {movie && (
           <img
-            className="object-fit"
+            className="object-fit h-full w-full"
             src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w185')}
             alt={movie.tmdb.title}
           />
@@ -60,72 +63,19 @@ export const ChatRecommendation = ({ message, recommendation, movie, library }: 
 
       {movie && (
         <div className="absolute right-2 bottom-2 flex items-center gap-1 self-end opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100">
-          <ButtonAddToWatchlist
-            messageId={message.messageId}
-            movieId={movie.movieId}
-            watchlist={library?.watchlist ?? false}
-          />
-          <Button size="sm" onClick={handleOpen} pill>
-            <Icon icon={PanelRight} size="sm" className="mr-1" />
-            Open
-          </Button>
+          <TooltipProvider>
+            <LibraryButtonWatchlist movieId={movie.movieId} library={library} />
+            <LibraryButtonLike movieId={movie.movieId} library={library} />
+            <LibraryButtonWatch movieId={movie.movieId} library={library} />
+          </TooltipProvider>
         </div>
       )}
 
       {movie && (
-        <MovieDetailsModalContextProvider
-          value={{
-            page: 'chat',
-            conversationId: message.conversationId,
-            messageId: message.messageId,
-            library,
-          }}
-        >
+        <MovieDetailsModalContextProvider value={{ library }}>
           <MovieDetailsModal movie={movie} />
         </MovieDetailsModalContextProvider>
       )}
     </div>
-  );
-};
-
-const ButtonAddToWatchlist = ({
-  messageId,
-  movieId,
-  watchlist,
-}: {
-  messageId: string;
-  movieId: string;
-  watchlist: boolean;
-}) => {
-  const { conversationId } = useChatContext();
-
-  const updateLibraryMutation = useMutationUpdateLibrary();
-
-  const handleAdd = () => {
-    updateLibraryMutation.mutate({
-      page: 'chat',
-      conversationId,
-      messageId,
-      data: {
-        movieId,
-        watchlist: !watchlist,
-      },
-    });
-  };
-
-  return (
-    <Button className={cn('justify-center transition-all')} size="sm" onClick={handleAdd} pill>
-      {watchlist ? (
-        <>
-          <Icon icon={Check} size="sm" className="mr-1" />
-          Added to watchlist
-        </>
-      ) : (
-        <>
-          <Icon icon={Plus} size="sm" className="mr-1" />
-          Add to watchlist
-        </>
-      )}
-    </Button>
   );
 };

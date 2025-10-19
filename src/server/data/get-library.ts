@@ -12,7 +12,7 @@ export const getLibrary = createServerFn()
 
     const data = await db.query.library.findMany({
       where: (library, { eq }) => eq(library.userId, context.user.id),
-      orderBy: (library, { desc }) => [desc(library.createdAt)],
+      orderBy: (library, { asc }) => [asc(library.createdAt)],
       with: {
         movie: true,
       },

@@ -8,6 +8,8 @@
     "serve": "vite preview",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types",
+    "lint": "eslint",
+    "format": "prettier",
     "db:setup-local": "docker-compose -f infra/local.docker-compose.yml up -d",
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",

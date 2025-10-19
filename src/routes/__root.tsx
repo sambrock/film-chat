@@ -34,7 +34,7 @@ function RootDocument(props: { children: React.ReactNode }) {
       <body className="text-foreground-0 bg-background-1 h-full w-full font-sans">
         <GlobalStoreProvider>
           <div className="relative flex h-full w-full flex-row">
-            <div className="sticky top-0 z-20 h-screen w-[260px] shrink-0 py-2 pl-2">
+            <div className="sticky top-0 left-0 z-20 h-screen w-[260px] shrink-0 py-2 pl-2">
               <Sidebar className="h-full w-full" />
             </div>
             <main className="bg-background-1 w-full">{props.children}</main>

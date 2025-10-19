@@ -11,7 +11,7 @@ type Props = {
 export const ChatPage = ({ conversationId }: Props) => {
   return (
     <ChatContextProvider conversationId={conversationId}>
-      <div className="group/chat relative flex h-full max-w-full flex-1 flex-col">
+      <div className="group/chat relative flex max-w-full h-full flex-1 flex-col">
         <ChatHeader />
 
         <ChatWelcome className="h-full justify-center self-center lg:w-3xl" />

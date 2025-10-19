@@ -1,54 +1,71 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from '@tanstack/react-router';
 import { produce } from 'immer';
 
-import { updateLibrary, UpdateLibraryData } from '~/server/data/update-library';
+import { updateLibrary } from '~/server/data/update-library';
+import { Library } from '~/lib/definitions';
 import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
-
-type MutationData =
-  | { page: 'library'; data: UpdateLibraryData }
-  | { page: 'chat'; conversationId: string; messageId: string; data: UpdateLibraryData };
+import { queryGetLibraryOptions } from './use-query-get-library';
 
 export const useMutationUpdateLibrary = () => {
   const queryClient = useQueryClient();
 
+  const location = useLocation();
+
   return useMutation({
-    mutationFn: ({ data }: MutationData) => {
-      return updateLibrary({ data });
+    mutationFn: (library: Library) => {
+      return updateLibrary({
+        data: {
+          movieId: library.movieId,
+          liked: library.liked,
+          watched: library.watched,
+          watchlist: library.watchlist,
+        },
+      });
     },
-    onMutate: (variables) => {
-      if (variables.page === 'chat') {
-        const { conversationId, messageId, data } = variables;
+    onMutate: (updatedLibrary) => {
+      if (location.pathname.startsWith('/chat')) {
+        const conversationId = location.pathname.split('/chat/')[1];
         queryClient.setQueryData(queryGetChatMessagesOptions(conversationId).queryKey, (state) =>
           produce(state, (draft) => {
             if (!draft) draft = [];
             const messages = draft.filter((m) => m.role === 'assistant');
             const libraries = messages.flatMap((m) => m.libraries);
-            const library = libraries.find((l) => l.movieId === data.movieId);
-            if (library) {
-              library.watched = data.watched ?? library.watched;
-              library.watchlist = data.watchlist ?? library.watchlist;
-              library.liked = data.liked ?? library.liked;
+            const hasMovie = libraries.find((l) => l.movieId === updatedLibrary.movieId);
+            if (hasMovie) {
+              for (const library of libraries) {
+                if (library.movieId === updatedLibrary.movieId) {
+                  library.watched = updatedLibrary.watched;
+                  library.watchlist = updatedLibrary.watchlist;
+                  library.liked = updatedLibrary.liked;
+                }
+              }
             } else {
-              const message = draft.find((m) => m.messageId === messageId);
-              if (message && message.role === 'assistant') {
-                if (!message.libraries) message.libraries = [];
-                message.libraries.push({
-                  userId: '',
-                  movieId: data.movieId,
-                  watched: data.watched ?? false,
-                  watchlist: data.watchlist ?? false,
-                  liked: data.liked ?? false,
-                  ignore: false,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                });
+              const messagesWithMovie = messages.filter((m) =>
+                m.movies?.some((mv) => mv.movieId === updatedLibrary.movieId)
+              );
+              for (const message of messagesWithMovie) {
+                message.libraries = message.libraries || [];
+                message.libraries.push(updatedLibrary);
               }
             }
           })
         );
-      } else if (variables.page === 'library') {
-        //
       }
+      queryClient.setQueryData(queryGetLibraryOptions().queryKey, (state) =>
+        produce(state, (draft) => {
+          if (!draft) draft = [];
+          const index = draft.findIndex((l) => l.movieId === updatedLibrary.movieId);
+          if (index !== -1) {
+            draft[index].watched = updatedLibrary.watched;
+            draft[index].watchlist = updatedLibrary.watchlist;
+            draft[index].liked = updatedLibrary.liked;
+          }
+        })
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryGetLibraryOptions().queryKey });
     },
   });
 };

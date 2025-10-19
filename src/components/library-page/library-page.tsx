@@ -6,14 +6,14 @@ export const LibraryPage = () => {
   const libraryQuery = useQueryGetLibrary();
 
   return (
-    <div className="">
+    <div>
       <Header>
         <Header.Title>Library</Header.Title>
       </Header>
 
-      <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4 lg:grid-cols-6">
-        {libraryQuery.data?.map((item) => (
-          <LibraryMovieItem key={item.movieId} movie={item.movie} />
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-2 gap-y-2 py-8 md:grid-cols-4 lg:grid-cols-6">
+        {libraryQuery.data?.map(({ movie, ...library }) => (
+          <LibraryMovieItem key={movie.movieId} library={library} movie={movie} />
         ))}
       </div>
     </div>

@@ -2,9 +2,7 @@ import { createContext, useContext } from 'react';
 
 import type { Library } from '~/lib/definitions';
 
-export type MovieDetailsModalContext =
-  | { page: 'chat'; messageId: string; conversationId: string; library?: Library }
-  | { page: 'library'; library?: Library };
+export type MovieDetailsModalContext = { library: Library | undefined };
 
 export const MovieDetailsModalContext = createContext<MovieDetailsModalContext | undefined>(undefined);
 

@@ -8,9 +8,9 @@ import { authMiddleware } from '../middleware/auth';
 
 const UpdateLibrarySchema = z.object({
   movieId: z.uuid(),
-  watched: z.boolean().optional(),
-  watchlist: z.boolean().optional(),
-  liked: z.boolean().optional(),
+  watched: z.boolean().nullish(),
+  watchlist: z.boolean().nullish(),
+  liked: z.boolean().nullish(),
 });
 
 export type UpdateLibraryData = z.infer<typeof UpdateLibrarySchema>;
