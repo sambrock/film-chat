@@ -1,4 +1,4 @@
-import type { Library, MessageAssistant, Movie, Recommendation } from '~/lib/definitions';
+import type { Library, Movie, Recommendation } from '~/lib/definitions';
 import { cn, genreName, runtimeToHoursMins, tmdbPosterSrc } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { LibraryButtonLike } from '../shared/library-buttons/library-button-like';
@@ -8,9 +8,14 @@ import { MovieDetailsModal } from '../shared/movie-details-modal/movie-details-m
 import { MovieDetailsModalContextProvider } from '../shared/movie-details-modal/movie-details-modal-context-provider';
 import { TooltipProvider } from '../ui/tooltip';
 
-type Props = { message: MessageAssistant; recommendation: Recommendation; movie?: Movie; library?: Library };
+type Props = {
+  recommendation: Recommendation;
+  movie?: Movie;
 
-export const ChatRecommendation = ({ message, recommendation, movie, library }: Props) => {
+  library?: Library;
+};
+
+export const ChatRecommendation = ({ recommendation, movie, library }: Props) => {
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const handleOpen = () => {

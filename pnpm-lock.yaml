@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^2.0.52
         version: 2.0.52(zod@4.1.12)
+      '@ai-sdk/xai':
+        specifier: ^2.0.26
+        version: 2.0.26(zod@4.1.12)
       '@dotenvx/dotenvx':
         specifier: ^1.51.0
         version: 1.51.0
@@ -171,6 +174,12 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/openai-compatible@1.0.22':
+    resolution: {integrity: sha512-Q+lwBIeMprc/iM+vg1yGjvzRrp74l316wDpqWdbmd4VXXlllblzGsUgBLTeKvcEapFTgqk0FRETvSb58Y6dsfA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/openai@2.0.52':
     resolution: {integrity: sha512-n1arAo4+63e6/FFE6z/1ZsZbiOl4cfsoZ3F4i2X7LPIEea786Y2yd7Qdr7AdB4HTLVo3OSb1PHVIcQmvYIhmEA==}
     engines: {node: '>=18'}
@@ -186,6 +195,12 @@ packages:
   '@ai-sdk/provider@2.0.0':
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
+
+  '@ai-sdk/xai@2.0.26':
+    resolution: {integrity: sha512-+VtaLZSxmoKnNeJGM9bbtbZ3QMkPFlBB4N8prngbrSnvU/hG8cNdvvSBW/rIk6/DHrc2R8nFntNIBQoIRuBdQw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
   '@babel/code-frame@7.26.2':
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
@@ -4125,6 +4140,12 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.12(zod@4.1.12)
       zod: 4.1.12
 
+  '@ai-sdk/openai-compatible@1.0.22(zod@4.1.12)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12(zod@4.1.12)
+      zod: 4.1.12
+
   '@ai-sdk/openai@2.0.52(zod@4.1.12)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
@@ -4141,6 +4162,13 @@ snapshots:
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
+
+  '@ai-sdk/xai@2.0.26(zod@4.1.12)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 1.0.22(zod@4.1.12)
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.12(zod@4.1.12)
+      zod: 4.1.12
 
   '@babel/code-frame@7.26.2':
     dependencies:

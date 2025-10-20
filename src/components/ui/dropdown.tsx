@@ -36,13 +36,16 @@ export const DropdownContent = ({ className, side, ...props }: DropdownMenu.Drop
   );
 };
 
-export const DropdownItem = ({ className, ...props }: DropdownMenu.DropdownMenuItemProps) => {
+export const DropdownItem = ({ className, disabled, ...props }: DropdownMenu.DropdownMenuItemProps) => {
   return (
     <DropdownMenu.Item
       className={cn(
         'focus:bg-foreground-0/5 text-foreground-0 flex h-7 cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm select-none focus:outline-none',
+        disabled && 'cursor-not-allowed opacity-50',
         className
       )}
+      disabled={disabled}
+      {...(disabled ? { 'data-disabled': true } : {})}
       {...props}
     >
       {props.children}
