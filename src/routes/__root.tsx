@@ -34,10 +34,10 @@ function RootDocument(props: { children: React.ReactNode }) {
       <body className="text-foreground-0 bg-background-1 h-full w-full font-sans">
         <GlobalStoreProvider>
           <div className="relative flex w-full flex-row">
-            <div className="fixed top-0 left-0 z-20 h-screen w-[260px] shrink-0 py-2 pl-2">
+            <div className="fixed top-0 left-0 z-20 hidden h-screen w-[260px] shrink-0 py-2 pl-2 md:block">
               <Sidebar className="h-full w-full" />
             </div>
-            <main className="bg-background-1 ml-[260px] h-full w-full flex-1">{props.children}</main>
+            <main className="bg-background-1 md:ml-[260px] h-full w-full flex-1">{props.children}</main>
           </div>
         </GlobalStoreProvider>
         <Scripts />

@@ -8,27 +8,26 @@ import { deserialize, uuidV4 } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useChatContext } from '~/components/chat-page/chat-context-provider';
 import { queryGetChatMessagesOptions } from './use-query-get-chat-messages';
-import { queryGetChatsOptions } from './use-query-get-chats';
+import { queryGetChatsOptions, useQueryGetChatsUtils } from './use-query-get-chats';
 
 export const useMutationSendMessage = () => {
   const { conversationId } = useChatContext();
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { isNewChat } = useQueryGetChatsUtils();
 
   const model = useGlobalStore((s) => s.model.get(conversationId) || s.defaultModel);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   return useMutation({
     mutationFn: async (content: string) => {
-      dispatch({ type: 'SET_CHAT_PROCESSING', payload: { conversationId } });
+      dispatch({
+        type: 'SET_CHAT_PROCESSING',
+        payload: { conversationId, isNewChat: isNewChat(conversationId) },
+      });
 
-      const isNewChat =
-        queryClient
-          .getQueryData(queryGetChatsOptions().queryKey)
-          ?.find((c) => c.conversationId === conversationId) == null;
-
-      if (isNewChat) {
+      if (isNewChat(conversationId)) {
         queryClient.setQueryData(queryGetChatsOptions().queryKey, (state) =>
           produce(state, (draft) => {
             if (!draft) draft = [];
@@ -204,7 +203,7 @@ export const useMutationSendMessage = () => {
 
         if (event === 'end') {
           dispatch({ type: 'SET_CHAT_DONE', payload: { conversationId } });
-          if (isNewChat) {
+          if (isNewChat(conversationId)) {
             queryClient.invalidateQueries({
               queryKey: queryGetChatsOptions().queryKey,
             });

@@ -28,14 +28,17 @@ export const MovieDetailsModal = ({ movie }: Props) => {
         <MovieDetailsModalHeader />
 
         <div className="-mt-12 mb-12 flex flex-col">
-          <div className="bg-background-1 relative h-[430px] overflow-clip">
-            <img className="" src={tmdbBackdropSrc(movie.tmdb.backdrop_path!, 'w1280')} />
+          <div className="bg-background-1 relative h-[55vw] overflow-clip md:h-[430px]">
+            <img
+              className="h-full w-full object-cover"
+              src={tmdbBackdropSrc(movie.tmdb.backdrop_path!, 'w1280')}
+            />
             <div className="to-background-0 absolute inset-0 z-10 bg-gradient-to-b from-transparent" />
           </div>
 
-          <div className="relative z-10 -mt-58 grid grid-cols-[1fr_160px] gap-x-4 px-10">
+          <div className="relative z-10 -mt-12 grid grid-cols-1 gap-x-4 px-3 sm:-mt-58 sm:grid-cols-[1fr_120px] sm:px-6 md:grid-cols-[1fr_160px] md:px-10">
             <div className="flex flex-col gap-2">
-              <h1 className="mt-auto text-4xl font-black">
+              <h1 className="mt-auto text-4xl font-black" w-full>
                 {movie.tmdb.title}{' '}
                 <span className="text-foreground-1 ml-2 text-sm font-medium">
                   {new Date(movie.tmdb.release_date!).getFullYear()}
@@ -46,8 +49,11 @@ export const MovieDetailsModal = ({ movie }: Props) => {
                 <span>{movie.tmdb.genres?.map((genre) => genreName(genre.name!)).join(', ')}</span>
               </div>
             </div>
-            <div className="overflow-clip rounded-md aspect-[1/1.5] bg-background-0 ring-1 ring-foreground-0/5">
-              <img className="w-full h-full object-cover" src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w185')} />
+            <div className="bg-background-0 ring-foreground-0/5 hidden aspect-[1/1.5] overflow-clip rounded-md ring-1 sm:flex">
+              <img
+                className="h-full w-full object-cover"
+                src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w185')}
+              />
             </div>
 
             <div className="col-span-2 mt-6">

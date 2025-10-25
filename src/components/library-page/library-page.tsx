@@ -19,10 +19,11 @@ export const LibraryPage = () => {
   return (
     <div className="pb-20">
       <Header>
+        <Header.MenuButton />
         <Header.Title>Library</Header.Title>
       </Header>
 
-      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-2 gap-y-2 py-8 md:grid-cols-4 lg:grid-cols-6">
+      <div className="mx-auto grid max-w-5xl grid-cols-3 gap-2 gap-y-2 py-8 sm:grid-cols-4  md:grid-cols-4 lg:grid-cols-6 px-3">
         {libraryQuery.data?.pages.map((page) =>
           page.results.map(({ movie, ...library }) => (
             <LibraryMovieItem key={movie.movieId} library={library} movie={movie} />

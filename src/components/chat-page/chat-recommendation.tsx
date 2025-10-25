@@ -55,10 +55,10 @@ export const ChatRecommendation = ({ recommendation, movie, library }: Props) =>
             {recommendation.releaseYear ? recommendation.releaseYear : ''}
           </span>
         </div>
-        <div className="text-foreground-1 text-sm md:max-w-3/4">{recommendation.why}</div>
+        <div className="text-foreground-1 sm:text-sm md:max-w-3/4">{recommendation.why}</div>
         <div className="flex items-baseline md:mt-auto">
           {movie && (
-            <div className="text-foreground-1 mt-auto flex gap-3 text-xs font-medium">
+            <div className="text-foreground-1 mt-3 flex gap-3 text-xs font-medium sm:mt-auto">
               <span>{runtimeToHoursMins(movie.tmdb.runtime)}</span>
               <span>{movie.tmdb.genres?.map((genre) => genreName(genre.name!)).join(', ')}</span>
             </div>
@@ -67,7 +67,7 @@ export const ChatRecommendation = ({ recommendation, movie, library }: Props) =>
       </div>
 
       {movie && (
-        <div className="absolute right-2 bottom-2 flex items-center gap-1 self-end opacity-0 transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100">
+        <div className="absolute bg-background-3/10 right-2 bottom-2 shadow items-center justify-between gap-0.5 rounded-full p-1 opacity-0 ring-1 ring-white/10 backdrop-blur-md flex self-end transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100">
           <TooltipProvider>
             <LibraryButtonWatchlist movieId={movie.movieId} library={library} />
             <LibraryButtonLike movieId={movie.movieId} library={library} />

@@ -28,8 +28,6 @@ export const updateLibrary = createServerFn({ method: 'POST' })
         and(eq(library.userId, context.user.id), eq(library.movieId, data.movieId)),
     });
 
-    console.log('exists', exists);
-
     if (exists) {
       await db
         .update(library)

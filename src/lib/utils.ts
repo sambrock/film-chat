@@ -1,9 +1,10 @@
 import { cx, type CxOptions } from 'class-variance-authority';
 import superjson from 'superjson';
+import { twMerge } from 'tailwind-merge';
 import { v4, v5 } from 'uuid';
 
 export const cn = (...inputs: CxOptions) => {
-  return cx(inputs);
+  return twMerge(cx(inputs));
 };
 
 export const uuidV4 = () => {

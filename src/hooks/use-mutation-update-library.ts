@@ -69,7 +69,7 @@ export const useMutationUpdateLibrary = () => {
     onSuccess: () => {
       // Only invalidate chat messages if we're on a chat page
       if (location.pathname.startsWith('/chat')) {
-        queryClient.invalidateQueries({ queryKey: queryGetLibraryOptions().queryKey });
+        queryClient.refetchQueries({ queryKey: queryGetLibraryOptions().queryKey });
       }
     },
   });

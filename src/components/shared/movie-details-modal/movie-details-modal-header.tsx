@@ -4,10 +4,10 @@ import { ChevronDown, ChevronsRight, ChevronUp } from 'lucide-react';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useDerivedChatMessagesMovies } from '~/hooks/use-query-get-chat-messages';
 import { useDerivedLibraryMovies } from '~/hooks/use-query-get-library';
-import { Button } from '~/components/ui/button';
+import { Button, ButtonProps } from '~/components/ui/button';
 import { Icon } from '~/components/ui/icon';
 import { ModalClose } from '~/components/ui/modal';
-import { TooltipProvider } from '~/components/ui/tooltip';
+import { Tooltip, TooltipProvider } from '~/components/ui/tooltip';
 import { Header } from '../header';
 import { LibraryButtonLike } from '../library-buttons/library-button-like';
 import { LibraryButtonWatch } from '../library-buttons/library-button-watch';
@@ -27,11 +27,27 @@ export const MovieDetailsModalHeader = () => {
         </Button>
       </ModalClose>
       <div className="flex gap-1">
-        <ButtonPrevMovie />
-        <ButtonNextMovie />
+        <Tooltip>
+          <Tooltip.Trigger asChild>
+            <ButtonPrevMovie />
+          </Tooltip.Trigger>
+          <Tooltip.Content side="bottom" sideOffset={6}>
+            Previous Movie
+          </Tooltip.Content>
+        </Tooltip>
+        <Tooltip>
+          <Tooltip.Trigger asChild>
+            <ButtonNextMovie />
+          </Tooltip.Trigger>
+          <Tooltip.Content side="bottom" sideOffset={6}>
+            Next Movie
+          </Tooltip.Content>
+        </Tooltip>
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="bg-background-3/60 ml-auto flex items-center gap-0.5 rounded-full p-1 shadow ring-1 ring-white/10 backdrop-blur-md">
+        {/* <div className="absolute bg-background-3/10 right-2 bottom-2 shadow items-center justify-between gap-0.5 rounded-full p-1 opacity-0 ring-1 ring-white/10 backdrop-blur-md flex self-end transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"> */}
+
         <TooltipProvider>
           <LibraryButtonWatchlist movieId={modal.movieId} library={library} />
           <LibraryButtonLike movieId={modal.movieId} library={library} />
@@ -42,7 +58,7 @@ export const MovieDetailsModalHeader = () => {
   );
 };
 
-const ButtonPrevMovie = () => {
+const ButtonPrevMovie = (props: ButtonProps) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -78,13 +94,13 @@ const ButtonPrevMovie = () => {
   };
 
   return (
-    <Button size="icon" onClick={handlePrev} disabled={!getPrevMovieId()}>
+    <Button size="icon" onClick={handlePrev} disabled={!getPrevMovieId()} {...props}>
       <Icon icon={ChevronDown} className="mt-0.5" />
     </Button>
   );
 };
 
-const ButtonNextMovie = () => {
+const ButtonNextMovie = (props: ButtonProps) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -120,7 +136,7 @@ const ButtonNextMovie = () => {
   };
 
   return (
-    <Button size="icon" onClick={handleNext} disabled={!getNextMovieId()}>
+    <Button size="icon" onClick={handleNext} disabled={!getNextMovieId()} {...props}>
       <Icon icon={ChevronUp} className="mb-0.5" />
     </Button>
   );

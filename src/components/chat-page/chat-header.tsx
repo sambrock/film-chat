@@ -1,4 +1,5 @@
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
+import { useWindowSize } from 'usehooks-ts';
 
 import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
@@ -16,7 +17,17 @@ export const ChatHeader = () => {
   const chat = useDerivedChat(conversationId);
   const isNewChat = useDerivedIsNewChat(conversationId);
 
+  const width = useWindowSize();
+
   if (isNewChat) {
+    if (width.width < 768) {
+      return (
+        <Header>
+          <Header.MenuButton />
+          <Header.Title>New chat</Header.Title>
+        </Header>
+      );
+    }
     return null;
   }
   if (!chat || !chat.title) {
@@ -24,10 +35,11 @@ export const ChatHeader = () => {
   }
   return (
     <Header>
+      <Header.MenuButton />
       <Header.Title>{chat.title}</Header.Title>
 
-      <div className="ml-auto flex items-center gap-4">
-        <div className="text-foreground-2 text-xs font-medium whitespace-nowrap">
+      <div className="ml-auto flex items-center md gap-4">
+        <div className="text-foreground-2 hidden text-xs font-medium whitespace-nowrap sm:flex">
           Updated {timeAgo(chat.lastUpdateAt)}
         </div>
 
