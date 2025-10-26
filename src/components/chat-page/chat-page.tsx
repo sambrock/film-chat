@@ -19,7 +19,7 @@ export const ChatPage = ({ conversationId }: Props) => {
 
         <div className="group/input sticky bottom-0 isolate z-10 mt-auto w-full px-3">
           <ChatInput className="mx-auto -mb-4 w-full shadow shadow-black/10 lg:w-3xl" />
-          <div className="to-background-1 via-background-1 h-8 bg-gradient-to-b from-transparent" />
+          <div className="to-background via-background h-8 bg-gradient-to-b from-transparent" />
         </div>
       </div>
     </ChatContextProvider>

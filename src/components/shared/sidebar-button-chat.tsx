@@ -6,7 +6,12 @@ import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
 import { Button } from '../ui/button';
-import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../ui/dropdown';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { Icon } from '../ui/icon';
 import { SpinnerEllipsis } from '../ui/spinner';
 import { SidebarButton } from './sidebar-button';
@@ -28,12 +33,10 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
   return (
     <div className="group relative flex items-center">
       <SidebarButton
-        className={cn(
-          'group-hover:bg-foreground-0/5 group-focus-within:bg-foreground-0/5 w-full gap-2',
-          location.pathname === `/chat/${conversation.conversationId}` && 'bg-foreground-0/5'
-        )}
+        className={cn('w-full gap-2')}
         href={`/chat/${conversation.conversationId}`}
         title={conversation.title}
+        isActive={location.pathname === `/chat/${conversation.conversationId}`}
         asChild
       >
         {conversation.title || 'New chat'}
@@ -41,8 +44,8 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
 
       {isProcessing && <SpinnerEllipsis className="absolute right-4 size-5" />}
 
-      <DropdownRoot>
-        <DropdownTrigger asChild disabled={isProcessing}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild disabled={isProcessing}>
           <Button
             variant="transparent"
             className={cn(
@@ -53,27 +56,27 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
           >
             <Icon icon={Ellipsis} />
           </Button>
-        </DropdownTrigger>
+        </DropdownMenuTrigger>
 
-        <DropdownContent className="min-w-60 origin-top-left" align="start" side="bottom" sideOffset={2}>
-          <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
+        <DropdownMenuContent className="min-w-60 origin-top-left" align="start" side="bottom" sideOffset={2}>
+          <div className="text-secondary-foreground my-1 px-2 text-xs font-medium select-none">Chat</div>
 
-          <DropdownItem>
+          <DropdownMenuItem>
             <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
-          </DropdownItem>
-          <DropdownItem onClick={handleDelete}>
-            <Icon icon={Trash2} className="text-red-400" size="xs" />
-            <div className="text-sm font-medium text-red-400">Delete</div>
-          </DropdownItem>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={handleDelete}>
+            <Icon icon={Trash2} className="text-destructive" size="xs" />
+            <div className="text-destructive text-sm font-medium">Delete</div>
+          </DropdownMenuItem>
 
           <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
-          <div className="text-foreground-2 px-2 py-1 text-xs select-none">
+          <div className="text-muted-foreground px-2 py-1 text-xs select-none">
             Created {conversation.createdAt && timeAgo(conversation.createdAt)}
           </div>
-        </DropdownContent>
-      </DropdownRoot>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };

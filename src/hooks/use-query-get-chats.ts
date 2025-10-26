@@ -25,13 +25,3 @@ export const useQueryGetChatsUtils = () => {
 
   return { getChat, isNewChat };
 };
-
-export const useDerivedChat = (conversationId: string) => {
-  const { data } = useQueryGetChats();
-  return data?.find((c) => c.conversationId === conversationId) || null;
-};
-
-export const useDerivedIsNewChat = (conversationId: string) => {
-  const { data } = useQueryGetChats();
-  return data?.some((c) => c.conversationId === conversationId) === false || false;
-};

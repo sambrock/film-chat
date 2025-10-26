@@ -2,14 +2,14 @@ import { Plus } from 'lucide-react';
 
 import type { Library } from '~/lib/definitions';
 import { useMutationUpdateLibrary } from '~/hooks/use-mutation-update-library';
-import { ButtonProps } from '~/components/ui/button';
-import { Tooltip } from '~/components/ui/tooltip';
+import { Button } from '~/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 import { LibraryButton } from './library-button';
 
 type Props = {
   movieId: string;
   library?: Library;
-} & ButtonProps;
+} & React.ComponentProps<typeof Button>;
 
 export const LibraryButtonWatchlist = ({ movieId, library, ...props }: Props) => {
   const updateLibraryMutation = useMutationUpdateLibrary();
@@ -37,10 +37,10 @@ export const LibraryButtonWatchlist = ({ movieId, library, ...props }: Props) =>
 
   return (
     <Tooltip>
-      <Tooltip.Content>{library?.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}</Tooltip.Content>
-      <Tooltip.Trigger asChild>
+      <TooltipContent>{library?.watchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}</TooltipContent>
+      <TooltipTrigger asChild>
         <LibraryButton icon={Plus} active={library?.watchlist ?? false} onClick={handleClick} {...props} />
-      </Tooltip.Trigger>
+      </TooltipTrigger>
     </Tooltip>
   );
 };

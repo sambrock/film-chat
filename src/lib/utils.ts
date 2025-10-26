@@ -1,11 +1,11 @@
-import { cx, type CxOptions } from 'class-variance-authority';
+import { clsx, type ClassValue } from 'clsx';
 import superjson from 'superjson';
 import { twMerge } from 'tailwind-merge';
 import { v4, v5 } from 'uuid';
 
-export const cn = (...inputs: CxOptions) => {
-  return twMerge(cx(inputs));
-};
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export const uuidV4 = () => {
   return v4();

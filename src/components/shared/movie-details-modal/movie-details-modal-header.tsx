@@ -2,12 +2,12 @@ import { useLocation } from '@tanstack/react-router';
 import { ChevronDown, ChevronsRight, ChevronUp } from 'lucide-react';
 
 import { useGlobalStore } from '~/stores/global-store-provider';
-import { useDerivedChatMessagesMovies } from '~/hooks/use-query-get-chat-messages';
-import { useDerivedLibraryMovies } from '~/hooks/use-query-get-library';
-import { Button, ButtonProps } from '~/components/ui/button';
+import { useQueryGetChatMessagesUtils } from '~/hooks/use-query-get-chat-messages';
+import { useQueryGetLibraryUtils } from '~/hooks/use-query-get-library';
+import { Button } from '~/components/ui/button';
 import { Icon } from '~/components/ui/icon';
 import { ModalClose } from '~/components/ui/modal';
-import { Tooltip, TooltipProvider } from '~/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip';
 import { Header } from '../header';
 import { LibraryButtonLike } from '../library-buttons/library-button-like';
 import { LibraryButtonWatch } from '../library-buttons/library-button-watch';
@@ -20,7 +20,7 @@ export const MovieDetailsModalHeader = () => {
   const { library } = useMovieDetailsModalContext();
 
   return (
-    <Header className="!bg-background-0/5 z-50 !backdrop-blur-none">
+    <Header className="z-50 border-b-0 bg-transparent !backdrop-blur-none">
       <ModalClose asChild>
         <Button size="icon">
           <Icon icon={ChevronsRight} />
@@ -28,26 +28,24 @@ export const MovieDetailsModalHeader = () => {
       </ModalClose>
       <div className="flex gap-1">
         <Tooltip>
-          <Tooltip.Trigger asChild>
+          <TooltipTrigger asChild>
             <ButtonPrevMovie />
-          </Tooltip.Trigger>
-          <Tooltip.Content side="bottom" sideOffset={6}>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={6}>
             Previous Movie
-          </Tooltip.Content>
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <Tooltip.Trigger asChild>
+          <TooltipTrigger asChild>
             <ButtonNextMovie />
-          </Tooltip.Trigger>
-          <Tooltip.Content side="bottom" sideOffset={6}>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={6}>
             Next Movie
-          </Tooltip.Content>
+          </TooltipContent>
         </Tooltip>
       </div>
 
-      <div className="bg-background-3/60 ml-auto flex items-center gap-0.5 rounded-full p-1 shadow ring-1 ring-white/10 backdrop-blur-md">
-        {/* <div className="absolute bg-background-3/10 right-2 bottom-2 shadow items-center justify-between gap-0.5 rounded-full p-1 opacity-0 ring-1 ring-white/10 backdrop-blur-md flex self-end transition group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"> */}
-
+      <div className="bg-background/10 ml-auto flex items-center gap-0.5 rounded-full p-1 shadow ring-1 ring-white/10 backdrop-blur-md">
         <TooltipProvider>
           <LibraryButtonWatchlist movieId={modal.movieId} library={library} />
           <LibraryButtonLike movieId={modal.movieId} library={library} />
@@ -58,22 +56,20 @@ export const MovieDetailsModalHeader = () => {
   );
 };
 
-const ButtonPrevMovie = (props: ButtonProps) => {
+const ButtonPrevMovie = (props: React.ComponentProps<typeof Button>) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const location = useLocation();
 
-  const chatMovies = useDerivedChatMessagesMovies(
-    location.pathname.startsWith('/chat') ? location.pathname.split('/chat/')[1] : undefined
-  );
-  const libraryMovies = useDerivedLibraryMovies();
+  const { getChatMessagesMovies } = useQueryGetChatMessagesUtils();
+  const { getLibraryMovies } = useQueryGetLibraryUtils();
 
   const getPrevMovieId = () => {
     const movieIds = location.pathname.startsWith('/chat')
-      ? chatMovies.getMovies()
+      ? getChatMessagesMovies(location.pathname.split('/chat/')[1])
       : location.pathname.startsWith('/library')
-        ? libraryMovies.getMovies()
+        ? getLibraryMovies()
         : [];
 
     const currentIndex = movieIds.indexOf(modal.movieId);
@@ -100,22 +96,20 @@ const ButtonPrevMovie = (props: ButtonProps) => {
   );
 };
 
-const ButtonNextMovie = (props: ButtonProps) => {
+const ButtonNextMovie = (props: React.ComponentProps<typeof Button>) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
   const location = useLocation();
 
-  const chatMovies = useDerivedChatMessagesMovies(
-    location.pathname.startsWith('/chat') ? location.pathname.split('/chat/')[1] : undefined
-  );
-  const libraryMovies = useDerivedLibraryMovies();
+  const { getChatMessagesMovies } = useQueryGetChatMessagesUtils();
+  const { getLibraryMovies } = useQueryGetLibraryUtils();
 
   const getNextMovieId = () => {
     const movieIds = location.pathname.startsWith('/chat')
-      ? chatMovies.getMovies()
+      ? getChatMessagesMovies(location.pathname.split('/chat/')[1])
       : location.pathname.startsWith('/library')
-        ? libraryMovies.getMovies()
+        ? getLibraryMovies()
         : [];
 
     const currentIndex = movieIds.indexOf(modal.movieId);

@@ -36,11 +36,11 @@ export const MovieDetailsModalCrew = ({ movieId }: Props) => {
           .map((crew) => (
             <div key={crew.id} className="flex w-32 flex-col">
               <div className="mt-1 text-sm font-medium">
-                <div className="text-foreground-0 w-32 font-medium" title={crew.name}>
+                <div className="text-foreground w-32 font-medium" title={crew.name}>
                   {crew.name}
                 </div>
               </div>
-              <div className="text-foreground-1 mt-0.5 text-xs font-normal">{crew.jobs.join(', ')}</div>
+              <div className="text-secondary-foreground mt-0.5 text-xs font-normal">{crew.jobs.join(', ')}</div>
             </div>
           ))}
       </div>
@@ -60,7 +60,7 @@ export const MovieDetailsModalCast = ({ movieId }: Props) => {
       <Carousel className="flex gap-2 overflow-x-auto">
         {movieData.data.credits.cast?.slice(0, 10).map((cast) => (
           <CarouselItem key={cast.cast_id} className="flex flex-col">
-            <div className="bg-background-1 mb-1 aspect-square h-42 w-32 overflow-clip rounded-md">
+            <div className="bg-secondary mb-1 aspect-square h-42 w-32 overflow-clip rounded-md">
               {cast.profile_path ? (
                 <img
                   className="object-fit brightness-90"
@@ -68,12 +68,12 @@ export const MovieDetailsModalCast = ({ movieId }: Props) => {
                   alt={cast.name}
                 />
               ) : (
-                <div className="bg-foreground-0/5 text-foreground-1 flex h-full w-full"></div>
+                <div className="bg-foreground/50 text-secondary-foreground flex h-full w-full"></div>
               )}
             </div>
             <div className="mt-1 text-sm font-medium">
               <div className="w-32 font-medium">{cast.name}</div>
-              <div className="text-foreground-1 mt-0.5 text-xs font-normal">{cast.character}</div>
+              <div className="text-secondary-foreground mt-0.5 text-xs font-normal">{cast.character}</div>
             </div>
           </CarouselItem>
         ))}

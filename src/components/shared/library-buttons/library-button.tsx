@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { LucideIcon } from 'lucide-react';
 
 import { cn } from '~/lib/utils';
-import { Button, ButtonProps } from '~/components/ui/button';
+import { Button } from '~/components/ui/button';
 import { Icon } from '~/components/ui/icon';
 
 type Props = {
   icon: LucideIcon;
   active: boolean;
-} & ButtonProps;
+} & React.ComponentProps<typeof Button>;
 
 export const LibraryButton = ({ icon, active, onMouseDown, ...props }: Props) => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -42,7 +42,7 @@ export const LibraryButton = ({ icon, active, onMouseDown, ...props }: Props) =>
           icon={icon}
           size="sm"
           className={cn(
-            'text-foreground-1 filter transition-all duration-400',
+            'text-secondary-foreground filter transition-all duration-400',
             !isAnimating
               ? 'drop-shadow-[0_0px_0px_rgba(24,225,157,0)]'
               : 'drop-shadow-[0_1px_2px_rgba(24,225,157,0.7)]',
