@@ -5,11 +5,9 @@ import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
 import { useQueryGetChatsUtils } from '~/hooks/use-query-get-chats';
-import { Button } from '../ui/button';
-
-import '../ui/dropdown-menu';
-
 import { Header } from '../shared/header';
+import { PopoverRenameChat } from '../shared/popover-rename-chat';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +42,9 @@ export const ChatHeader = () => {
   return (
     <Header>
       <Header.MenuButton />
-      <Header.Title>{chat.title}</Header.Title>
+      <PopoverRenameChat conversationId={conversationId} title={chat.title}>
+        <Header.Title>{chat.title}</Header.Title>
+      </PopoverRenameChat>
 
       <div className="md ml-auto flex items-center gap-4">
         <div className="text-muted-foreground hidden text-xs font-medium whitespace-nowrap sm:flex">
@@ -61,6 +61,7 @@ const ChatHeaderOptions = () => {
   const { conversationId } = useChatContext();
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
+  const dispatch = useGlobalStore((s) => s.dispatch);
 
   const { getChat } = useQueryGetChatsUtils();
   const chat = getChat(conversationId);
@@ -83,14 +84,24 @@ const ChatHeaderOptions = () => {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="min-w-60 origin-top-right" align="end" side="bottom" sideOffset={2}>
+      <DropdownMenuContent
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        className="min-w-60 origin-top-right"
+        align="end"
+        side="bottom"
+        sideOffset={2}
+      >
         <div className="text-secondary-foreground my-1 px-2 text-xs font-medium select-none">Chat</div>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            dispatch({ type: 'SET_RENAME_CHAT', payload: { conversationId } });
+          }}
+        >
           <Icon icon={Pencil} size="xs" />
           <div className="text-sm font-medium">Rename</div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete}>
+        <DropdownMenuItem onSelect={handleDelete}>
           <Icon icon={Trash2} className="text-red-400" size="xs" />
           <div className="text-sm font-medium text-red-400">Delete</div>
         </DropdownMenuItem>

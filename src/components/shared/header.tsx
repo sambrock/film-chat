@@ -7,6 +7,7 @@ import { Icon } from '../ui/icon';
 import {
   Modal,
   ModalContent,
+  ModalContentSidebar,
   ModalDescription,
   ModalOverlay,
   ModalPortal,
@@ -43,14 +44,11 @@ const HeaderMenuButton = ({ className, ...props }: React.ComponentProps<typeof B
         </Button>
       </ModalTrigger>
 
-      <ModalPortal>
-        <ModalOverlay />
-        <ModalContent className="fixed top-0 left-0 z-[999] h-screen w-[280px]">
-          <ModalTitle className="sr-only">Menu</ModalTitle>
-          <ModalDescription className="sr-only">App navigation menu</ModalDescription>
-          <Sidebar className="absolute left-0 h-screen w-full rounded-none rounded-r-xl border-y-0 border-l-0" />
-        </ModalContent>
-      </ModalPortal>
+      <ModalContentSidebar className="decoration-background fixed top-0 left-0 z-[999] h-screen w-[280px]">
+        <ModalTitle className="sr-only">Menu</ModalTitle>
+        <ModalDescription className="sr-only">App navigation menu</ModalDescription>
+        <Sidebar className="h-screen w-full rounded-none rounded-r-xl border-y-0 border-l-0" />
+      </ModalContentSidebar>
     </Modal>
   );
 };
@@ -71,7 +69,7 @@ const HeaderTitle = ({ className, ...props }: React.ComponentProps<'h1'>) => {
 const HeaderSkeleton = () => {
   return (
     <Header>
-      <div className="bg-muted/20 h-4 w-32 animate-pulse rounded"></div>
+      <div className="bg-muted/60 h-4 w-32 animate-pulse rounded"></div>
     </Header>
   );
 };

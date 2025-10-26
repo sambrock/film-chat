@@ -32,7 +32,7 @@ export const ChatWelcome = ({ className, ...props }: Props) => {
     input?.focus();
   };
 
-  if (!isNewChat || location.pathname !== '/') {
+  if (!isNewChat(conversationId) || location.pathname !== '/') {
     return null;
   }
   return (

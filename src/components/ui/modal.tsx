@@ -82,8 +82,8 @@ export const ModalContentDrawer = ({
       <ModalOverlay className={cn(!shouldAnimate && '!duration-0')} />
       <ModalPrimitive.Content
         className={cn(
-          'bg-sidebar fixed top-8 right-0 z-50 h-screen w-full overflow-y-auto rounded-t-xl border border-t border-l outline-none md:top-0 md:w-3xl md:rounded-t-none',
-          'data-[state=open]:animate-in data-[state=open]:slide-in-from-right-full data-[state=closed]:slide-out-to-right-full data-[state=closed]:animate-out duration-150',
+          'bg-sidebar fixed top-8 right-0 z-50 h-screen w-full overflow-y-auto rounded-t-xl overflow-clip border outline-none md:top-0 md:w-3xl md:rounded-t-none',
+          'data-[state=open]:animate-in md:data-[state=open]:slide-in-from-right-full md:data-[state=closed]:slide-out-to-right-full data-[state=closed]:animate-out duration-150',
           !shouldAnimate && '!duration-0',
           className
         )}
@@ -92,6 +92,25 @@ export const ModalContentDrawer = ({
       >
         {children}
       </ModalPrimitive.Content>
+    </ModalPortal>
+  );
+};
+
+export const ModalContentSidebar = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof ModalPrimitive.Content>) => {
+  return (
+    <ModalPortal data-slot="modal-portal">
+      <ModalOverlay />
+      <ModalPrimitive.Content
+        data-slot="modal-content"
+        className={cn(
+          className,
+          'data-[state=open]:animate-in data-[state=open]:slide-in-from-left-full data-[state=closed]:slide-out-to-left-full data-[state=closed]:animate-out duration-150'
+        )}
+        {...props}
+      />
     </ModalPortal>
   );
 };

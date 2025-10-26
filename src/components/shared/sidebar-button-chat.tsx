@@ -1,4 +1,4 @@
-import { useLocation } from '@tanstack/react-router';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 
 import type { Conversation } from '~/lib/definitions';
@@ -23,7 +23,10 @@ type Props = {
 export const SidebarButtonChat = ({ conversation }: Props) => {
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversation.conversationId));
 
+  const dispatch = useGlobalStore((s) => s.dispatch);
+
   const location = useLocation();
+  const navigate = useNavigate();
   const deleteChatMutation = useMutationDeleteChat();
 
   const handleDelete = () => {
@@ -42,7 +45,7 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
         {conversation.title || 'New chat'}
       </SidebarButton>
 
-      {isProcessing && <SpinnerEllipsis className="absolute right-4 size-5" />}
+      {isProcessing && <SpinnerEllipsis className="text-secondary-foreground absolute right-4 size-5" />}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild disabled={isProcessing}>
@@ -58,10 +61,30 @@ export const SidebarButtonChat = ({ conversation }: Props) => {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="min-w-60 origin-top-left" align="start" side="bottom" sideOffset={2}>
+        <DropdownMenuContent
+          className="min-w-60 origin-top-left"
+          align="start"
+          side="bottom"
+          sideOffset={2}
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <div className="text-secondary-foreground my-1 px-2 text-xs font-medium select-none">Chat</div>
 
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              if (location.pathname !== `/chat/${conversation.conversationId}`) {
+                navigate({
+                  to: `/chat/${conversation.conversationId}`,
+                });
+              }
+              requestAnimationFrame(() =>
+                dispatch({
+                  type: 'SET_RENAME_CHAT',
+                  payload: { conversationId: conversation.conversationId },
+                })
+              );
+            }}
+          >
             <Icon icon={Pencil} size="xs" />
             <div className="text-sm font-medium">Rename</div>
           </DropdownMenuItem>
