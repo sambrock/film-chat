@@ -33,6 +33,10 @@ export type GlobalStoreAction =
   | {
       type: 'CLOSE_MODAL_MOVIE_DETAILS';
       payload: undefined;
+    }
+  | {
+      type: 'SET_RENAME_CHAT';
+      payload: { conversationId: string } | undefined;
     };
 
 export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction) => {
@@ -88,6 +92,11 @@ export const reducer = (state: GlobalState, { type, payload }: GlobalStoreAction
         if (!draft.modalMovieDetails) return state;
         draft.modalMovieDetails.isOpen = false;
         draft.modalMovieDetails.shouldAnimate = true;
+      });
+    }
+    case 'SET_RENAME_CHAT': {
+      return produce(state, (draft) => {
+        draft.renameChat = payload?.conversationId;
       });
     }
     default: {

@@ -5,7 +5,12 @@ import { cn } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { ProviderIcon } from '../shared/provider-icon';
 import { Button } from '../ui/button';
-import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../ui/dropdown';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { useChatContext } from './chat-context-provider';
 
 export const ChatModelSelect = () => {
@@ -22,19 +27,22 @@ export const ChatModelSelect = () => {
   };
 
   return (
-    <DropdownRoot>
-      <DropdownTrigger asChild>
-        <Button variant="ghost" className="!text-foreground-0/60 !rounded-full !px-2">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="text-secondary-foreground hover:bg-foreground/5 hover:text-secondary-foreground !px-2"
+        >
           {models.get(selectedModel)?.name}
           <ChevronDown className="size-5" />
         </Button>
-      </DropdownTrigger>
+      </DropdownMenuTrigger>
 
-      <DropdownContent className="min-w-80 origin-bottom-left" align="start" side="top" sideOffset={2}>
+      <DropdownMenuContent className="min-w-80 origin-bottom-left" align="start" side="top" sideOffset={2}>
         {[...models.values()].map((model) => (
-          <DropdownItem
+          <DropdownMenuItem
             key={model.model}
-            className={cn('h-8', model.model === selectedModel && 'bg-background-1/50')}
+            className={cn('h-8', model.model === selectedModel && 'bg-accent')}
             onClick={() => {
               handleSelect(model.model);
             }}
@@ -42,16 +50,16 @@ export const ChatModelSelect = () => {
           >
             <div className="flex items-center gap-3">
               <ProviderIcon
-                className="text-foreground-0/80 size-4 antialiased"
+                className="text-foreground/80 size-4 antialiased"
                 provider={model.provider}
                 title={model.provider}
               />
               <span className="font-medium">{model.name}</span>
               {!model.active && <div className="ml-auto text-xs">(unavailable)</div>}
             </div>
-          </DropdownItem>
+          </DropdownMenuItem>
         ))}
-      </DropdownContent>
-    </DropdownRoot>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

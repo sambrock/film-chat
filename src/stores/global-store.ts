@@ -17,6 +17,8 @@ export type GlobalState = {
     movieId: string;
     shouldAnimate: boolean;
   };
+
+  renameChat?: string;
 };
 
 export type GlobalStore = GlobalState & {
@@ -35,6 +37,8 @@ export const createGlobalStore = () => {
         isProcessing: new Set(),
 
         modalMovieDetails: undefined,
+
+        renameChat: undefined,
 
         dispatch: (action) => set((state) => reducer(state, action)),
       }),

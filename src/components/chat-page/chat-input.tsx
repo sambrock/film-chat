@@ -4,10 +4,11 @@ import { ArrowUp } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationSendMessage } from '~/hooks/use-mutation-send-message';
-import { useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
+import { useQueryGetChatsUtils } from '~/hooks/use-query-get-chats';
 import { Button } from '../ui/button';
 import { Icon } from '../ui/icon';
-import { Tooltip } from '../ui/tooltip';
+import { Textarea } from '../ui/textarea';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { useChatContext } from './chat-context-provider';
 import { ChatModelSelect } from './chat-model-select';
 
@@ -16,11 +17,13 @@ type Props = React.ComponentProps<'div'>;
 export const ChatInput = ({ className, ...props }: Props) => {
   const { conversationId } = useChatContext();
 
+  const { isNewChat } = useQueryGetChatsUtils();
+
   const location = useLocation();
 
-  const isNewChat = useDerivedIsNewChat(conversationId);
-
-  const value = useGlobalStore((s) => s.inputValue.get(isNewChat ? 'new' : conversationId) || '');
+  const value = useGlobalStore(
+    (s) => s.inputValue.get(isNewChat(conversationId) ? 'new' : conversationId) || ''
+  );
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -38,22 +41,16 @@ export const ChatInput = ({ className, ...props }: Props) => {
       payload: {
         conversationId: location.pathname === `/chat/${conversationId}` ? conversationId : 'new',
         value,
-        isNewChat,
+        isNewChat: isNewChat(conversationId),
       },
     });
   };
 
   return (
-    <div
-      className={cn(
-        'border-foreground-0/10 bg-background-2/90 flex flex-col rounded-xl border px-2 shadow-[inset_0_1px_0px_rgba(255,255,255,0.3),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
-        className
-      )}
-      {...props}
-    >
-      <textarea
+    <div className={cn('bg-secondary/90 glass flex flex-col rounded-xl border px-2', className)} {...props}>
+      <Textarea
         id="chat-input"
-        className="text-foreground-0 placeholder:text-foreground-1/80 my-2 w-full resize-none px-2 py-2 text-base focus:outline-none"
+        className="mt-2 mb-1 min-h-10 w-full resize-none border-none px-2 py-2 focus:outline-none focus-visible:ring-0 md:text-base"
         placeholder="Type your message here..."
         value={value}
         rows={1}
@@ -73,8 +70,8 @@ export const ChatInput = ({ className, ...props }: Props) => {
       <div className="flex items-center gap-1 py-1 pb-1">
         <ChatModelSelect />
         <Tooltip>
-          <Tooltip.Content>{isSendDisabled ? 'Message requires text' : 'Send Message'}</Tooltip.Content>
-          <Tooltip.Trigger asChild>
+          <TooltipContent>{isSendDisabled ? 'Message requires text' : 'Send Message'}</TooltipContent>
+          <TooltipTrigger asChild>
             <Button
               className={cn('ml-auto', isSendDisabled && 'cursor-not-allowed opacity-50')}
               size="icon"
@@ -83,7 +80,7 @@ export const ChatInput = ({ className, ...props }: Props) => {
             >
               <Icon icon={ArrowUp} />
             </Button>
-          </Tooltip.Trigger>
+          </TooltipTrigger>
         </Tooltip>
       </div>
     </div>

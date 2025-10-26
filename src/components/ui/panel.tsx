@@ -23,7 +23,7 @@ export const Panel = ({ asChild, className, size, ...props }: Props) => {
   return (
     <Comp
       className={cn(
-        'border-foreground-0/5 bg-background-0/95 relative shrink-0 grow-0 border shadow-[inset_0_1px_0px_rgba(255,255,255,0.15),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
+        'relative shrink-0 grow-0 border shadow-[inset_0_1px_0px_rgba(255,255,255,0.15),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
         variants({ size }),
         className
       )}

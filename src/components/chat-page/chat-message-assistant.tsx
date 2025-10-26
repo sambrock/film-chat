@@ -34,10 +34,10 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
   return (
     <div className={cn(className)} {...props} data-message-id={message.messageId}>
       {message.status === 'processing' && getRecommendations().length === 0 && (
-        <SpinnerEllipsis className="text-foreground-1 size-10" />
+        <SpinnerEllipsis className="text-secondary-foreground size-10" />
       )}
       {getRecommendations().length > 0 && (
-        <div className="bg-background-0 divide-foreground-0/5 divide-y overflow-clip rounded-xl">
+        <div className="bg-sidebar divide-border divide-y overflow-clip rounded-xl">
           {getRecommendations().map((recommendation, i) => (
             <ChatRecommendation
               key={recommendation.recommendationId || i}
@@ -51,7 +51,7 @@ export const ChatMessageAssistant = ({ message, className, scrollToEnd, ...props
 
       <div
         className={cn(
-          'text-foreground-1 mt-4 flex px-2 text-xs',
+          'text-secondary-foreground mt-4 flex px-2 text-xs',
           message.status === 'done' ? 'visible' : 'invisible'
         )}
         {...props}

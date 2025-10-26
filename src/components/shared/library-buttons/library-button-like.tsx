@@ -2,14 +2,14 @@ import { Heart } from 'lucide-react';
 
 import type { Library } from '~/lib/definitions';
 import { useMutationUpdateLibrary } from '~/hooks/use-mutation-update-library';
-import { ButtonProps } from '~/components/ui/button';
-import { Tooltip } from '~/components/ui/tooltip';
+import { Button } from '~/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '~/components/ui/tooltip';
 import { LibraryButton } from './library-button';
 
 type Props = {
   movieId: string;
   library?: Library;
-} & ButtonProps;
+} & React.ComponentProps<typeof Button>;
 
 export const LibraryButtonLike = ({ movieId, library, ...props }: Props) => {
   const updateLibraryMutation = useMutationUpdateLibrary();
@@ -38,10 +38,10 @@ export const LibraryButtonLike = ({ movieId, library, ...props }: Props) => {
 
   return (
     <Tooltip>
-      <Tooltip.Content>{library?.liked ? 'Unlike' : 'Like'}</Tooltip.Content>
-      <Tooltip.Trigger asChild>
+      <TooltipContent>{library?.liked ? 'Unlike' : 'Like'}</TooltipContent>
+      <TooltipTrigger asChild>
         <LibraryButton icon={Heart} active={library?.liked ?? false} onClick={handleClick} {...props} />
-      </Tooltip.Trigger>
+      </TooltipTrigger>
     </Tooltip>
   );
 };

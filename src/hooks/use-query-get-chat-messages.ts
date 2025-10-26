@@ -17,20 +17,19 @@ export const useQueryGetChatMessages = (conversationId: string) => {
   return useQuery(queryGetChatMessagesOptions(conversationId));
 };
 
-export const useDerivedChatMessagesMovies = (conversationId?: string) => {
+export const useQueryGetChatMessagesUtils = () => {
   const queryClient = useQueryClient();
 
-  const getMovies = () => {
-    if (!conversationId) return [];
-    const movieIds =
-      queryClient
-        .getQueryData(queryGetChatMessagesOptions(conversationId).queryKey)
-        ?.filter((m) => m.role === 'assistant')
-        .flatMap((m) => m.movies)
-        .map((r) => r.movieId) || [];
+  const getChatMessagesMovies = (conversationId: string) => {
+    const messages = queryClient.getQueryData(queryGetChatMessagesOptions(conversationId).queryKey) || [];
+
+    const movieIds = messages
+      .filter((m) => m.role === 'assistant')
+      .flatMap((m) => m.movies)
+      .map((r) => r.movieId);
 
     return [...new Set(movieIds)]; // return unique
   };
 
-  return { getMovies };
+  return { getChatMessagesMovies };
 };

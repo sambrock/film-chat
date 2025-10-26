@@ -10,7 +10,8 @@ export const SidebarButtonLibrary = () => {
   return (
     <SidebarButton
       href="/library"
-      className={cn('flex w-full gap-2', location.pathname === '/library' && 'bg-foreground-0/5')}
+      className={cn('flex w-full gap-2')}
+      isActive={location.pathname === '/library'}
       icon={<LibraryBig className="size-4.5 shrink-0" strokeWidth={2} />}
     >
       Library

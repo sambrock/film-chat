@@ -4,22 +4,28 @@ import { useWindowSize } from 'usehooks-ts';
 import { cn, timeAgo } from '~/lib/utils';
 import { useGlobalStore } from '~/stores/global-store-provider';
 import { useMutationDeleteChat } from '~/hooks/use-mutation-delete-chat';
-import { useDerivedChat, useDerivedIsNewChat } from '~/hooks/use-query-get-chats';
+import { useQueryGetChatsUtils } from '~/hooks/use-query-get-chats';
 import { Header } from '../shared/header';
+import { PopoverRenameChat } from '../shared/popover-rename-chat';
 import { Button } from '../ui/button';
-import { DropdownContent, DropdownItem, DropdownRoot, DropdownTrigger } from '../ui/dropdown';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { Icon } from '../ui/icon';
 import { useChatContext } from './chat-context-provider';
 
 export const ChatHeader = () => {
   const { conversationId } = useChatContext();
 
-  const chat = useDerivedChat(conversationId);
-  const isNewChat = useDerivedIsNewChat(conversationId);
+  const { getChat, isNewChat } = useQueryGetChatsUtils();
+  const chat = getChat(conversationId);
 
   const width = useWindowSize();
 
-  if (isNewChat) {
+  if (isNewChat(conversationId)) {
     if (width.width < 768) {
       return (
         <Header>
@@ -36,10 +42,12 @@ export const ChatHeader = () => {
   return (
     <Header>
       <Header.MenuButton />
-      <Header.Title>{chat.title}</Header.Title>
+      <PopoverRenameChat conversationId={conversationId} title={chat.title}>
+        <Header.Title>{chat.title}</Header.Title>
+      </PopoverRenameChat>
 
-      <div className="ml-auto flex items-center md gap-4">
-        <div className="text-foreground-2 hidden text-xs font-medium whitespace-nowrap sm:flex">
+      <div className="md ml-auto flex items-center gap-4">
+        <div className="text-muted-foreground hidden text-xs font-medium whitespace-nowrap sm:flex">
           Updated {timeAgo(chat.lastUpdateAt)}
         </div>
 
@@ -53,7 +61,10 @@ const ChatHeaderOptions = () => {
   const { conversationId } = useChatContext();
 
   const isProcessing = useGlobalStore((s) => s.isProcessing.has(conversationId));
-  const chat = useDerivedChat(conversationId);
+  const dispatch = useGlobalStore((s) => s.dispatch);
+
+  const { getChat } = useQueryGetChatsUtils();
+  const chat = getChat(conversationId);
 
   const deleteConversationMutation = useMutationDeleteChat();
 
@@ -66,35 +77,41 @@ const ChatHeaderOptions = () => {
     return null;
   }
   return (
-    <DropdownRoot>
-      <DropdownTrigger asChild disabled={isProcessing}>
-        <Button
-          className={cn('group-focus-within:bg-foreground-0/5 text-sm')}
-          disabled={isProcessing}
-          size="icon"
-        >
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild disabled={isProcessing}>
+        <Button className={cn('text-sm')} disabled={isProcessing} size="icon">
           <Icon icon={Ellipsis} />
         </Button>
-      </DropdownTrigger>
+      </DropdownMenuTrigger>
 
-      <DropdownContent className="min-w-60 origin-top-right" align="end" side="bottom" sideOffset={2}>
-        <div className="text-foreground-1 my-1 px-2 text-xs font-medium select-none">Chat</div>
+      <DropdownMenuContent
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        className="min-w-60 origin-top-right"
+        align="end"
+        side="bottom"
+        sideOffset={2}
+      >
+        <div className="text-secondary-foreground my-1 px-2 text-xs font-medium select-none">Chat</div>
 
-        <DropdownItem>
+        <DropdownMenuItem
+          onSelect={() => {
+            dispatch({ type: 'SET_RENAME_CHAT', payload: { conversationId } });
+          }}
+        >
           <Icon icon={Pencil} size="xs" />
           <div className="text-sm font-medium">Rename</div>
-        </DropdownItem>
-        <DropdownItem onClick={handleDelete}>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleDelete}>
           <Icon icon={Trash2} className="text-red-400" size="xs" />
           <div className="text-sm font-medium text-red-400">Delete</div>
-        </DropdownItem>
+        </DropdownMenuItem>
 
-        <hr className="bg-foreground-0/5 border-foreground-0/5 mx-2 my-1 h-px"></hr>
+        <hr className="bg-border border-foreground-0/5 mx-2 my-1 h-px"></hr>
 
-        <div className="text-foreground-2 px-2 py-1 text-xs select-none">
+        <div className="text-muted-foreground px-2 py-1 text-xs select-none">
           Created {chat.createdAt && timeAgo(chat.createdAt)}
         </div>
-      </DropdownContent>
-    </DropdownRoot>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

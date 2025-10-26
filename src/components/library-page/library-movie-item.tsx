@@ -6,7 +6,7 @@ import { LibraryButtonWatch } from '../shared/library-buttons/library-button-wat
 import { LibraryButtonWatchlist } from '../shared/library-buttons/library-button-watchlist';
 import { MovieDetailsModal } from '../shared/movie-details-modal/movie-details-modal';
 import { MovieDetailsModalContext } from '../shared/movie-details-modal/movie-details-modal-context-provider';
-import { Tooltip } from '../ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 type Props = {
   library: Library;
@@ -40,18 +40,18 @@ export const LibraryMovieItem = ({ library, movie }: Props) => {
         data-movie-id={movie.movieId}
       >
         <Tooltip>
-          <Tooltip.Content sideOffset={-14}>
+          <TooltipContent sideOffset={-14}>
             <div className="flex items-baseline">
-              <div className="text-foreground-0/90 text-sm font-medium" title={movie.tmdb.title}>
+              <div className="text-foreground/90 text-sm font-medium" title={movie.tmdb.title}>
                 {movie.tmdb.title}
               </div>
-              <div className="text-foreground-1 ml-1 text-xs">
+              <div className="text-secondary-foreground ml-1 text-xs">
                 {new Date(movie.tmdb.release_date!).getFullYear()}
               </div>
             </div>
-          </Tooltip.Content>
-          <Tooltip.Trigger asChild>
-            <div className="hover:ring-primary/50 ring-foreground-0/5 aspect-[1/1.5] w-full cursor-pointer overflow-clip rounded-md shadow-md ring-1 shadow-black/20 hover:ring-2">
+          </TooltipContent>
+          <TooltipTrigger asChild>
+            <div className="hover:ring-primary/50 ring-border aspect-[1/1.5] w-full cursor-pointer overflow-clip rounded-md shadow-md ring-1 shadow-black/20 hover:ring-2">
               <img
                 className={cn(
                   'object-fit h-full w-full brightness-90 transition-opacity select-none',
@@ -60,10 +60,10 @@ export const LibraryMovieItem = ({ library, movie }: Props) => {
                 src={tmdbPosterSrc(movie.tmdb.poster_path!, 'w342')}
               />
             </div>
-          </Tooltip.Trigger>
+          </TooltipTrigger>
         </Tooltip>
 
-        <div className="bg-background-3/80 absolute right-2 bottom-2 left-1/2 flex w-min -translate-x-1/2 items-center justify-between gap-0.5 rounded-full p-1 opacity-0 ring-1 ring-white/10 backdrop-blur-md group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+        <div className="bg-background/5 absolute right-2 bottom-2 left-1/2 flex w-min -translate-x-1/2 items-center justify-between gap-0.5 rounded-full p-1 opacity-0 ring-1 ring-white/10 backdrop-blur-md group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
           <LibraryButtonWatchlist movieId={movie.movieId} library={library} />
           <LibraryButtonLike movieId={movie.movieId} library={library} />
           <LibraryButtonWatch movieId={movie.movieId} library={library} />
@@ -79,6 +79,6 @@ export const LibraryMovieItem = ({ library, movie }: Props) => {
 
 export const LibraryMovieItemSkeleton = () => {
   return (
-    <div className="bg-background-2/40 ring-foreground-0/5 aspect-[1/1.5] w-full animate-pulse overflow-clip rounded-md ring-1" />
+    <div className="bg-muted-background/20 aspect-[1/1.5] w-full animate-pulse overflow-clip rounded-md border" />
   );
 };

@@ -1,50 +1,53 @@
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Slot } from 'radix-ui';
 
-const variants = cva(
-  'focus-visible:ring-ring flex items-center font-sans font-medium whitespace-nowrap transition-all select-none focus:outline-none focus-visible:ring-2',
+import { cn } from '~/lib/utils';
+
+const buttonVariants = cva(
+  "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default:
-          'text-foreground-0 border-foreground-0/10 bg-background-1/60 hover:bg-background-2/90 border shadow-[inset_0_1px_0px_rgba(255,255,255,0.15),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] backdrop-blur-sm',
-        ghost: 'text-foreground-1 hover:bg-foreground-0/10',
-        transparent: 'text-foreground-1',
-        sidebar: 'text-foreground-0 hover:bg-foreground-0/5',
+        default: 'glass text-foreground bg-background/50 hover:bg-background/70',
+        destructive:
+          'bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
+        outline:
+          'bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border shadow-xs',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+        transparent: 'text-secondary-foreground bg-transparent hover:bg-transparent',
       },
       size: {
-        default: 'h-8 rounded-lg px-3 text-sm',
-        sm: 'h-7 rounded-md px-2 text-xs',
-        icon: 'size-8 justify-center rounded-full',
-      },
-      pill: {
-        true: '!rounded-full',
-        false: '',
-      },
-      disabled: {
-        true: 'cursor-not-allowed opacity-50',
-        false: 'cursor-pointer',
+        default: 'h-8 px-4 py-2 has-[>svg]:px-3',
+        sm: 'h-7 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
+        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        icon: 'size-9 rounded-full',
+        'icon-sm': 'size-8 rounded-full',
+        'icon-lg': 'size-10 rounded-full',
       },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
-      disabled: false,
     },
   }
 );
 
-export type ButtonProps = React.ComponentProps<'button'> &
-  VariantProps<typeof variants> & { asChild?: boolean };
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot : 'button';
 
-export const Button = ({ asChild, variant, size, className, disabled, pill, ...props }: ButtonProps) => {
-  const Comp = asChild ? Slot.Root : 'button';
+  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+}
 
-  return (
-    <Comp className={variants({ className, variant, size, disabled, pill })} disabled={disabled} {...props}>
-      {props.children}
-    </Comp>
-  );
-};
-
-//   <button class="inline-flex items-center justify-center border align-middle select-none font-sans font-medium text-center px-4 py-2 text-white text-sm font-medium rounded-lg bg-white/2.5 border border-white/50 backdrop-blur-sm shadow-[inset_0_1px_0px_rgba(255,255,255,0.75),0_0_9px_rgba(0,0,0,0.2),0_3px_8px_rgba(0,0,0,0.15)] hover:bg-white/30 transition-all duration-300 before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-br before:from-white/60 before:via-transparent before:to-transparent before:opacity-70 before:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:bg-gradient-to-tl after:from-white/30 after:via-transparent after:to-transparent after:opacity-50 after:pointer-events-none transition antialiased">Button</button>
+export { Button, buttonVariants };
