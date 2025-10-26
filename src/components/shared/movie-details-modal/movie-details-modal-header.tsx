@@ -56,7 +56,7 @@ export const MovieDetailsModalHeader = () => {
   );
 };
 
-const ButtonPrevMovie = (props: React.ComponentProps<typeof Button>) => {
+const ButtonPrevMovie = ({ onClick, ...props }: React.ComponentProps<typeof Button>) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -90,13 +90,22 @@ const ButtonPrevMovie = (props: React.ComponentProps<typeof Button>) => {
   };
 
   return (
-    <Button size="icon" onClick={handlePrev} disabled={!getPrevMovieId()} {...props}>
+    <Button
+      size="icon"
+      onClick={(e) => {
+        e.stopPropagation();
+        handlePrev();
+        onClick?.(e);
+      }}
+      disabled={!getPrevMovieId()}
+      {...props}
+    >
       <Icon icon={ChevronDown} className="mt-0.5" />
     </Button>
   );
 };
 
-const ButtonNextMovie = (props: React.ComponentProps<typeof Button>) => {
+const ButtonNextMovie = ({ onClick, ...props }: React.ComponentProps<typeof Button>) => {
   const modal = useGlobalStore((s) => s.modalMovieDetails!);
   const dispatch = useGlobalStore((s) => s.dispatch);
 
@@ -130,7 +139,16 @@ const ButtonNextMovie = (props: React.ComponentProps<typeof Button>) => {
   };
 
   return (
-    <Button size="icon" onClick={handleNext} disabled={!getNextMovieId()} {...props}>
+    <Button
+      size="icon"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleNext();
+        onClick?.(e);
+      }}
+      disabled={!getNextMovieId()}
+      {...props}
+    >
       <Icon icon={ChevronUp} className="mb-0.5" />
     </Button>
   );

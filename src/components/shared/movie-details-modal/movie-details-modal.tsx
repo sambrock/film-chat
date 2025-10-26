@@ -38,7 +38,7 @@ export const MovieDetailsModal = ({ movie }: Props) => {
 
           <div className="relative z-10 -mt-12 grid grid-cols-1 gap-x-4 px-3 sm:-mt-58 sm:grid-cols-[1fr_120px] sm:px-6 md:grid-cols-[1fr_160px] md:px-10">
             <div className="flex flex-col gap-2">
-              <h1 className="mt-auto text-4xl font-black" w-full>
+              <h1 className="mt-auto text-4xl font-black">
                 {movie.tmdb.title}{' '}
                 <span className="text-secondary-foreground ml-2 text-sm font-medium">
                   {new Date(movie.tmdb.release_date!).getFullYear()}
