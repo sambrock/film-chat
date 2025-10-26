@@ -1,9 +1,4 @@
-import {
-  InfiniteQueryObserver,
-  infiniteQueryOptions,
-  useInfiniteQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { infiniteQueryOptions, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getLibrary } from '~/server/data/get-library';
 
@@ -35,19 +30,3 @@ export const useQueryGetLibraryUtils = () => {
 
   return { getLibraryMovies };
 };
-// export const useDerivedLibraryMovies = () => {
-//   const queryClient = useQueryClient();
-
-//   const getMovies = () => {
-//     const movieIds =
-//       queryClient
-//         .getQueryData(queryGetLibraryOptions().queryKey)
-//         ?.pages.flatMap((page) => page.results)
-//         .flatMap((m) => m.movie)
-//         .map((r) => r.movieId) || [];
-
-//     return [...new Set(movieIds)]; // return unique
-//   };
-
-//   return { getMovies };
-// };

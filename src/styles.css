@@ -4,29 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* @theme {
-  --color-background-0: oklch(0.2061 0.0086 245.81);
-  --color-background-1: oklch(0.2292 0.0086 245.81);
-  --color-background-2: oklch(0.2692 0.0086 245.81);
-  --color-background-3: oklch(0.3003 0.0086 245.81);
-
-  --color-foreground-0: oklch(0.8952 0.0068 245.81);
-  --color-foreground-1: oklch(0.6852 0.0068 245.81);
-  --color-foreground-2: oklch(0.4852 0.0068 245.81);
-  --color-foreground-3: oklch(0.3252 0.0068 245.81);
-
-  --color-primary: oklch(0.8057 0.173 162.18);
-  --color-primary-foreground: oklch(0.9657 0.012 245.81);
-  --color-primary-muted: oklch(0.1081 0.1299 162.7);
-
-  --color-ring: #0466ff;
-
-  --font-sans: 'Schibsted Grotesk', sans-serif;
-
-  --ease-pop: cubic-bezier(0.77, 0, 0.18, 1);
-  --animate-pop: pop 0.6s var(--ease-pop);
-} */
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
