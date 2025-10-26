@@ -1,4 +1,5 @@
 import { Menu } from 'lucide-react';
+import { Popover } from 'radix-ui';
 
 import { cn } from '~/lib/utils';
 import { Button, ButtonProps } from '../ui/button';
@@ -56,9 +57,16 @@ const HeaderMenuButton = ({ className, ...props }: ButtonProps) => {
 
 const HeaderTitle = ({ className, ...props }: React.ComponentProps<'h1'>) => {
   return (
-    <h1 className={cn('text-foreground-0/80 text-sm font-medium', className)} {...props}>
-      {props.children}
-    </h1>
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <h1 className={cn('text-foreground-0/80 text-sm font-medium', className)} {...props}>
+          {props.children}
+        </h1>
+      </Popover.Trigger>
+      <Popover.Content>
+
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
